@@ -1,172 +1,108 @@
-# AWS Study Project
+# AWS Solutions Architect Quiz App
 
-Personal learning repository for studying AWS services, cloud architecture, and preparing for AWS certifications. This project contains practical exercises, study notes, and hands-on implementations of various AWS services.
+An interactive web-based quiz application for studying and preparing for the AWS Certified Solutions Architect - Associate exam. This project contains practice questions organized by AWS domains and services.
 
-## � Learning Journey
+## 📋 Project Overview
 
-This repository documents my journey through learning AWS, from basic concepts to advanced implementations. It includes practical exercises, study materials, and certification preparation resources.
-
-## 🎯 Objectives
-
-- Master core AWS services and concepts
-- Prepare for AWS certifications (Solutions Architect, Developer, DevOps Engineer)
-- Build hands-on experience with real-world scenarios
-- Document best practices and architectural patterns
+This is a simple HTML-based quiz application that helps you practice AWS certification questions. The app loads questions from JSON files and provides an interactive interface for testing your knowledge.
 
 ## 📁 Project Structure
 
 ```
 AWS/
-├── study-notes/             # Learning notes and concepts
-├── hands-on-labs/           # Practical exercises and implementations
-├── certification-prep/     # Practice questions and exam materials
-├── architecture-diagrams/  # System design and architecture examples
-├── scripts/               # Automation scripts and utilities
-├── templates/             # CloudFormation/Terraform templates
-└── documentation/         # Reference materials and guides
+├── aws_saa_quiz_app.html          # Main quiz application
+├── questions/                     # Practice questions by category
+│   ├── domain1-secure-architectures.json
+│   ├── domain2-resilient-architectures.json
+│   ├── domain3-high-performing-architectures.json
+│   ├── domain4-cost-optimized-architectures.json
+│   ├── ec2.json
+│   ├── s3.json
+│   ├── rds.json
+│   ├── lambda.json
+│   ├── vpc.json
+│   └── ... (other service-specific questions)
+├── backup/                        # Backup copies of questions
+├── start_quiz.py                  # Python script to run the quiz
+└── tools/lint_decks.py           # Utility script for question validation
 ```
 
-## 🛠️ AWS Services Covered
+## 🚀 How to Use
 
-### Core Services
-- **Compute**: EC2, Lambda, ECS, EKS
-- **Storage**: S3, EBS, EFS, Glacier
-- **Database**: RDS, DynamoDB, ElastiCache
-- **Networking**: VPC, Route 53, CloudFront, API Gateway
+### Web Quiz App
+1. Open `aws_saa_quiz_app.html` in your web browser
+2. Select a question category from the dropdown
+3. Answer questions and get immediate feedback
+4. Track your score and progress
 
-### Advanced Services
-- **Security**: IAM, KMS, Secrets Manager, GuardDuty
-- **Monitoring**: CloudWatch, X-Ray, AWS Config
-- **Serverless**: Lambda, API Gateway, Step Functions
-- **DevOps**: CodePipeline, CodeBuild, CloudFormation
-
-## 🚀 Getting Started
-
-### Prerequisites
-- AWS account with appropriate permissions
-- AWS CLI configured
-- Basic understanding of cloud concepts
-
-### Setup
+### Python Quiz Runner
 ```bash
-# Clone the repository
-git clone https://github.com/tonmatos/AWS.git
-cd AWS
-
-# Configure AWS CLI
-aws configure
-
-# Run setup script
-./scripts/setup.sh
+# Run the quiz with Python
+python start_quiz.py
 ```
 
-## � Study Topics
+## 📚 Question Categories
 
-### 1. Cloud Foundations
-- AWS Global Infrastructure
-- Cloud concepts and terminology
-- Pricing and billing models
+### AWS Exam Domains
+- **Domain 1**: Secure Architectures
+- **Domain 2**: Resilient Architectures  
+- **Domain 3**: High-Performing Architectures
+- **Domain 4**: Cost-Optimized Architectures
 
-### 2. Core Services
-- Compute services comparison
-- Storage options and use cases
-- Database selection criteria
+### Service-Specific Questions
+- EC2 (Elastic Compute Cloud)
+- S3 (Simple Storage Service)
+- RDS (Relational Database Service)
+- Lambda (Serverless Computing)
+- VPC (Virtual Private Cloud)
+- And more...
 
-### 3. Networking & Content Delivery
-- VPC design and configuration
-- DNS management with Route 53
-- Content delivery with CloudFront
+## 🛠️ Technical Details
 
-### 4. Security & Compliance
-- IAM best practices
-- Data encryption options
-- Compliance frameworks
+- **Frontend**: Pure HTML, CSS, and JavaScript
+- **Data Format**: JSON files for questions
+- **No Dependencies**: Runs entirely in the browser
+- **Portable**: Can be used offline
 
-### 5. Monitoring & Optimization
-- CloudWatch monitoring
-- Cost optimization strategies
-- Performance tuning
+## 📊 Features
 
-## 🏗️ Hands-On Labs
+- Interactive quiz interface
+- Multiple question categories
+- Immediate feedback on answers
+- Score tracking
+- Explanations for correct answers
+- Responsive design
 
-Each lab includes:
-- Learning objectives
-- Step-by-step instructions
-- Code examples and templates
-- Cleanup procedures
+## 🔧 Question Format
 
-### Featured Labs
-- **EC2 Web Server Setup**: Deploy a scalable web application
-- **Serverless API**: Build a REST API with Lambda and API Gateway
-- **Data Pipeline**: Create ETL processes with Glue and S3
-- **CI/CD Pipeline**: Set up automated deployment with CodePipeline
+Each question in the JSON files follows this structure:
+```json
+{
+  "question": "Question text here",
+  "options": ["Option A", "Option B", "Option C", "Option D"],
+  "correct": 0,
+  "explanation": "Explanation for why this answer is correct"
+}
+```
 
-## � Study Notes
+## � Adding New Questions
 
-### Key Concepts
-- **High Availability**: Multi-AZ, Auto Scaling, Load Balancing
-- **Scalability**: Horizontal vs Vertical scaling
-- **Durability**: Data backup and disaster recovery
-- **Security**: Defense in depth, least privilege
-
-### Best Practices
-- Infrastructure as Code
-- Cost optimization
-- Security first approach
-- Monitoring and logging
-
-## 🎯 Certification Prep
-
-### AWS Certified Solutions Architect - Associate
-- Practice questions by domain
-- Exam tips and strategies
-- Sample scenarios
-
-### AWS Certified Developer - Associate
-- Code examples and SDK usage
-- API integration patterns
-- Deployment strategies
-
-## 📊 Progress Tracking
-
-- [ ] Core Services Mastery
-- [ ] Security Implementation
-- [ ] Cost Optimization
-- [ ] Monitoring Setup
-- [ ] Serverless Architecture
-- [ ] DevOps Pipeline
-
-## 🔧 Tools & Resources
-
-### Study Resources
-- AWS Documentation
-- AWS Whitepapers
-- AWS Training Portal
-- Practice exams
-
-### Development Tools
-- AWS CLI
-- AWS SDKs
-- CloudFormation
-- Terraform
+1. Edit the appropriate JSON file in the `questions/` directory
+2. Follow the question format shown above
+3. Use the `lint_decks.py` script to validate the format
 
 ## 🤝 Contributing
 
-This is a personal study repository, but feel free to:
-- Report issues or suggest improvements
-- Share study tips and resources
-- Contribute examples and templates
+Feel to contribute by:
+- Adding new practice questions
+- Improving explanations
+- Fixing any bugs in the quiz app
+- Enhancing the user interface
 
 ## 📄 License
 
-This project is for educational purposes. Feel free to use and adapt for your own learning journey.
-
-## 🏷️ Tags
-
-`#AWS` `#CloudComputing` `#Study` `#Certification` `#Learning` `#HandsOn` `#Architecture` `#DevOps`
+This project is for educational purposes to help with AWS certification preparation.
 
 ---
 
-**Disclaimer**: This repository is for personal learning and educational purposes. Always follow AWS best practices and test in non-production environments.
-
-**Happy Learning! 🚀**
+**Happy Studying! 🚀**

@@ -1,0 +1,1086 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "D4COST-1001",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "spot-instances-for-interruptible-workloa",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: run non-critical batch jobs at the lowest compute price. Which cost-optimized architecture design capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Graviton adoption"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "C",
+          "text": "Scheduled and target tracking scaling"
+        },
+        {
+          "key": "D",
+          "text": "S3 lifecycle and tiering policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: run non-critical batch jobs at the lowest compute price.",
+      "explanation": "Spot Instances for interruptible workloads is correct because they offer substantial discounts for flexible workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Graviton adoption is useful when you need to improve price-performance for supported workloads on modern ARM-based instances, but it is not the best fit for this requirement.",
+        "B": "Correct. Spot Instances for interruptible workloads is the best choice because they offer substantial discounts for flexible workloads.",
+        "C": "Incorrect. Scheduled and target tracking scaling is useful when you need to avoid paying for idle compute capacity outside peak periods, but it is not the best fit for this requirement.",
+        "D": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1002",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "savings-plans-commitment-strategy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: lower steady-state compute costs with flexible usage commitments. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "B",
+          "text": "Graviton adoption"
+        },
+        {
+          "key": "C",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "D",
+          "text": "Scheduled and target tracking scaling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: lower steady-state compute costs with flexible usage commitments.",
+      "explanation": "Savings Plans commitment strategy is correct because they reduce long-term compute spend compared to On-Demand pricing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Cost visibility with Budgets and Cost Explorer is useful when you need to detect spending anomalies and enforce proactive cost controls, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Graviton adoption is useful when you need to improve price-performance for supported workloads on modern ARM-based instances, but it is not the best fit for this requirement.",
+        "C": "Correct. Savings Plans commitment strategy is the best choice because they reduce long-term compute spend compared to On-Demand pricing.",
+        "D": "Incorrect. Scheduled and target tracking scaling is useful when you need to avoid paying for idle compute capacity outside peak periods, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1003",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "s3-lifecycle-and-tiering-policies",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: move infrequently accessed data to lower-cost storage classes. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Graviton adoption"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "C",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "D",
+          "text": "S3 lifecycle and tiering policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: move infrequently accessed data to lower-cost storage classes.",
+      "explanation": "S3 lifecycle and tiering policies is correct because they automate storage cost reduction over the object lifecycle.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Graviton adoption is useful when you need to improve price-performance for supported workloads on modern ARM-based instances, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Spot Instances for interruptible workloads is useful when you need to run non-critical batch jobs at the lowest compute price, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Cost visibility with Budgets and Cost Explorer is useful when you need to detect spending anomalies and enforce proactive cost controls, but it is not the best fit for this requirement.",
+        "D": "Correct. S3 lifecycle and tiering policies is the best choice because they automate storage cost reduction over the object lifecycle."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1004",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "scheduled-and-target-tracking-scaling",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to avoid paying for idle compute capacity outside peak periods. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "B",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "C",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "D",
+          "text": "Scheduled and target tracking scaling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: avoid paying for idle compute capacity outside peak periods.",
+      "explanation": "Scheduled and target tracking scaling is correct because it aligns running capacity with actual demand patterns.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Spot Instances for interruptible workloads is useful when you need to run non-critical batch jobs at the lowest compute price, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Cost visibility with Budgets and Cost Explorer is useful when you need to detect spending anomalies and enforce proactive cost controls, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Savings Plans commitment strategy is useful when you need to lower steady-state compute costs with flexible usage commitments, but it is not the best fit for this requirement.",
+        "D": "Correct. Scheduled and target tracking scaling is the best choice because it aligns running capacity with actual demand patterns."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1005",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "graviton-adoption",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: improve price-performance for supported workloads on modern ARM-based instances. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "B",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "C",
+          "text": "Graviton adoption"
+        },
+        {
+          "key": "D",
+          "text": "Savings Plans commitment strategy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve price-performance for supported workloads on modern ARM-based instances.",
+      "explanation": "Graviton adoption is correct because it often lowers cost for equivalent or better performance.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Spot Instances for interruptible workloads is useful when you need to run non-critical batch jobs at the lowest compute price, but it is not the best fit for this requirement.",
+        "B": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement.",
+        "C": "Correct. Graviton adoption is the best choice because it often lowers cost for equivalent or better performance.",
+        "D": "Incorrect. Savings Plans commitment strategy is useful when you need to lower steady-state compute costs with flexible usage commitments, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1006",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "cost-visibility-with-budgets-and-cost-ex",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: detect spending anomalies and enforce proactive cost controls. Which cost-optimized architecture design capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "B",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "C",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "D",
+          "text": "Scheduled and target tracking scaling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: detect spending anomalies and enforce proactive cost controls.",
+      "explanation": "Cost visibility with Budgets and Cost Explorer is correct because they provide governance signals before overruns grow.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Savings Plans commitment strategy is useful when you need to lower steady-state compute costs with flexible usage commitments, but it is not the best fit for this requirement.",
+        "C": "Correct. Cost visibility with Budgets and Cost Explorer is the best choice because they provide governance signals before overruns grow.",
+        "D": "Incorrect. Scheduled and target tracking scaling is useful when you need to avoid paying for idle compute capacity outside peak periods, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1007",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "spot-instances-for-interruptible-workloa",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: run non-critical batch jobs at the lowest compute price. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "B",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "C",
+          "text": "Scheduled and target tracking scaling"
+        },
+        {
+          "key": "D",
+          "text": "Graviton adoption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: run non-critical batch jobs at the lowest compute price.",
+      "explanation": "Spot Instances for interruptible workloads is correct because they offer substantial discounts for flexible workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Spot Instances for interruptible workloads is the best choice because they offer substantial discounts for flexible workloads.",
+        "B": "Incorrect. Cost visibility with Budgets and Cost Explorer is useful when you need to detect spending anomalies and enforce proactive cost controls, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Scheduled and target tracking scaling is useful when you need to avoid paying for idle compute capacity outside peak periods, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Graviton adoption is useful when you need to improve price-performance for supported workloads on modern ARM-based instances, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1008",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "savings-plans-commitment-strategy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: lower steady-state compute costs with flexible usage commitments. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "C",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "D",
+          "text": "Graviton adoption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: lower steady-state compute costs with flexible usage commitments.",
+      "explanation": "Savings Plans commitment strategy is correct because they reduce long-term compute spend compared to On-Demand pricing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Savings Plans commitment strategy is the best choice because they reduce long-term compute spend compared to On-Demand pricing.",
+        "B": "Incorrect. Spot Instances for interruptible workloads is useful when you need to run non-critical batch jobs at the lowest compute price, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Cost visibility with Budgets and Cost Explorer is useful when you need to detect spending anomalies and enforce proactive cost controls, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Graviton adoption is useful when you need to improve price-performance for supported workloads on modern ARM-based instances, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1009",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "s3-lifecycle-and-tiering-policies",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to move infrequently accessed data to lower-cost storage classes. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "C",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "D",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: move infrequently accessed data to lower-cost storage classes.",
+      "explanation": "S3 lifecycle and tiering policies is correct because they automate storage cost reduction over the object lifecycle.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. S3 lifecycle and tiering policies is the best choice because they automate storage cost reduction over the object lifecycle.",
+        "B": "Incorrect. Spot Instances for interruptible workloads is useful when you need to run non-critical batch jobs at the lowest compute price, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Savings Plans commitment strategy is useful when you need to lower steady-state compute costs with flexible usage commitments, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Cost visibility with Budgets and Cost Explorer is useful when you need to detect spending anomalies and enforce proactive cost controls, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1010",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "scheduled-and-target-tracking-scaling",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: avoid paying for idle compute capacity outside peak periods. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Scheduled and target tracking scaling"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "C",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "D",
+          "text": "Savings Plans commitment strategy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: avoid paying for idle compute capacity outside peak periods.",
+      "explanation": "Scheduled and target tracking scaling is correct because it aligns running capacity with actual demand patterns.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Scheduled and target tracking scaling is the best choice because it aligns running capacity with actual demand patterns.",
+        "B": "Incorrect. Spot Instances for interruptible workloads is useful when you need to run non-critical batch jobs at the lowest compute price, but it is not the best fit for this requirement.",
+        "C": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Savings Plans commitment strategy is useful when you need to lower steady-state compute costs with flexible usage commitments, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1011",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "graviton-adoption",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: improve price-performance for supported workloads on modern ARM-based instances. Which cost-optimized architecture design capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "B",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "C",
+          "text": "Scheduled and target tracking scaling"
+        },
+        {
+          "key": "D",
+          "text": "Graviton adoption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve price-performance for supported workloads on modern ARM-based instances.",
+      "explanation": "Graviton adoption is correct because it often lowers cost for equivalent or better performance.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Savings Plans commitment strategy is useful when you need to lower steady-state compute costs with flexible usage commitments, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Scheduled and target tracking scaling is useful when you need to avoid paying for idle compute capacity outside peak periods, but it is not the best fit for this requirement.",
+        "D": "Correct. Graviton adoption is the best choice because it often lowers cost for equivalent or better performance."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1012",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "cost-visibility-with-budgets-and-cost-ex",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: detect spending anomalies and enforce proactive cost controls. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "B",
+          "text": "Scheduled and target tracking scaling"
+        },
+        {
+          "key": "C",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "D",
+          "text": "Graviton adoption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: detect spending anomalies and enforce proactive cost controls.",
+      "explanation": "Cost visibility with Budgets and Cost Explorer is correct because they provide governance signals before overruns grow.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Cost visibility with Budgets and Cost Explorer is the best choice because they provide governance signals before overruns grow.",
+        "B": "Incorrect. Scheduled and target tracking scaling is useful when you need to avoid paying for idle compute capacity outside peak periods, but it is not the best fit for this requirement.",
+        "C": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Graviton adoption is useful when you need to improve price-performance for supported workloads on modern ARM-based instances, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1013",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "spot-instances-for-interruptible-workloa",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: run non-critical batch jobs at the lowest compute price. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "C",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "D",
+          "text": "Graviton adoption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: run non-critical batch jobs at the lowest compute price.",
+      "explanation": "Spot Instances for interruptible workloads is correct because they offer substantial discounts for flexible workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Savings Plans commitment strategy is useful when you need to lower steady-state compute costs with flexible usage commitments, but it is not the best fit for this requirement.",
+        "B": "Correct. Spot Instances for interruptible workloads is the best choice because they offer substantial discounts for flexible workloads.",
+        "C": "Incorrect. Cost visibility with Budgets and Cost Explorer is useful when you need to detect spending anomalies and enforce proactive cost controls, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Graviton adoption is useful when you need to improve price-performance for supported workloads on modern ARM-based instances, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1014",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "savings-plans-commitment-strategy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to lower steady-state compute costs with flexible usage commitments. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "B",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "C",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances for interruptible workloads"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: lower steady-state compute costs with flexible usage commitments.",
+      "explanation": "Savings Plans commitment strategy is correct because they reduce long-term compute spend compared to On-Demand pricing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Cost visibility with Budgets and Cost Explorer is useful when you need to detect spending anomalies and enforce proactive cost controls, but it is not the best fit for this requirement.",
+        "C": "Correct. Savings Plans commitment strategy is the best choice because they reduce long-term compute spend compared to On-Demand pricing.",
+        "D": "Incorrect. Spot Instances for interruptible workloads is useful when you need to run non-critical batch jobs at the lowest compute price, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1015",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "s3-lifecycle-and-tiering-policies",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: move infrequently accessed data to lower-cost storage classes. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "B",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "C",
+          "text": "Scheduled and target tracking scaling"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances for interruptible workloads"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: move infrequently accessed data to lower-cost storage classes.",
+      "explanation": "S3 lifecycle and tiering policies is correct because they automate storage cost reduction over the object lifecycle.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. S3 lifecycle and tiering policies is the best choice because they automate storage cost reduction over the object lifecycle.",
+        "B": "Incorrect. Savings Plans commitment strategy is useful when you need to lower steady-state compute costs with flexible usage commitments, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Scheduled and target tracking scaling is useful when you need to avoid paying for idle compute capacity outside peak periods, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Spot Instances for interruptible workloads is useful when you need to run non-critical batch jobs at the lowest compute price, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1016",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "scheduled-and-target-tracking-scaling",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: avoid paying for idle compute capacity outside peak periods. Which cost-optimized architecture design capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Scheduled and target tracking scaling"
+        },
+        {
+          "key": "B",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "C",
+          "text": "Graviton adoption"
+        },
+        {
+          "key": "D",
+          "text": "S3 lifecycle and tiering policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: avoid paying for idle compute capacity outside peak periods.",
+      "explanation": "Scheduled and target tracking scaling is correct because it aligns running capacity with actual demand patterns.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Scheduled and target tracking scaling is the best choice because it aligns running capacity with actual demand patterns.",
+        "B": "Incorrect. Savings Plans commitment strategy is useful when you need to lower steady-state compute costs with flexible usage commitments, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Graviton adoption is useful when you need to improve price-performance for supported workloads on modern ARM-based instances, but it is not the best fit for this requirement.",
+        "D": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1017",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "graviton-adoption",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: improve price-performance for supported workloads on modern ARM-based instances. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Graviton adoption"
+        },
+        {
+          "key": "B",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "C",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "D",
+          "text": "Scheduled and target tracking scaling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve price-performance for supported workloads on modern ARM-based instances.",
+      "explanation": "Graviton adoption is correct because it often lowers cost for equivalent or better performance.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Graviton adoption is the best choice because it often lowers cost for equivalent or better performance.",
+        "B": "Incorrect. Cost visibility with Budgets and Cost Explorer is useful when you need to detect spending anomalies and enforce proactive cost controls, but it is not the best fit for this requirement.",
+        "C": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Scheduled and target tracking scaling is useful when you need to avoid paying for idle compute capacity outside peak periods, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1018",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "cost-visibility-with-budgets-and-cost-ex",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: detect spending anomalies and enforce proactive cost controls. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "C",
+          "text": "Graviton adoption"
+        },
+        {
+          "key": "D",
+          "text": "Scheduled and target tracking scaling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: detect spending anomalies and enforce proactive cost controls.",
+      "explanation": "Cost visibility with Budgets and Cost Explorer is correct because they provide governance signals before overruns grow.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Cost visibility with Budgets and Cost Explorer is the best choice because they provide governance signals before overruns grow.",
+        "B": "Incorrect. Spot Instances for interruptible workloads is useful when you need to run non-critical batch jobs at the lowest compute price, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Graviton adoption is useful when you need to improve price-performance for supported workloads on modern ARM-based instances, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Scheduled and target tracking scaling is useful when you need to avoid paying for idle compute capacity outside peak periods, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1019",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "spot-instances-for-interruptible-workloa",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to run non-critical batch jobs at the lowest compute price. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "C",
+          "text": "Cost visibility with Budgets and Cost Explorer"
+        },
+        {
+          "key": "D",
+          "text": "Savings Plans commitment strategy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: run non-critical batch jobs at the lowest compute price.",
+      "explanation": "Spot Instances for interruptible workloads is correct because they offer substantial discounts for flexible workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement.",
+        "B": "Correct. Spot Instances for interruptible workloads is the best choice because they offer substantial discounts for flexible workloads.",
+        "C": "Incorrect. Cost visibility with Budgets and Cost Explorer is useful when you need to detect spending anomalies and enforce proactive cost controls, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Savings Plans commitment strategy is useful when you need to lower steady-state compute costs with flexible usage commitments, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D4COST-1020",
+      "domain": "Domain 4 - Cost-Optimized Architectures",
+      "tags": [
+        "savings-plans-commitment-strategy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: lower steady-state compute costs with flexible usage commitments. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Savings Plans commitment strategy"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances for interruptible workloads"
+        },
+        {
+          "key": "C",
+          "text": "S3 lifecycle and tiering policies"
+        },
+        {
+          "key": "D",
+          "text": "Scheduled and target tracking scaling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: lower steady-state compute costs with flexible usage commitments.",
+      "explanation": "Savings Plans commitment strategy is correct because they reduce long-term compute spend compared to On-Demand pricing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Savings Plans commitment strategy is the best choice because they reduce long-term compute spend compared to On-Demand pricing.",
+        "B": "Incorrect. Spot Instances for interruptible workloads is useful when you need to run non-critical batch jobs at the lowest compute price, but it is not the best fit for this requirement.",
+        "C": "Incorrect. S3 lifecycle and tiering policies is useful when you need to move infrequently accessed data to lower-cost storage classes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Scheduled and target tracking scaling is useful when you need to avoid paying for idle compute capacity outside peak periods, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Cost-Optimized Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    }
+  ]
+}

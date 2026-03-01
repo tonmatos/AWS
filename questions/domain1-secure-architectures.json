@@ -1,0 +1,1086 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "D1SEC-1001",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "least-privilege-iam-roles",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: grant workloads only the minimum permissions required for their tasks. Which secure architecture design capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "B",
+          "text": "Least-privilege IAM roles"
+        },
+        {
+          "key": "C",
+          "text": "Private access using VPC endpoints"
+        },
+        {
+          "key": "D",
+          "text": "Centralized CloudTrail and Config"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: grant workloads only the minimum permissions required for their tasks.",
+      "explanation": "Least-privilege IAM roles is correct because it reduces blast radius and enforces least privilege.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement.",
+        "B": "Correct. Least-privilege IAM roles is the best choice because it reduces blast radius and enforces least privilege.",
+        "C": "Incorrect. Private access using VPC endpoints is useful when you need to keep service traffic off the public internet for sensitive systems, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Centralized CloudTrail and Config is useful when you need to maintain an auditable history of API actions and configuration changes, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1002",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "kms-customer-managed-keys",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: control key policies, rotation, and key usage auditing for encryption. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "B",
+          "text": "KMS customer managed keys"
+        },
+        {
+          "key": "C",
+          "text": "Centralized CloudTrail and Config"
+        },
+        {
+          "key": "D",
+          "text": "Private access using VPC endpoints"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: control key policies, rotation, and key usage auditing for encryption.",
+      "explanation": "KMS customer managed keys is correct because they provide granular control and auditability for encryption keys.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Secrets Manager automatic rotation is useful when you need to avoid hardcoded credentials and rotate secrets with minimal disruption, but it is not the best fit for this requirement.",
+        "B": "Correct. KMS customer managed keys is the best choice because they provide granular control and auditability for encryption keys.",
+        "C": "Incorrect. Centralized CloudTrail and Config is useful when you need to maintain an auditable history of API actions and configuration changes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Private access using VPC endpoints is useful when you need to keep service traffic off the public internet for sensitive systems, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1003",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "security-group-referencing",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: restrict backend access to traffic originating from specific application tiers. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "B",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "C",
+          "text": "Centralized CloudTrail and Config"
+        },
+        {
+          "key": "D",
+          "text": "Least-privilege IAM roles"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: restrict backend access to traffic originating from specific application tiers.",
+      "explanation": "Security group referencing is correct because it enforces identity-based network trust between tiers.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Security group referencing is the best choice because it enforces identity-based network trust between tiers.",
+        "B": "Incorrect. Secrets Manager automatic rotation is useful when you need to avoid hardcoded credentials and rotate secrets with minimal disruption, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Centralized CloudTrail and Config is useful when you need to maintain an auditable history of API actions and configuration changes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Least-privilege IAM roles is useful when you need to grant workloads only the minimum permissions required for their tasks, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1004",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "private-access-using-vpc-endpoints",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to keep service traffic off the public internet for sensitive systems. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "B",
+          "text": "Least-privilege IAM roles"
+        },
+        {
+          "key": "C",
+          "text": "KMS customer managed keys"
+        },
+        {
+          "key": "D",
+          "text": "Private access using VPC endpoints"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: keep service traffic off the public internet for sensitive systems.",
+      "explanation": "Private access using VPC endpoints is correct because it provides private connectivity to AWS services inside the VPC.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Secrets Manager automatic rotation is useful when you need to avoid hardcoded credentials and rotate secrets with minimal disruption, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Least-privilege IAM roles is useful when you need to grant workloads only the minimum permissions required for their tasks, but it is not the best fit for this requirement.",
+        "C": "Incorrect. KMS customer managed keys is useful when you need to control key policies, rotation, and key usage auditing for encryption, but it is not the best fit for this requirement.",
+        "D": "Correct. Private access using VPC endpoints is the best choice because it provides private connectivity to AWS services inside the VPC."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1005",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "centralized-cloudtrail-and-config",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: maintain an auditable history of API actions and configuration changes. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "B",
+          "text": "Centralized CloudTrail and Config"
+        },
+        {
+          "key": "C",
+          "text": "Least-privilege IAM roles"
+        },
+        {
+          "key": "D",
+          "text": "KMS customer managed keys"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: maintain an auditable history of API actions and configuration changes.",
+      "explanation": "Centralized CloudTrail and Config is correct because they provide traceability and compliance evidence.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement.",
+        "B": "Correct. Centralized CloudTrail and Config is the best choice because they provide traceability and compliance evidence.",
+        "C": "Incorrect. Least-privilege IAM roles is useful when you need to grant workloads only the minimum permissions required for their tasks, but it is not the best fit for this requirement.",
+        "D": "Incorrect. KMS customer managed keys is useful when you need to control key policies, rotation, and key usage auditing for encryption, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1006",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "secrets-manager-automatic-rotation",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: avoid hardcoded credentials and rotate secrets with minimal disruption. Which secure architecture design capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "KMS customer managed keys"
+        },
+        {
+          "key": "B",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "C",
+          "text": "Private access using VPC endpoints"
+        },
+        {
+          "key": "D",
+          "text": "Secrets Manager automatic rotation"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: avoid hardcoded credentials and rotate secrets with minimal disruption.",
+      "explanation": "Secrets Manager automatic rotation is correct because it securely stores and rotates credentials on a schedule.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. KMS customer managed keys is useful when you need to control key policies, rotation, and key usage auditing for encryption, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Private access using VPC endpoints is useful when you need to keep service traffic off the public internet for sensitive systems, but it is not the best fit for this requirement.",
+        "D": "Correct. Secrets Manager automatic rotation is the best choice because it securely stores and rotates credentials on a schedule."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1007",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "least-privilege-iam-roles",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: grant workloads only the minimum permissions required for their tasks. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Private access using VPC endpoints"
+        },
+        {
+          "key": "B",
+          "text": "Least-privilege IAM roles"
+        },
+        {
+          "key": "C",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "D",
+          "text": "Centralized CloudTrail and Config"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: grant workloads only the minimum permissions required for their tasks.",
+      "explanation": "Least-privilege IAM roles is correct because it reduces blast radius and enforces least privilege.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Private access using VPC endpoints is useful when you need to keep service traffic off the public internet for sensitive systems, but it is not the best fit for this requirement.",
+        "B": "Correct. Least-privilege IAM roles is the best choice because it reduces blast radius and enforces least privilege.",
+        "C": "Incorrect. Secrets Manager automatic rotation is useful when you need to avoid hardcoded credentials and rotate secrets with minimal disruption, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Centralized CloudTrail and Config is useful when you need to maintain an auditable history of API actions and configuration changes, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1008",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "kms-customer-managed-keys",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: control key policies, rotation, and key usage auditing for encryption. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "B",
+          "text": "Least-privilege IAM roles"
+        },
+        {
+          "key": "C",
+          "text": "Centralized CloudTrail and Config"
+        },
+        {
+          "key": "D",
+          "text": "KMS customer managed keys"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: control key policies, rotation, and key usage auditing for encryption.",
+      "explanation": "KMS customer managed keys is correct because they provide granular control and auditability for encryption keys.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Secrets Manager automatic rotation is useful when you need to avoid hardcoded credentials and rotate secrets with minimal disruption, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Least-privilege IAM roles is useful when you need to grant workloads only the minimum permissions required for their tasks, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Centralized CloudTrail and Config is useful when you need to maintain an auditable history of API actions and configuration changes, but it is not the best fit for this requirement.",
+        "D": "Correct. KMS customer managed keys is the best choice because they provide granular control and auditability for encryption keys."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1009",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "security-group-referencing",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to restrict backend access to traffic originating from specific application tiers. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Least-privilege IAM roles"
+        },
+        {
+          "key": "B",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "C",
+          "text": "KMS customer managed keys"
+        },
+        {
+          "key": "D",
+          "text": "Security group referencing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: restrict backend access to traffic originating from specific application tiers.",
+      "explanation": "Security group referencing is correct because it enforces identity-based network trust between tiers.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Least-privilege IAM roles is useful when you need to grant workloads only the minimum permissions required for their tasks, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Secrets Manager automatic rotation is useful when you need to avoid hardcoded credentials and rotate secrets with minimal disruption, but it is not the best fit for this requirement.",
+        "C": "Incorrect. KMS customer managed keys is useful when you need to control key policies, rotation, and key usage auditing for encryption, but it is not the best fit for this requirement.",
+        "D": "Correct. Security group referencing is the best choice because it enforces identity-based network trust between tiers."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1010",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "private-access-using-vpc-endpoints",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: keep service traffic off the public internet for sensitive systems. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "KMS customer managed keys"
+        },
+        {
+          "key": "B",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "C",
+          "text": "Least-privilege IAM roles"
+        },
+        {
+          "key": "D",
+          "text": "Private access using VPC endpoints"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: keep service traffic off the public internet for sensitive systems.",
+      "explanation": "Private access using VPC endpoints is correct because it provides private connectivity to AWS services inside the VPC.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. KMS customer managed keys is useful when you need to control key policies, rotation, and key usage auditing for encryption, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Least-privilege IAM roles is useful when you need to grant workloads only the minimum permissions required for their tasks, but it is not the best fit for this requirement.",
+        "D": "Correct. Private access using VPC endpoints is the best choice because it provides private connectivity to AWS services inside the VPC."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1011",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "centralized-cloudtrail-and-config",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: maintain an auditable history of API actions and configuration changes. Which secure architecture design capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Centralized CloudTrail and Config"
+        },
+        {
+          "key": "B",
+          "text": "Private access using VPC endpoints"
+        },
+        {
+          "key": "C",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "D",
+          "text": "KMS customer managed keys"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: maintain an auditable history of API actions and configuration changes.",
+      "explanation": "Centralized CloudTrail and Config is correct because they provide traceability and compliance evidence.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Centralized CloudTrail and Config is the best choice because they provide traceability and compliance evidence.",
+        "B": "Incorrect. Private access using VPC endpoints is useful when you need to keep service traffic off the public internet for sensitive systems, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement.",
+        "D": "Incorrect. KMS customer managed keys is useful when you need to control key policies, rotation, and key usage auditing for encryption, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1012",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "secrets-manager-automatic-rotation",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: avoid hardcoded credentials and rotate secrets with minimal disruption. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "B",
+          "text": "Private access using VPC endpoints"
+        },
+        {
+          "key": "C",
+          "text": "Centralized CloudTrail and Config"
+        },
+        {
+          "key": "D",
+          "text": "Security group referencing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: avoid hardcoded credentials and rotate secrets with minimal disruption.",
+      "explanation": "Secrets Manager automatic rotation is correct because it securely stores and rotates credentials on a schedule.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Secrets Manager automatic rotation is the best choice because it securely stores and rotates credentials on a schedule.",
+        "B": "Incorrect. Private access using VPC endpoints is useful when you need to keep service traffic off the public internet for sensitive systems, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Centralized CloudTrail and Config is useful when you need to maintain an auditable history of API actions and configuration changes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1013",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "least-privilege-iam-roles",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: grant workloads only the minimum permissions required for their tasks. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Least-privilege IAM roles"
+        },
+        {
+          "key": "B",
+          "text": "Centralized CloudTrail and Config"
+        },
+        {
+          "key": "C",
+          "text": "KMS customer managed keys"
+        },
+        {
+          "key": "D",
+          "text": "Secrets Manager automatic rotation"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: grant workloads only the minimum permissions required for their tasks.",
+      "explanation": "Least-privilege IAM roles is correct because it reduces blast radius and enforces least privilege.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Least-privilege IAM roles is the best choice because it reduces blast radius and enforces least privilege.",
+        "B": "Incorrect. Centralized CloudTrail and Config is useful when you need to maintain an auditable history of API actions and configuration changes, but it is not the best fit for this requirement.",
+        "C": "Incorrect. KMS customer managed keys is useful when you need to control key policies, rotation, and key usage auditing for encryption, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Secrets Manager automatic rotation is useful when you need to avoid hardcoded credentials and rotate secrets with minimal disruption, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1014",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "kms-customer-managed-keys",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to control key policies, rotation, and key usage auditing for encryption. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "B",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "C",
+          "text": "KMS customer managed keys"
+        },
+        {
+          "key": "D",
+          "text": "Least-privilege IAM roles"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: control key policies, rotation, and key usage auditing for encryption.",
+      "explanation": "KMS customer managed keys is correct because they provide granular control and auditability for encryption keys.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Secrets Manager automatic rotation is useful when you need to avoid hardcoded credentials and rotate secrets with minimal disruption, but it is not the best fit for this requirement.",
+        "C": "Correct. KMS customer managed keys is the best choice because they provide granular control and auditability for encryption keys.",
+        "D": "Incorrect. Least-privilege IAM roles is useful when you need to grant workloads only the minimum permissions required for their tasks, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1015",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "security-group-referencing",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: restrict backend access to traffic originating from specific application tiers. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "KMS customer managed keys"
+        },
+        {
+          "key": "B",
+          "text": "Private access using VPC endpoints"
+        },
+        {
+          "key": "C",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "D",
+          "text": "Least-privilege IAM roles"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: restrict backend access to traffic originating from specific application tiers.",
+      "explanation": "Security group referencing is correct because it enforces identity-based network trust between tiers.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. KMS customer managed keys is useful when you need to control key policies, rotation, and key usage auditing for encryption, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Private access using VPC endpoints is useful when you need to keep service traffic off the public internet for sensitive systems, but it is not the best fit for this requirement.",
+        "C": "Correct. Security group referencing is the best choice because it enforces identity-based network trust between tiers.",
+        "D": "Incorrect. Least-privilege IAM roles is useful when you need to grant workloads only the minimum permissions required for their tasks, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1016",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "private-access-using-vpc-endpoints",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: keep service traffic off the public internet for sensitive systems. Which secure architecture design capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "B",
+          "text": "Private access using VPC endpoints"
+        },
+        {
+          "key": "C",
+          "text": "Centralized CloudTrail and Config"
+        },
+        {
+          "key": "D",
+          "text": "KMS customer managed keys"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: keep service traffic off the public internet for sensitive systems.",
+      "explanation": "Private access using VPC endpoints is correct because it provides private connectivity to AWS services inside the VPC.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement.",
+        "B": "Correct. Private access using VPC endpoints is the best choice because it provides private connectivity to AWS services inside the VPC.",
+        "C": "Incorrect. Centralized CloudTrail and Config is useful when you need to maintain an auditable history of API actions and configuration changes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. KMS customer managed keys is useful when you need to control key policies, rotation, and key usage auditing for encryption, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1017",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "centralized-cloudtrail-and-config",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: maintain an auditable history of API actions and configuration changes. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Centralized CloudTrail and Config"
+        },
+        {
+          "key": "B",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "C",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "D",
+          "text": "Private access using VPC endpoints"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: maintain an auditable history of API actions and configuration changes.",
+      "explanation": "Centralized CloudTrail and Config is correct because they provide traceability and compliance evidence.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Centralized CloudTrail and Config is the best choice because they provide traceability and compliance evidence.",
+        "B": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Secrets Manager automatic rotation is useful when you need to avoid hardcoded credentials and rotate secrets with minimal disruption, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Private access using VPC endpoints is useful when you need to keep service traffic off the public internet for sensitive systems, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1018",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "secrets-manager-automatic-rotation",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: avoid hardcoded credentials and rotate secrets with minimal disruption. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Private access using VPC endpoints"
+        },
+        {
+          "key": "B",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "C",
+          "text": "Centralized CloudTrail and Config"
+        },
+        {
+          "key": "D",
+          "text": "Least-privilege IAM roles"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: avoid hardcoded credentials and rotate secrets with minimal disruption.",
+      "explanation": "Secrets Manager automatic rotation is correct because it securely stores and rotates credentials on a schedule.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Private access using VPC endpoints is useful when you need to keep service traffic off the public internet for sensitive systems, but it is not the best fit for this requirement.",
+        "B": "Correct. Secrets Manager automatic rotation is the best choice because it securely stores and rotates credentials on a schedule.",
+        "C": "Incorrect. Centralized CloudTrail and Config is useful when you need to maintain an auditable history of API actions and configuration changes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Least-privilege IAM roles is useful when you need to grant workloads only the minimum permissions required for their tasks, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1019",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "least-privilege-iam-roles",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to grant workloads only the minimum permissions required for their tasks. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "KMS customer managed keys"
+        },
+        {
+          "key": "B",
+          "text": "Least-privilege IAM roles"
+        },
+        {
+          "key": "C",
+          "text": "Secrets Manager automatic rotation"
+        },
+        {
+          "key": "D",
+          "text": "Security group referencing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: grant workloads only the minimum permissions required for their tasks.",
+      "explanation": "Least-privilege IAM roles is correct because it reduces blast radius and enforces least privilege.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. KMS customer managed keys is useful when you need to control key policies, rotation, and key usage auditing for encryption, but it is not the best fit for this requirement.",
+        "B": "Correct. Least-privilege IAM roles is the best choice because it reduces blast radius and enforces least privilege.",
+        "C": "Incorrect. Secrets Manager automatic rotation is useful when you need to avoid hardcoded credentials and rotate secrets with minimal disruption, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D1SEC-1020",
+      "domain": "Domain 1 - Secure Architectures",
+      "tags": [
+        "kms-customer-managed-keys",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: control key policies, rotation, and key usage auditing for encryption. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Security group referencing"
+        },
+        {
+          "key": "B",
+          "text": "Private access using VPC endpoints"
+        },
+        {
+          "key": "C",
+          "text": "Least-privilege IAM roles"
+        },
+        {
+          "key": "D",
+          "text": "KMS customer managed keys"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: control key policies, rotation, and key usage auditing for encryption.",
+      "explanation": "KMS customer managed keys is correct because they provide granular control and auditability for encryption keys.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Security group referencing is useful when you need to restrict backend access to traffic originating from specific application tiers, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Private access using VPC endpoints is useful when you need to keep service traffic off the public internet for sensitive systems, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Least-privilege IAM roles is useful when you need to grant workloads only the minimum permissions required for their tasks, but it is not the best fit for this requirement.",
+        "D": "Correct. KMS customer managed keys is the best choice because they provide granular control and auditability for encryption keys."
+      },
+      "references": [
+        {
+          "label": "Secure Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    }
+  ]
+}

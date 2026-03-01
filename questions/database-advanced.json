@@ -1,0 +1,1380 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "AURORA-001",
+      "domain": "Aurora",
+      "tags": [
+        "mysql",
+        "high-availability",
+        "read-scaling"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An e-commerce company needs a **MySQL-compatible** database with **fast failover** and **read scaling** across multiple read replicas. Which database option is BEST?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon RDS for MySQL with Multi-AZ"
+        },
+        {
+          "key": "B",
+          "text": "Amazon Aurora MySQL with reader endpoint"
+        },
+        {
+          "key": "C",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "key": "D",
+          "text": "Amazon Redshift"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Amazon Aurora MySQL** provides fast failover, distributed storage across multiple AZs, and built-in read scaling with multiple Aurora replicas. The **reader endpoint** automatically load-balances read traffic.\n\nThis provides both high availability and read scalability for MySQL workloads.",
+      "incorrect": "- **RDS Multi-AZ** provides HA but does not automatically load-balance read replicas.\n- **DynamoDB** is NoSQL and not MySQL compatible.\n- **Redshift** is a data warehouse, not OLTP.\n\nAurora MySQL best meets the requirements.",
+      "hint": "Look for a MySQL-compatible service with reader endpoints and faster failover."
+    },
+    {
+      "id": "RDS-REPLICA-001",
+      "domain": "RDS",
+      "tags": [
+        "read-replica",
+        "scaling",
+        "read-heavy"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A reporting workload is causing **read bottlenecks** on a primary RDS PostgreSQL instance. The team wants to scale reads without impacting write performance. What is the BEST solution?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Increase the instance size only"
+        },
+        {
+          "key": "B",
+          "text": "Create one or more RDS Read Replicas"
+        },
+        {
+          "key": "C",
+          "text": "Enable RDS Multi-AZ"
+        },
+        {
+          "key": "D",
+          "text": "Move the database to DynamoDB"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**RDS Read Replicas** offload read traffic from the primary database and are the standard approach for scaling read-heavy workloads. They can be used for analytics or reporting without affecting writes.\n\nThis directly addresses read bottlenecks.",
+      "incorrect": "- **Scaling up** helps but does not separate read workloads.\n- **Multi-AZ** is for high availability, not read scaling.\n- **DynamoDB** is not a drop-in replacement for relational workloads.\n\nRead Replicas are the right solution.",
+      "hint": "Use the feature that creates read-only copies of the database."
+    },
+    {
+      "id": "DDB-001",
+      "domain": "DynamoDB",
+      "tags": [
+        "partition-key",
+        "hot-partition",
+        "design"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A DynamoDB table uses a **sequential order ID** as the partition key and is experiencing **hot partitions**. What is the BEST way to improve write distribution?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Switch to strongly consistent reads"
+        },
+        {
+          "key": "B",
+          "text": "Add a random or hash-based suffix to the partition key"
+        },
+        {
+          "key": "C",
+          "text": "Decrease the table's provisioned throughput"
+        },
+        {
+          "key": "D",
+          "text": "Use a single large partition for all items"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Hot partitions occur when many writes target the same partition key range. Adding a **random or hash-based suffix** to the partition key distributes writes across multiple partitions while still allowing query patterns with a composite key.\n\nThis is a common DynamoDB design pattern for high write throughput.",
+      "incorrect": "- **Strongly consistent reads** affect read consistency, not write distribution.\n- **Reducing throughput** worsens the issue.\n- **Single partition** concentrates traffic and increases hot partitioning.\n\nSpreading the key space is the correct solution.",
+      "hint": "You need to spread writes across more partition keys."
+    },
+    {
+      "id": "DAX-001",
+      "domain": "DynamoDB",
+      "tags": [
+        "dax",
+        "cache",
+        "latency"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An application using DynamoDB requires **microsecond read latency** for frequently accessed items. What should the team implement?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable DynamoDB Streams"
+        },
+        {
+          "key": "B",
+          "text": "Use DynamoDB Accelerator (DAX)"
+        },
+        {
+          "key": "C",
+          "text": "Use Global Secondary Indexes"
+        },
+        {
+          "key": "D",
+          "text": "Switch to on-demand capacity"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**DynamoDB Accelerator (DAX)** is an in-memory cache that sits in front of DynamoDB and provides **microsecond read latency** for read-heavy workloads. It is API-compatible and ideal for hot keys.\n\nThis directly satisfies the latency requirement.",
+      "incorrect": "- **Streams** capture changes, not reduce read latency.\n- **GSIs** add query flexibility but do not provide caching.\n- **On-demand capacity** changes billing mode, not latency.\n\nDAX is purpose-built for this use case.",
+      "hint": "Use the in-memory cache service specifically designed for DynamoDB."
+    },
+    {
+      "id": "DDB-GLOBAL-001",
+      "domain": "DynamoDB",
+      "tags": [
+        "global-tables",
+        "multi-region",
+        "active-active"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A globally distributed application needs **active-active** writes in multiple regions with low latency and automatic replication. Which DynamoDB feature should be used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB Streams"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB Global Tables"
+        },
+        {
+          "key": "C",
+          "text": "DynamoDB TTL"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB Local Secondary Indexes"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**DynamoDB Global Tables** provide multi-region, multi-active replication with automatic conflict resolution. This enables low-latency reads and writes in each region.\n\nIt is the standard DynamoDB solution for active-active global applications.",
+      "incorrect": "- **Streams** capture changes but do not provide multi-region active-active.\n- **TTL** is for automatic item expiration.\n- **LSIs** are for alternative sort keys within a region.\n\nGlobal Tables are the correct feature.",
+      "hint": "You need built-in multi-region, active-active replication."
+    },
+    {
+      "id": "CACHE-001",
+      "domain": "ElastiCache",
+      "tags": [
+        "redis",
+        "session",
+        "persistence"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An application needs a cache for **user session data**, requires **data persistence**, and relies on **advanced data structures** (sorted sets, hashes). Which cache engine is BEST?",
+      "options": [
+        {
+          "key": "A",
+          "text": "ElastiCache for Memcached"
+        },
+        {
+          "key": "B",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "C",
+          "text": "Amazon DynamoDB"
+        },
+        {
+          "key": "D",
+          "text": "Amazon Aurora"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Redis** supports persistence, replication, and advanced data structures like sorted sets and hashes, making it ideal for session storage and complex caching patterns.\n\nMemcached is simpler and does not support persistence or advanced structures.",
+      "incorrect": "- **Memcached** lacks persistence and advanced data structures.\n- **DynamoDB** is a database, not an in-memory cache.\n- **Aurora** is a relational database and not optimized for caching.\n\nRedis is the correct cache engine.",
+      "hint": "Choose the cache engine with persistence and rich data structures."
+    },
+    {
+      "id": "ATHENA-001",
+      "domain": "Athena",
+      "tags": [
+        "s3",
+        "sql",
+        "serverless"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A data team wants to run **ad-hoc SQL queries** directly on log files stored in Amazon S3 without managing servers. Which service is MOST appropriate?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon Redshift"
+        },
+        {
+          "key": "B",
+          "text": "Amazon Athena"
+        },
+        {
+          "key": "C",
+          "text": "Amazon EMR"
+        },
+        {
+          "key": "D",
+          "text": "AWS Glue DataBrew"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Amazon Athena** is a serverless, pay-per-query service that runs SQL directly against data stored in S3. It requires no infrastructure management and is ideal for ad-hoc analysis.\n\nThis exactly matches the requirement.",
+      "incorrect": "- **Redshift** requires a managed cluster.\n- **EMR** requires cluster management.\n- **DataBrew** is for data preparation, not ad-hoc SQL queries.\n\nAthena is the correct serverless query service.",
+      "hint": "Look for serverless SQL directly on S3."
+    },
+    {
+      "id": "DBA-1001",
+      "domain": "Database",
+      "tags": [
+        "dynamodb-on-demand-capacity-mode",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: handle highly unpredictable read and write traffic without capacity planning. Which advanced database design capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "B",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "C",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "D",
+          "text": "Amazon Athena"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: handle highly unpredictable read and write traffic without capacity planning.",
+      "explanation": "DynamoDB on-demand capacity mode is correct because it scales automatically and charges per request without pre-provisioning.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. DynamoDB on-demand capacity mode is the best choice because it scales automatically and charges per request without pre-provisioning.",
+        "B": "Incorrect. ElastiCache for Redis is useful when you need to offload repeated reads and session lookups from the primary database, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Amazon Athena is useful when you need to run serverless SQL analytics directly on data stored in Amazon S3, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1002",
+      "domain": "Database",
+      "tags": [
+        "dynamodb-dax",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: reduce millisecond read latency to microseconds for frequently accessed key-value data. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon Athena"
+        },
+        {
+          "key": "B",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "C",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB DAX"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce millisecond read latency to microseconds for frequently accessed key-value data.",
+      "explanation": "DynamoDB DAX is correct because it adds an in-memory cache layer in front of DynamoDB.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Amazon Athena is useful when you need to run serverless SQL analytics directly on data stored in Amazon S3, but it is not the best fit for this requirement.",
+        "B": "Incorrect. RDS Proxy is useful when you need to improve database scalability by managing many short-lived application connections, but it is not the best fit for this requirement.",
+        "C": "Incorrect. ElastiCache for Redis is useful when you need to offload repeated reads and session lookups from the primary database, but it is not the best fit for this requirement.",
+        "D": "Correct. DynamoDB DAX is the best choice because it adds an in-memory cache layer in front of DynamoDB."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1003",
+      "domain": "Database",
+      "tags": [
+        "aurora-global-database",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: provide low-latency cross-Region reads and fast disaster recovery for Aurora. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "B",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "C",
+          "text": "Amazon Athena"
+        },
+        {
+          "key": "D",
+          "text": "Aurora Global Database"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: provide low-latency cross-Region reads and fast disaster recovery for Aurora.",
+      "explanation": "Aurora Global Database is correct because it replicates storage across Regions with low replication lag.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. DynamoDB on-demand capacity mode is useful when you need to handle highly unpredictable read and write traffic without capacity planning, but it is not the best fit for this requirement.",
+        "B": "Incorrect. RDS Proxy is useful when you need to improve database scalability by managing many short-lived application connections, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Amazon Athena is useful when you need to run serverless SQL analytics directly on data stored in Amazon S3, but it is not the best fit for this requirement.",
+        "D": "Correct. Aurora Global Database is the best choice because it replicates storage across Regions with low replication lag."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1004",
+      "domain": "Database",
+      "tags": [
+        "elasticache-for-redis",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to offload repeated reads and session lookups from the primary database. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB DAX"
+        },
+        {
+          "key": "B",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "C",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "D",
+          "text": "ElastiCache for Redis"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: offload repeated reads and session lookups from the primary database.",
+      "explanation": "ElastiCache for Redis is correct because it stores hot data in memory to reduce backend query load.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. DynamoDB DAX is useful when you need to reduce millisecond read latency to microseconds for frequently accessed key-value data, but it is not the best fit for this requirement.",
+        "B": "Incorrect. RDS Proxy is useful when you need to improve database scalability by managing many short-lived application connections, but it is not the best fit for this requirement.",
+        "C": "Incorrect. DynamoDB on-demand capacity mode is useful when you need to handle highly unpredictable read and write traffic without capacity planning, but it is not the best fit for this requirement.",
+        "D": "Correct. ElastiCache for Redis is the best choice because it stores hot data in memory to reduce backend query load."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1005",
+      "domain": "Database",
+      "tags": [
+        "amazon-athena",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: run serverless SQL analytics directly on data stored in Amazon S3. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB DAX"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "C",
+          "text": "Amazon Athena"
+        },
+        {
+          "key": "D",
+          "text": "Aurora Global Database"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: run serverless SQL analytics directly on data stored in Amazon S3.",
+      "explanation": "Amazon Athena is correct because it queries S3 with SQL without provisioning database servers.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. DynamoDB DAX is useful when you need to reduce millisecond read latency to microseconds for frequently accessed key-value data, but it is not the best fit for this requirement.",
+        "B": "Incorrect. DynamoDB on-demand capacity mode is useful when you need to handle highly unpredictable read and write traffic without capacity planning, but it is not the best fit for this requirement.",
+        "C": "Correct. Amazon Athena is the best choice because it queries S3 with SQL without provisioning database servers.",
+        "D": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1006",
+      "domain": "Database",
+      "tags": [
+        "rds-proxy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: improve database scalability by managing many short-lived application connections. Which advanced database design capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB DAX"
+        },
+        {
+          "key": "C",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve database scalability by managing many short-lived application connections.",
+      "explanation": "RDS Proxy is correct because it pools and reuses connections to reduce database connection pressure.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement.",
+        "B": "Incorrect. DynamoDB DAX is useful when you need to reduce millisecond read latency to microseconds for frequently accessed key-value data, but it is not the best fit for this requirement.",
+        "C": "Incorrect. ElastiCache for Redis is useful when you need to offload repeated reads and session lookups from the primary database, but it is not the best fit for this requirement.",
+        "D": "Correct. RDS Proxy is the best choice because it pools and reuses connections to reduce database connection pressure."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1007",
+      "domain": "Database",
+      "tags": [
+        "dynamodb-on-demand-capacity-mode",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: handle highly unpredictable read and write traffic without capacity planning. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "B",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "C",
+          "text": "Amazon Athena"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: handle highly unpredictable read and write traffic without capacity planning.",
+      "explanation": "DynamoDB on-demand capacity mode is correct because it scales automatically and charges per request without pre-provisioning.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. DynamoDB on-demand capacity mode is the best choice because it scales automatically and charges per request without pre-provisioning.",
+        "B": "Incorrect. ElastiCache for Redis is useful when you need to offload repeated reads and session lookups from the primary database, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Amazon Athena is useful when you need to run serverless SQL analytics directly on data stored in Amazon S3, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Proxy is useful when you need to improve database scalability by managing many short-lived application connections, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1008",
+      "domain": "Database",
+      "tags": [
+        "dynamodb-dax",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: reduce millisecond read latency to microseconds for frequently accessed key-value data. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB DAX"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "C",
+          "text": "Amazon Athena"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce millisecond read latency to microseconds for frequently accessed key-value data.",
+      "explanation": "DynamoDB DAX is correct because it adds an in-memory cache layer in front of DynamoDB.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. DynamoDB DAX is the best choice because it adds an in-memory cache layer in front of DynamoDB.",
+        "B": "Incorrect. DynamoDB on-demand capacity mode is useful when you need to handle highly unpredictable read and write traffic without capacity planning, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Amazon Athena is useful when you need to run serverless SQL analytics directly on data stored in Amazon S3, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Proxy is useful when you need to improve database scalability by managing many short-lived application connections, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1009",
+      "domain": "Database",
+      "tags": [
+        "aurora-global-database",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to provide low-latency cross-Region reads and fast disaster recovery for Aurora. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB DAX"
+        },
+        {
+          "key": "C",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB on-demand capacity mode"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: provide low-latency cross-Region reads and fast disaster recovery for Aurora.",
+      "explanation": "Aurora Global Database is correct because it replicates storage across Regions with low replication lag.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Aurora Global Database is the best choice because it replicates storage across Regions with low replication lag.",
+        "B": "Incorrect. DynamoDB DAX is useful when you need to reduce millisecond read latency to microseconds for frequently accessed key-value data, but it is not the best fit for this requirement.",
+        "C": "Incorrect. RDS Proxy is useful when you need to improve database scalability by managing many short-lived application connections, but it is not the best fit for this requirement.",
+        "D": "Incorrect. DynamoDB on-demand capacity mode is useful when you need to handle highly unpredictable read and write traffic without capacity planning, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1010",
+      "domain": "Database",
+      "tags": [
+        "elasticache-for-redis",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: offload repeated reads and session lookups from the primary database. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "B",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "C",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB DAX"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: offload repeated reads and session lookups from the primary database.",
+      "explanation": "ElastiCache for Redis is correct because it stores hot data in memory to reduce backend query load.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. ElastiCache for Redis is the best choice because it stores hot data in memory to reduce backend query load.",
+        "B": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement.",
+        "C": "Incorrect. DynamoDB on-demand capacity mode is useful when you need to handle highly unpredictable read and write traffic without capacity planning, but it is not the best fit for this requirement.",
+        "D": "Incorrect. DynamoDB DAX is useful when you need to reduce millisecond read latency to microseconds for frequently accessed key-value data, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1011",
+      "domain": "Database",
+      "tags": [
+        "amazon-athena",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: run serverless SQL analytics directly on data stored in Amazon S3. Which advanced database design capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "B",
+          "text": "Amazon Athena"
+        },
+        {
+          "key": "C",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB DAX"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: run serverless SQL analytics directly on data stored in Amazon S3.",
+      "explanation": "Amazon Athena is correct because it queries S3 with SQL without provisioning database servers.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. ElastiCache for Redis is useful when you need to offload repeated reads and session lookups from the primary database, but it is not the best fit for this requirement.",
+        "B": "Correct. Amazon Athena is the best choice because it queries S3 with SQL without provisioning database servers.",
+        "C": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement.",
+        "D": "Incorrect. DynamoDB DAX is useful when you need to reduce millisecond read latency to microseconds for frequently accessed key-value data, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1012",
+      "domain": "Database",
+      "tags": [
+        "rds-proxy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: improve database scalability by managing many short-lived application connections. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "B",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "C",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "D",
+          "text": "Amazon Athena"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve database scalability by managing many short-lived application connections.",
+      "explanation": "RDS Proxy is correct because it pools and reuses connections to reduce database connection pressure.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement.",
+        "B": "Correct. RDS Proxy is the best choice because it pools and reuses connections to reduce database connection pressure.",
+        "C": "Incorrect. ElastiCache for Redis is useful when you need to offload repeated reads and session lookups from the primary database, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Amazon Athena is useful when you need to run serverless SQL analytics directly on data stored in Amazon S3, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1013",
+      "domain": "Database",
+      "tags": [
+        "dynamodb-on-demand-capacity-mode",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: handle highly unpredictable read and write traffic without capacity planning. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "C",
+          "text": "Amazon Athena"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB DAX"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: handle highly unpredictable read and write traffic without capacity planning.",
+      "explanation": "DynamoDB on-demand capacity mode is correct because it scales automatically and charges per request without pre-provisioning.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. RDS Proxy is useful when you need to improve database scalability by managing many short-lived application connections, but it is not the best fit for this requirement.",
+        "B": "Correct. DynamoDB on-demand capacity mode is the best choice because it scales automatically and charges per request without pre-provisioning.",
+        "C": "Incorrect. Amazon Athena is useful when you need to run serverless SQL analytics directly on data stored in Amazon S3, but it is not the best fit for this requirement.",
+        "D": "Incorrect. DynamoDB DAX is useful when you need to reduce millisecond read latency to microseconds for frequently accessed key-value data, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1014",
+      "domain": "Database",
+      "tags": [
+        "dynamodb-dax",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to reduce millisecond read latency to microseconds for frequently accessed key-value data. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB DAX"
+        },
+        {
+          "key": "C",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB on-demand capacity mode"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce millisecond read latency to microseconds for frequently accessed key-value data.",
+      "explanation": "DynamoDB DAX is correct because it adds an in-memory cache layer in front of DynamoDB.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement.",
+        "B": "Correct. DynamoDB DAX is the best choice because it adds an in-memory cache layer in front of DynamoDB.",
+        "C": "Incorrect. RDS Proxy is useful when you need to improve database scalability by managing many short-lived application connections, but it is not the best fit for this requirement.",
+        "D": "Incorrect. DynamoDB on-demand capacity mode is useful when you need to handle highly unpredictable read and write traffic without capacity planning, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1015",
+      "domain": "Database",
+      "tags": [
+        "aurora-global-database",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: provide low-latency cross-Region reads and fast disaster recovery for Aurora. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB DAX"
+        },
+        {
+          "key": "C",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "D",
+          "text": "ElastiCache for Redis"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: provide low-latency cross-Region reads and fast disaster recovery for Aurora.",
+      "explanation": "Aurora Global Database is correct because it replicates storage across Regions with low replication lag.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Aurora Global Database is the best choice because it replicates storage across Regions with low replication lag.",
+        "B": "Incorrect. DynamoDB DAX is useful when you need to reduce millisecond read latency to microseconds for frequently accessed key-value data, but it is not the best fit for this requirement.",
+        "C": "Incorrect. DynamoDB on-demand capacity mode is useful when you need to handle highly unpredictable read and write traffic without capacity planning, but it is not the best fit for this requirement.",
+        "D": "Incorrect. ElastiCache for Redis is useful when you need to offload repeated reads and session lookups from the primary database, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1016",
+      "domain": "Database",
+      "tags": [
+        "elasticache-for-redis",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: offload repeated reads and session lookups from the primary database. Which advanced database design capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "B",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "C",
+          "text": "Amazon Athena"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB DAX"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: offload repeated reads and session lookups from the primary database.",
+      "explanation": "ElastiCache for Redis is correct because it stores hot data in memory to reduce backend query load.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement.",
+        "B": "Correct. ElastiCache for Redis is the best choice because it stores hot data in memory to reduce backend query load.",
+        "C": "Incorrect. Amazon Athena is useful when you need to run serverless SQL analytics directly on data stored in Amazon S3, but it is not the best fit for this requirement.",
+        "D": "Incorrect. DynamoDB DAX is useful when you need to reduce millisecond read latency to microseconds for frequently accessed key-value data, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1017",
+      "domain": "Database",
+      "tags": [
+        "amazon-athena",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: run serverless SQL analytics directly on data stored in Amazon S3. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "B",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "C",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "D",
+          "text": "Amazon Athena"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: run serverless SQL analytics directly on data stored in Amazon S3.",
+      "explanation": "Amazon Athena is correct because it queries S3 with SQL without provisioning database servers.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement.",
+        "B": "Incorrect. ElastiCache for Redis is useful when you need to offload repeated reads and session lookups from the primary database, but it is not the best fit for this requirement.",
+        "C": "Incorrect. RDS Proxy is useful when you need to improve database scalability by managing many short-lived application connections, but it is not the best fit for this requirement.",
+        "D": "Correct. Amazon Athena is the best choice because it queries S3 with SQL without provisioning database servers."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1018",
+      "domain": "Database",
+      "tags": [
+        "rds-proxy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: improve database scalability by managing many short-lived application connections. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "B",
+          "text": "Amazon Athena"
+        },
+        {
+          "key": "C",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve database scalability by managing many short-lived application connections.",
+      "explanation": "RDS Proxy is correct because it pools and reuses connections to reduce database connection pressure.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. ElastiCache for Redis is useful when you need to offload repeated reads and session lookups from the primary database, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Amazon Athena is useful when you need to run serverless SQL analytics directly on data stored in Amazon S3, but it is not the best fit for this requirement.",
+        "C": "Incorrect. DynamoDB on-demand capacity mode is useful when you need to handle highly unpredictable read and write traffic without capacity planning, but it is not the best fit for this requirement.",
+        "D": "Correct. RDS Proxy is the best choice because it pools and reuses connections to reduce database connection pressure."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1019",
+      "domain": "Database",
+      "tags": [
+        "dynamodb-on-demand-capacity-mode",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to handle highly unpredictable read and write traffic without capacity planning. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB DAX"
+        },
+        {
+          "key": "C",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB on-demand capacity mode"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: handle highly unpredictable read and write traffic without capacity planning.",
+      "explanation": "DynamoDB on-demand capacity mode is correct because it scales automatically and charges per request without pre-provisioning.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement.",
+        "B": "Incorrect. DynamoDB DAX is useful when you need to reduce millisecond read latency to microseconds for frequently accessed key-value data, but it is not the best fit for this requirement.",
+        "C": "Incorrect. RDS Proxy is useful when you need to improve database scalability by managing many short-lived application connections, but it is not the best fit for this requirement.",
+        "D": "Correct. DynamoDB on-demand capacity mode is the best choice because it scales automatically and charges per request without pre-provisioning."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    },
+    {
+      "id": "DBA-1020",
+      "domain": "Database",
+      "tags": [
+        "dynamodb-dax",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: reduce millisecond read latency to microseconds for frequently accessed key-value data. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "ElastiCache for Redis"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB on-demand capacity mode"
+        },
+        {
+          "key": "C",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB DAX"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce millisecond read latency to microseconds for frequently accessed key-value data.",
+      "explanation": "DynamoDB DAX is correct because it adds an in-memory cache layer in front of DynamoDB.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. ElastiCache for Redis is useful when you need to offload repeated reads and session lookups from the primary database, but it is not the best fit for this requirement.",
+        "B": "Incorrect. DynamoDB on-demand capacity mode is useful when you need to handle highly unpredictable read and write traffic without capacity planning, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Aurora Global Database is useful when you need to provide low-latency cross-Region reads and fast disaster recovery for Aurora, but it is not the best fit for this requirement.",
+        "D": "Correct. DynamoDB DAX is the best choice because it adds an in-memory cache layer in front of DynamoDB."
+      },
+      "references": [
+        {
+          "label": "Advanced Database Design documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/database-services.html"
+        }
+      ]
+    }
+  ]
+}

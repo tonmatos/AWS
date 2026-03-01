@@ -1,0 +1,1339 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "ELB-001",
+      "domain": "ELB",
+      "tags": [
+        "alb",
+        "l7",
+        "routing",
+        "waf"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A retail company runs multiple HTTP microservices behind a single endpoint. They need **host-based routing**, **path-based routing**, HTTP/2 support, and WebSocket connections. They also want to integrate AWS WAF for application-layer protection and terminate TLS at the load balancer. Which load balancer should they use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Network Load Balancer"
+        },
+        {
+          "key": "B",
+          "text": "Application Load Balancer"
+        },
+        {
+          "key": "C",
+          "text": "Classic Load Balancer"
+        },
+        {
+          "key": "D",
+          "text": "Gateway Load Balancer"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Application Load Balancer (ALB)** is the only option that provides Layer 7 features like host-based and path-based routing, native HTTP/2, WebSockets, and tight integration with AWS WAF. ALB also supports TLS termination and routing to multiple target groups for microservices architectures.\n\n**Why ALB fits the requirements:**\n- Layer 7 (HTTP/HTTPS) routing with rules based on host/path/headers\n- HTTP/2 and WebSocket support\n- Native integration with AWS WAF\n- TLS termination with ACM certificates\n- Target groups for microservices, containers, or EC2 instances\n\nThis makes ALB the correct choice for modern web applications that need intelligent routing and application-level features.",
+      "incorrect": "- **Network Load Balancer** is Layer 4 only (TCP/UDP/TLS) and cannot do host/path routing or WAF integration.\n- **Classic Load Balancer** is legacy and lacks advanced routing rules and modern HTTP features.\n- **Gateway Load Balancer** is designed for inserting network appliances (firewalls/IDS) and is not used for HTTP routing.\n\nOnly ALB satisfies all application-layer requirements.",
+      "hint": "Look for Layer 7 features like host/path routing, HTTP/2, WebSockets, and WAF integration."
+    },
+    {
+      "id": "ELB-002",
+      "domain": "ELB",
+      "tags": [
+        "nlb",
+        "tcp",
+        "static-ip"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A gaming company runs a latency-sensitive TCP service on port 443. Clients must connect using **static IP addresses** that are allow-listed by partners, and the service must preserve the **original client IP**. Which AWS load balancer meets these requirements?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Application Load Balancer"
+        },
+        {
+          "key": "B",
+          "text": "Network Load Balancer"
+        },
+        {
+          "key": "C",
+          "text": "Classic Load Balancer"
+        },
+        {
+          "key": "D",
+          "text": "Gateway Load Balancer"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Network Load Balancer (NLB)** provides static IP addresses (or Elastic IPs), preserves the source client IP at the target, and operates at Layer 4 for TCP/TLS. This is ideal for low-latency, high-throughput TCP services that require IP allow-listing.\n\nKey capabilities of NLB:\n- Static IPs per AZ (or EIPs) for allow-lists\n- Source IP preservation\n- TCP, UDP, and TLS pass-through or termination\n- Ultra-low latency and high throughput\n\nThis aligns exactly with the requirements.",
+      "incorrect": "- **ALB** is Layer 7 and does not provide static IPs or source IP preservation by default.\n- **CLB** is legacy and does not provide the same static IP and performance characteristics.\n- **GWLB** is for inserting appliances, not for fronting client traffic directly.\n\nOnly NLB meets the static IP + TCP + client IP preservation requirements.",
+      "hint": "Static IPs and source IP preservation for TCP traffic point to a Layer 4 load balancer."
+    },
+    {
+      "id": "ASG-001",
+      "domain": "Auto Scaling",
+      "tags": [
+        "autoscaling",
+        "sqs",
+        "target-tracking"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A processing fleet reads jobs from an Amazon SQS queue. The team wants to keep the queue depth near **100 messages per instance** and scale in or out automatically as traffic changes. What is the MOST appropriate Auto Scaling policy?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Scheduled scaling to add 5 instances every hour"
+        },
+        {
+          "key": "B",
+          "text": "Target tracking scaling based on a custom metric: SQS messages per in-service instance"
+        },
+        {
+          "key": "C",
+          "text": "Step scaling based only on average CPU utilization"
+        },
+        {
+          "key": "D",
+          "text": "Use Spot Fleet without Auto Scaling policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Target tracking scaling** is designed to maintain a metric at a desired target value. By publishing or using a metric such as **queue depth per instance** (e.g., `ApproximateNumberOfMessagesVisible / InServiceInstances`), Auto Scaling can continuously adjust capacity to keep the backlog around the desired level.\n\nWhy this is best:\n- Directly aligns scaling with the workload (queue depth)\n- Automatically scales in and out to keep near the target (100 msgs/instance)\n- Works well for variable demand without manual schedules\n\nThis provides the most stable, workload-aware scaling behavior.",
+      "incorrect": "- **Scheduled scaling** does not respond to real-time demand.\n- **CPU-only step scaling** is an indirect signal for queue-backed workloads and often leads to lag or over-scaling.\n- **Spot Fleet without policies** does not manage capacity relative to queue depth.\n\nTarget tracking on queue depth per instance directly meets the requirement.",
+      "hint": "Use a policy that maintains a metric at a desired target value rather than guessing schedules."
+    },
+    {
+      "id": "ASG-002",
+      "domain": "Auto Scaling",
+      "tags": [
+        "launch-template",
+        "instance-refresh",
+        "rolling-update"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An Auto Scaling group must roll out a new AMI version with **zero downtime**. Instances are behind an Application Load Balancer and must pass health checks before receiving traffic. What is the BEST approach?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Edit the existing launch configuration and manually terminate all instances"
+        },
+        {
+          "key": "B",
+          "text": "Create a new launch template version and start an instance refresh with health checks"
+        },
+        {
+          "key": "C",
+          "text": "Stop all instances, create a new AMI, and start them"
+        },
+        {
+          "key": "D",
+          "text": "Disable the load balancer and replace instances in bulk"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Instance Refresh** with a new launch template version performs a controlled rolling update. Auto Scaling replaces instances in batches, waits for ALB health checks to pass, and maintains capacity during the rollout.\n\nWhy this is best:\n- Zero downtime with health-check gating\n- Automated rolling replacement\n- Works with launch templates and ALB integration\n- Easy rollback by reverting the template version\n\nThis is the recommended method for safe AMI updates.",
+      "incorrect": "- **Launch configuration edits** are not supported (they are immutable), and manual termination risks downtime.\n- **Stopping all instances** causes outage and violates zero-downtime requirements.\n- **Disabling the load balancer** breaks traffic routing and health checks.\n\nInstance Refresh is purpose-built for safe rolling updates.",
+      "hint": "Use the Auto Scaling feature that replaces instances gradually while respecting ALB health checks."
+    },
+    {
+      "id": "EKS-001",
+      "domain": "EKS",
+      "tags": [
+        "kubernetes",
+        "containers",
+        "managed-control-plane"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company wants to run **Kubernetes** workloads on AWS with a managed control plane, automated patching for the control plane, and tight IAM integration. Which service should they choose?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon ECS"
+        },
+        {
+          "key": "B",
+          "text": "Amazon EKS"
+        },
+        {
+          "key": "C",
+          "text": "Run Kubernetes manually on EC2"
+        },
+        {
+          "key": "D",
+          "text": "AWS Elastic Beanstalk"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Amazon EKS** provides a fully managed Kubernetes control plane, with AWS handling control-plane availability, upgrades, and patching. It also integrates with IAM for authentication and authorization.\n\nThis directly matches the requirement for managed Kubernetes with AWS-native security integration.",
+      "incorrect": "- **ECS** is AWS-native orchestration but not Kubernetes.\n- **Self-managed Kubernetes on EC2** requires you to manage and patch the control plane.\n- **Elastic Beanstalk** is a PaaS service and does not provide Kubernetes.\n\nOnly EKS is managed Kubernetes.",
+      "hint": "The requirement is managed Kubernetes with AWS-managed control plane."
+    },
+    {
+      "id": "FARGATE-001",
+      "domain": "Fargate",
+      "tags": [
+        "fargate",
+        "serverless-containers",
+        "ecs"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A startup runs containerized batch jobs that spike unpredictably. They want to avoid managing EC2 instances and only pay for CPU/memory used while jobs run. Which compute option is BEST?",
+      "options": [
+        {
+          "key": "A",
+          "text": "ECS on EC2 with fixed cluster size"
+        },
+        {
+          "key": "B",
+          "text": "ECS on Fargate"
+        },
+        {
+          "key": "C",
+          "text": "EKS on EC2 managed node groups"
+        },
+        {
+          "key": "D",
+          "text": "AWS Lambda"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**AWS Fargate** is serverless container compute for ECS or EKS. It removes the need to manage EC2 instances and bills only for vCPU and memory used during task execution, making it ideal for bursty or unpredictable container workloads.\n\nThis meets the requirement to avoid instance management and pay only for usage.",
+      "incorrect": "- **ECS on EC2** and **EKS on EC2** require cluster capacity management.\n- **Lambda** is not suitable for long-running or containerized batch jobs with custom runtimes beyond Lambda limits.\n\nFargate is purpose-built for serverless containers.",
+      "hint": "Look for serverless containers that remove EC2 management overhead."
+    },
+    {
+      "id": "CS-1001",
+      "domain": "Compute",
+      "tags": [
+        "target-tracking-scaling-policies",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: keep average CPU or request count near a specific target as load changes automatically. Which compute scaling capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "EKS Cluster Autoscaler"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "C",
+          "text": "Application Load Balancer path-based routing"
+        },
+        {
+          "key": "D",
+          "text": "Target tracking scaling policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: keep average CPU or request count near a specific target as load changes automatically.",
+      "explanation": "Target tracking scaling policies is correct because it continuously adjusts capacity to maintain the chosen metric target.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. EKS Cluster Autoscaler is useful when you need to add or remove Kubernetes worker nodes based on unschedulable pods, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Application Load Balancer path-based routing is useful when you need to route traffic to different services based on URL paths and host headers, but it is not the best fit for this requirement.",
+        "D": "Correct. Target tracking scaling policies is the best choice because it continuously adjusts capacity to maintain the chosen metric target."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1002",
+      "domain": "Compute",
+      "tags": [
+        "predictive-scaling",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: scale ahead of recurring daily traffic spikes with historical patterns. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "EKS Cluster Autoscaler"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling warm pools"
+        },
+        {
+          "key": "C",
+          "text": "Predictive scaling"
+        },
+        {
+          "key": "D",
+          "text": "Application Load Balancer path-based routing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: scale ahead of recurring daily traffic spikes with historical patterns.",
+      "explanation": "Predictive scaling is correct because it forecasts demand and launches capacity before the spike starts.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. EKS Cluster Autoscaler is useful when you need to add or remove Kubernetes worker nodes based on unschedulable pods, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Auto Scaling warm pools is useful when you need to reduce startup latency when scaling out after sudden demand changes, but it is not the best fit for this requirement.",
+        "C": "Correct. Predictive scaling is the best choice because it forecasts demand and launches capacity before the spike starts.",
+        "D": "Incorrect. Application Load Balancer path-based routing is useful when you need to route traffic to different services based on URL paths and host headers, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1003",
+      "domain": "Compute",
+      "tags": [
+        "auto-scaling-instance-refresh",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: roll out a new AMI across an Auto Scaling group without full downtime. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Target tracking scaling policies"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "C",
+          "text": "Auto Scaling warm pools"
+        },
+        {
+          "key": "D",
+          "text": "Application Load Balancer path-based routing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: roll out a new AMI across an Auto Scaling group without full downtime.",
+      "explanation": "Auto Scaling instance refresh is correct because it performs controlled replacement of instances with health checks during rollout.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Target tracking scaling policies is useful when you need to keep average CPU or request count near a specific target as load changes automatically, but it is not the best fit for this requirement.",
+        "B": "Correct. Auto Scaling instance refresh is the best choice because it performs controlled replacement of instances with health checks during rollout.",
+        "C": "Incorrect. Auto Scaling warm pools is useful when you need to reduce startup latency when scaling out after sudden demand changes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Application Load Balancer path-based routing is useful when you need to route traffic to different services based on URL paths and host headers, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1004",
+      "domain": "Compute",
+      "tags": [
+        "eks-cluster-autoscaler",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to add or remove Kubernetes worker nodes based on unschedulable pods. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Auto Scaling warm pools"
+        },
+        {
+          "key": "B",
+          "text": "Predictive scaling"
+        },
+        {
+          "key": "C",
+          "text": "Target tracking scaling policies"
+        },
+        {
+          "key": "D",
+          "text": "EKS Cluster Autoscaler"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: add or remove Kubernetes worker nodes based on unschedulable pods.",
+      "explanation": "EKS Cluster Autoscaler is correct because it aligns node capacity with Kubernetes scheduling demand.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Auto Scaling warm pools is useful when you need to reduce startup latency when scaling out after sudden demand changes, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Predictive scaling is useful when you need to scale ahead of recurring daily traffic spikes with historical patterns, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Target tracking scaling policies is useful when you need to keep average CPU or request count near a specific target as load changes automatically, but it is not the best fit for this requirement.",
+        "D": "Correct. EKS Cluster Autoscaler is the best choice because it aligns node capacity with Kubernetes scheduling demand."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1005",
+      "domain": "Compute",
+      "tags": [
+        "application-load-balancer-path-based-rou",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: route traffic to different services based on URL paths and host headers. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Application Load Balancer path-based routing"
+        },
+        {
+          "key": "B",
+          "text": "Predictive scaling"
+        },
+        {
+          "key": "C",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "D",
+          "text": "Target tracking scaling policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: route traffic to different services based on URL paths and host headers.",
+      "explanation": "Application Load Balancer path-based routing is correct because it supports Layer 7 routing decisions for microservice architectures.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Application Load Balancer path-based routing is the best choice because it supports Layer 7 routing decisions for microservice architectures.",
+        "B": "Incorrect. Predictive scaling is useful when you need to scale ahead of recurring daily traffic spikes with historical patterns, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Target tracking scaling policies is useful when you need to keep average CPU or request count near a specific target as load changes automatically, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1006",
+      "domain": "Compute",
+      "tags": [
+        "auto-scaling-warm-pools",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: reduce startup latency when scaling out after sudden demand changes. Which compute scaling capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "EKS Cluster Autoscaler"
+        },
+        {
+          "key": "B",
+          "text": "Predictive scaling"
+        },
+        {
+          "key": "C",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling warm pools"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce startup latency when scaling out after sudden demand changes.",
+      "explanation": "Auto Scaling warm pools is correct because it keeps pre-initialized instances ready for faster scale-out.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. EKS Cluster Autoscaler is useful when you need to add or remove Kubernetes worker nodes based on unschedulable pods, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Predictive scaling is useful when you need to scale ahead of recurring daily traffic spikes with historical patterns, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement.",
+        "D": "Correct. Auto Scaling warm pools is the best choice because it keeps pre-initialized instances ready for faster scale-out."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1007",
+      "domain": "Compute",
+      "tags": [
+        "target-tracking-scaling-policies",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: keep average CPU or request count near a specific target as load changes automatically. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Auto Scaling warm pools"
+        },
+        {
+          "key": "B",
+          "text": "Application Load Balancer path-based routing"
+        },
+        {
+          "key": "C",
+          "text": "EKS Cluster Autoscaler"
+        },
+        {
+          "key": "D",
+          "text": "Target tracking scaling policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: keep average CPU or request count near a specific target as load changes automatically.",
+      "explanation": "Target tracking scaling policies is correct because it continuously adjusts capacity to maintain the chosen metric target.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Auto Scaling warm pools is useful when you need to reduce startup latency when scaling out after sudden demand changes, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Application Load Balancer path-based routing is useful when you need to route traffic to different services based on URL paths and host headers, but it is not the best fit for this requirement.",
+        "C": "Incorrect. EKS Cluster Autoscaler is useful when you need to add or remove Kubernetes worker nodes based on unschedulable pods, but it is not the best fit for this requirement.",
+        "D": "Correct. Target tracking scaling policies is the best choice because it continuously adjusts capacity to maintain the chosen metric target."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1008",
+      "domain": "Compute",
+      "tags": [
+        "predictive-scaling",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: scale ahead of recurring daily traffic spikes with historical patterns. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Auto Scaling warm pools"
+        },
+        {
+          "key": "B",
+          "text": "Application Load Balancer path-based routing"
+        },
+        {
+          "key": "C",
+          "text": "Target tracking scaling policies"
+        },
+        {
+          "key": "D",
+          "text": "Predictive scaling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: scale ahead of recurring daily traffic spikes with historical patterns.",
+      "explanation": "Predictive scaling is correct because it forecasts demand and launches capacity before the spike starts.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Auto Scaling warm pools is useful when you need to reduce startup latency when scaling out after sudden demand changes, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Application Load Balancer path-based routing is useful when you need to route traffic to different services based on URL paths and host headers, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Target tracking scaling policies is useful when you need to keep average CPU or request count near a specific target as load changes automatically, but it is not the best fit for this requirement.",
+        "D": "Correct. Predictive scaling is the best choice because it forecasts demand and launches capacity before the spike starts."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1009",
+      "domain": "Compute",
+      "tags": [
+        "auto-scaling-instance-refresh",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to roll out a new AMI across an Auto Scaling group without full downtime. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Target tracking scaling policies"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling warm pools"
+        },
+        {
+          "key": "C",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "D",
+          "text": "Predictive scaling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: roll out a new AMI across an Auto Scaling group without full downtime.",
+      "explanation": "Auto Scaling instance refresh is correct because it performs controlled replacement of instances with health checks during rollout.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Target tracking scaling policies is useful when you need to keep average CPU or request count near a specific target as load changes automatically, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Auto Scaling warm pools is useful when you need to reduce startup latency when scaling out after sudden demand changes, but it is not the best fit for this requirement.",
+        "C": "Correct. Auto Scaling instance refresh is the best choice because it performs controlled replacement of instances with health checks during rollout.",
+        "D": "Incorrect. Predictive scaling is useful when you need to scale ahead of recurring daily traffic spikes with historical patterns, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1010",
+      "domain": "Compute",
+      "tags": [
+        "eks-cluster-autoscaler",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: add or remove Kubernetes worker nodes based on unschedulable pods. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Target tracking scaling policies"
+        },
+        {
+          "key": "B",
+          "text": "EKS Cluster Autoscaler"
+        },
+        {
+          "key": "C",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "D",
+          "text": "Predictive scaling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: add or remove Kubernetes worker nodes based on unschedulable pods.",
+      "explanation": "EKS Cluster Autoscaler is correct because it aligns node capacity with Kubernetes scheduling demand.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Target tracking scaling policies is useful when you need to keep average CPU or request count near a specific target as load changes automatically, but it is not the best fit for this requirement.",
+        "B": "Correct. EKS Cluster Autoscaler is the best choice because it aligns node capacity with Kubernetes scheduling demand.",
+        "C": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Predictive scaling is useful when you need to scale ahead of recurring daily traffic spikes with historical patterns, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1011",
+      "domain": "Compute",
+      "tags": [
+        "application-load-balancer-path-based-rou",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: route traffic to different services based on URL paths and host headers. Which compute scaling capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "B",
+          "text": "EKS Cluster Autoscaler"
+        },
+        {
+          "key": "C",
+          "text": "Application Load Balancer path-based routing"
+        },
+        {
+          "key": "D",
+          "text": "Predictive scaling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: route traffic to different services based on URL paths and host headers.",
+      "explanation": "Application Load Balancer path-based routing is correct because it supports Layer 7 routing decisions for microservice architectures.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement.",
+        "B": "Incorrect. EKS Cluster Autoscaler is useful when you need to add or remove Kubernetes worker nodes based on unschedulable pods, but it is not the best fit for this requirement.",
+        "C": "Correct. Application Load Balancer path-based routing is the best choice because it supports Layer 7 routing decisions for microservice architectures.",
+        "D": "Incorrect. Predictive scaling is useful when you need to scale ahead of recurring daily traffic spikes with historical patterns, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1012",
+      "domain": "Compute",
+      "tags": [
+        "auto-scaling-warm-pools",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: reduce startup latency when scaling out after sudden demand changes. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Application Load Balancer path-based routing"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "C",
+          "text": "EKS Cluster Autoscaler"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling warm pools"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce startup latency when scaling out after sudden demand changes.",
+      "explanation": "Auto Scaling warm pools is correct because it keeps pre-initialized instances ready for faster scale-out.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Application Load Balancer path-based routing is useful when you need to route traffic to different services based on URL paths and host headers, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement.",
+        "C": "Incorrect. EKS Cluster Autoscaler is useful when you need to add or remove Kubernetes worker nodes based on unschedulable pods, but it is not the best fit for this requirement.",
+        "D": "Correct. Auto Scaling warm pools is the best choice because it keeps pre-initialized instances ready for faster scale-out."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1013",
+      "domain": "Compute",
+      "tags": [
+        "target-tracking-scaling-policies",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: keep average CPU or request count near a specific target as load changes automatically. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Auto Scaling warm pools"
+        },
+        {
+          "key": "B",
+          "text": "Target tracking scaling policies"
+        },
+        {
+          "key": "C",
+          "text": "Predictive scaling"
+        },
+        {
+          "key": "D",
+          "text": "Application Load Balancer path-based routing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: keep average CPU or request count near a specific target as load changes automatically.",
+      "explanation": "Target tracking scaling policies is correct because it continuously adjusts capacity to maintain the chosen metric target.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Auto Scaling warm pools is useful when you need to reduce startup latency when scaling out after sudden demand changes, but it is not the best fit for this requirement.",
+        "B": "Correct. Target tracking scaling policies is the best choice because it continuously adjusts capacity to maintain the chosen metric target.",
+        "C": "Incorrect. Predictive scaling is useful when you need to scale ahead of recurring daily traffic spikes with historical patterns, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Application Load Balancer path-based routing is useful when you need to route traffic to different services based on URL paths and host headers, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1014",
+      "domain": "Compute",
+      "tags": [
+        "predictive-scaling",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to scale ahead of recurring daily traffic spikes with historical patterns. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Target tracking scaling policies"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "C",
+          "text": "Predictive scaling"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling warm pools"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: scale ahead of recurring daily traffic spikes with historical patterns.",
+      "explanation": "Predictive scaling is correct because it forecasts demand and launches capacity before the spike starts.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Target tracking scaling policies is useful when you need to keep average CPU or request count near a specific target as load changes automatically, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement.",
+        "C": "Correct. Predictive scaling is the best choice because it forecasts demand and launches capacity before the spike starts.",
+        "D": "Incorrect. Auto Scaling warm pools is useful when you need to reduce startup latency when scaling out after sudden demand changes, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1015",
+      "domain": "Compute",
+      "tags": [
+        "auto-scaling-instance-refresh",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: roll out a new AMI across an Auto Scaling group without full downtime. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "EKS Cluster Autoscaler"
+        },
+        {
+          "key": "B",
+          "text": "Predictive scaling"
+        },
+        {
+          "key": "C",
+          "text": "Target tracking scaling policies"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling instance refresh"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: roll out a new AMI across an Auto Scaling group without full downtime.",
+      "explanation": "Auto Scaling instance refresh is correct because it performs controlled replacement of instances with health checks during rollout.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. EKS Cluster Autoscaler is useful when you need to add or remove Kubernetes worker nodes based on unschedulable pods, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Predictive scaling is useful when you need to scale ahead of recurring daily traffic spikes with historical patterns, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Target tracking scaling policies is useful when you need to keep average CPU or request count near a specific target as load changes automatically, but it is not the best fit for this requirement.",
+        "D": "Correct. Auto Scaling instance refresh is the best choice because it performs controlled replacement of instances with health checks during rollout."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1016",
+      "domain": "Compute",
+      "tags": [
+        "eks-cluster-autoscaler",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: add or remove Kubernetes worker nodes based on unschedulable pods. Which compute scaling capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Predictive scaling"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "C",
+          "text": "Application Load Balancer path-based routing"
+        },
+        {
+          "key": "D",
+          "text": "EKS Cluster Autoscaler"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: add or remove Kubernetes worker nodes based on unschedulable pods.",
+      "explanation": "EKS Cluster Autoscaler is correct because it aligns node capacity with Kubernetes scheduling demand.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Predictive scaling is useful when you need to scale ahead of recurring daily traffic spikes with historical patterns, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Application Load Balancer path-based routing is useful when you need to route traffic to different services based on URL paths and host headers, but it is not the best fit for this requirement.",
+        "D": "Correct. EKS Cluster Autoscaler is the best choice because it aligns node capacity with Kubernetes scheduling demand."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1017",
+      "domain": "Compute",
+      "tags": [
+        "application-load-balancer-path-based-rou",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: route traffic to different services based on URL paths and host headers. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Auto Scaling warm pools"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "C",
+          "text": "Application Load Balancer path-based routing"
+        },
+        {
+          "key": "D",
+          "text": "EKS Cluster Autoscaler"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: route traffic to different services based on URL paths and host headers.",
+      "explanation": "Application Load Balancer path-based routing is correct because it supports Layer 7 routing decisions for microservice architectures.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Auto Scaling warm pools is useful when you need to reduce startup latency when scaling out after sudden demand changes, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement.",
+        "C": "Correct. Application Load Balancer path-based routing is the best choice because it supports Layer 7 routing decisions for microservice architectures.",
+        "D": "Incorrect. EKS Cluster Autoscaler is useful when you need to add or remove Kubernetes worker nodes based on unschedulable pods, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1018",
+      "domain": "Compute",
+      "tags": [
+        "auto-scaling-warm-pools",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: reduce startup latency when scaling out after sudden demand changes. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "EKS Cluster Autoscaler"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling warm pools"
+        },
+        {
+          "key": "C",
+          "text": "Application Load Balancer path-based routing"
+        },
+        {
+          "key": "D",
+          "text": "Target tracking scaling policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce startup latency when scaling out after sudden demand changes.",
+      "explanation": "Auto Scaling warm pools is correct because it keeps pre-initialized instances ready for faster scale-out.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. EKS Cluster Autoscaler is useful when you need to add or remove Kubernetes worker nodes based on unschedulable pods, but it is not the best fit for this requirement.",
+        "B": "Correct. Auto Scaling warm pools is the best choice because it keeps pre-initialized instances ready for faster scale-out.",
+        "C": "Incorrect. Application Load Balancer path-based routing is useful when you need to route traffic to different services based on URL paths and host headers, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Target tracking scaling policies is useful when you need to keep average CPU or request count near a specific target as load changes automatically, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1019",
+      "domain": "Compute",
+      "tags": [
+        "target-tracking-scaling-policies",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to keep average CPU or request count near a specific target as load changes automatically. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Auto Scaling warm pools"
+        },
+        {
+          "key": "B",
+          "text": "Predictive scaling"
+        },
+        {
+          "key": "C",
+          "text": "Target tracking scaling policies"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling instance refresh"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: keep average CPU or request count near a specific target as load changes automatically.",
+      "explanation": "Target tracking scaling policies is correct because it continuously adjusts capacity to maintain the chosen metric target.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Auto Scaling warm pools is useful when you need to reduce startup latency when scaling out after sudden demand changes, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Predictive scaling is useful when you need to scale ahead of recurring daily traffic spikes with historical patterns, but it is not the best fit for this requirement.",
+        "C": "Correct. Target tracking scaling policies is the best choice because it continuously adjusts capacity to maintain the chosen metric target.",
+        "D": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    },
+    {
+      "id": "CS-1020",
+      "domain": "Compute",
+      "tags": [
+        "predictive-scaling",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: scale ahead of recurring daily traffic spikes with historical patterns. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Auto Scaling instance refresh"
+        },
+        {
+          "key": "B",
+          "text": "Predictive scaling"
+        },
+        {
+          "key": "C",
+          "text": "EKS Cluster Autoscaler"
+        },
+        {
+          "key": "D",
+          "text": "Target tracking scaling policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: scale ahead of recurring daily traffic spikes with historical patterns.",
+      "explanation": "Predictive scaling is correct because it forecasts demand and launches capacity before the spike starts.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Auto Scaling instance refresh is useful when you need to roll out a new AMI across an Auto Scaling group without full downtime, but it is not the best fit for this requirement.",
+        "B": "Correct. Predictive scaling is the best choice because it forecasts demand and launches capacity before the spike starts.",
+        "C": "Incorrect. EKS Cluster Autoscaler is useful when you need to add or remove Kubernetes worker nodes based on unschedulable pods, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Target tracking scaling policies is useful when you need to keep average CPU or request count near a specific target as load changes automatically, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Compute Scaling documentation",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+        }
+      ]
+    }
+  ]
+}

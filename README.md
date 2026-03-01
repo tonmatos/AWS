@@ -1,154 +1,172 @@
-# AWS Cloud Infrastructure & Automation
+# AWS Study Project
 
-A comprehensive collection of AWS infrastructure, automation scripts, and cloud management tools for scalable and efficient cloud operations.
+Personal learning repository for studying AWS services, cloud architecture, and preparing for AWS certifications. This project contains practical exercises, study notes, and hands-on implementations of various AWS services.
 
-## 🚀 Overview
+## � Learning Journey
 
-This repository contains AWS infrastructure as code, automation scripts, and deployment configurations designed to streamline cloud operations and ensure best practices in cloud architecture.
+This repository documents my journey through learning AWS, from basic concepts to advanced implementations. It includes practical exercises, study materials, and certification preparation resources.
+
+## 🎯 Objectives
+
+- Master core AWS services and concepts
+- Prepare for AWS certifications (Solutions Architect, Developer, DevOps Engineer)
+- Build hands-on experience with real-world scenarios
+- Document best practices and architectural patterns
 
 ## 📁 Project Structure
 
 ```
 AWS/
-├── infrastructure/          # CloudFormation/Terraform templates
-├── automation/             # PowerShell and Python automation scripts
-├── deployment/             # CI/CD pipeline configurations
-├── monitoring/             # CloudWatch dashboards and alerts
-├── security/              # IAM policies and security configurations
-├── documentation/         # Technical documentation and guides
-└── scripts/              # Utility scripts and tools
+├── study-notes/             # Learning notes and concepts
+├── hands-on-labs/           # Practical exercises and implementations
+├── certification-prep/     # Practice questions and exam materials
+├── architecture-diagrams/  # System design and architecture examples
+├── scripts/               # Automation scripts and utilities
+├── templates/             # CloudFormation/Terraform templates
+└── documentation/         # Reference materials and guides
 ```
 
-## 🛠️ Technologies & Tools
+## 🛠️ AWS Services Covered
 
-- **AWS Services**: EC2, S3, Lambda, RDS, CloudFormation, IAM, CloudWatch
-- **Infrastructure as Code**: CloudFormation, Terraform
-- **Automation**: PowerShell, Python, AWS CLI
-- **CI/CD**: GitHub Actions, AWS CodePipeline
-- **Monitoring**: CloudWatch, AWS X-Ray
-- **Security**: IAM, Security Groups, VPC
+### Core Services
+- **Compute**: EC2, Lambda, ECS, EKS
+- **Storage**: S3, EBS, EFS, Glacier
+- **Database**: RDS, DynamoDB, ElastiCache
+- **Networking**: VPC, Route 53, CloudFront, API Gateway
 
-## ⚙️ Prerequisites
+### Advanced Services
+- **Security**: IAM, KMS, Secrets Manager, GuardDuty
+- **Monitoring**: CloudWatch, X-Ray, AWS Config
+- **Serverless**: Lambda, API Gateway, Step Functions
+- **DevOps**: CodePipeline, CodeBuild, CloudFormation
 
-- AWS CLI configured with appropriate permissions
-- PowerShell 7+ or Python 3.8+
-- Git for version control
-- AWS account with necessary IAM permissions
+## 🚀 Getting Started
 
-## 🚀 Quick Start
+### Prerequisites
+- AWS account with appropriate permissions
+- AWS CLI configured
+- Basic understanding of cloud concepts
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/AWS.git
-   cd AWS
-   ```
-
-2. **Configure AWS CLI**
-   ```bash
-   aws configure
-   ```
-
-3. **Set up environment variables**
-   ```powershell
-   # PowerShell
-   $env:AWS_DEFAULT_REGION = "us-east-1"
-   $env:AWS_PROFILE = "default"
-   ```
-
-4. **Run initialization scripts**
-   ```bash
-   ./scripts/init-environment.ps1
-   ```
-
-## 📚 Documentation
-
-### Infrastructure Setup
-- [VPC Configuration](docs/vpc-setup.md)
-- [Security Groups](docs/security-groups.md)
-- [IAM Roles](docs/iam-roles.md)
-
-### Automation Guides
-- [PowerShell Scripts](docs/powershell-automation.md)
-- [Python Automation](docs/python-automation.md)
-- [Scheduled Tasks](docs/scheduled-tasks.md)
-
-### Deployment Pipelines
-- [CI/CD Setup](docs/cicd-setup.md)
-- [Environment Management](docs/environment-management.md)
-- [Rollback Procedures](docs/rollback-procedures.md)
-
-## 🔧 Configuration
-
-### AWS Environment
-```powershell
-# Set your AWS region
-$env:AWS_DEFAULT_REGION = "us-east-1"
-
-# Set your AWS profile
-$env:AWS_PROFILE = "production"
-
-# Verify configuration
-aws sts get-caller-identity
-```
-
-### PowerShell Profile
-The repository includes an enhanced PowerShell profile with:
-- AWS-specific aliases
-- Git shortcuts
-- System information functions
-- Custom themes with Oh My Posh
-
-## 📊 Monitoring & Logging
-
-- **CloudWatch Dashboards**: Real-time metrics and logs
-- **CloudTrail**: API activity tracking
-- **AWS Config**: Configuration compliance
-- **Custom Alerts**: Automated notifications
-
-## 🔒 Security Features
-
-- **IAM Best Practices**: Least privilege access
-- **VPC Isolation**: Network segmentation
-- **Encryption**: Data at rest and in transit
-- **Audit Logging**: Comprehensive activity tracking
-
-## 🚀 Deployment
-
-### Staging Environment
+### Setup
 ```bash
-# Deploy to staging
-./scripts/deploy-staging.ps1
+# Clone the repository
+git clone https://github.com/tonmatos/AWS.git
+cd AWS
+
+# Configure AWS CLI
+aws configure
+
+# Run setup script
+./scripts/setup.sh
 ```
 
-### Production Environment
-```bash
-# Deploy to production
-./scripts/deploy-production.ps1
-```
+## � Study Topics
+
+### 1. Cloud Foundations
+- AWS Global Infrastructure
+- Cloud concepts and terminology
+- Pricing and billing models
+
+### 2. Core Services
+- Compute services comparison
+- Storage options and use cases
+- Database selection criteria
+
+### 3. Networking & Content Delivery
+- VPC design and configuration
+- DNS management with Route 53
+- Content delivery with CloudFront
+
+### 4. Security & Compliance
+- IAM best practices
+- Data encryption options
+- Compliance frameworks
+
+### 5. Monitoring & Optimization
+- CloudWatch monitoring
+- Cost optimization strategies
+- Performance tuning
+
+## 🏗️ Hands-On Labs
+
+Each lab includes:
+- Learning objectives
+- Step-by-step instructions
+- Code examples and templates
+- Cleanup procedures
+
+### Featured Labs
+- **EC2 Web Server Setup**: Deploy a scalable web application
+- **Serverless API**: Build a REST API with Lambda and API Gateway
+- **Data Pipeline**: Create ETL processes with Glue and S3
+- **CI/CD Pipeline**: Set up automated deployment with CodePipeline
+
+## � Study Notes
+
+### Key Concepts
+- **High Availability**: Multi-AZ, Auto Scaling, Load Balancing
+- **Scalability**: Horizontal vs Vertical scaling
+- **Durability**: Data backup and disaster recovery
+- **Security**: Defense in depth, least privilege
+
+### Best Practices
+- Infrastructure as Code
+- Cost optimization
+- Security first approach
+- Monitoring and logging
+
+## 🎯 Certification Prep
+
+### AWS Certified Solutions Architect - Associate
+- Practice questions by domain
+- Exam tips and strategies
+- Sample scenarios
+
+### AWS Certified Developer - Associate
+- Code examples and SDK usage
+- API integration patterns
+- Deployment strategies
+
+## 📊 Progress Tracking
+
+- [ ] Core Services Mastery
+- [ ] Security Implementation
+- [ ] Cost Optimization
+- [ ] Monitoring Setup
+- [ ] Serverless Architecture
+- [ ] DevOps Pipeline
+
+## 🔧 Tools & Resources
+
+### Study Resources
+- AWS Documentation
+- AWS Whitepapers
+- AWS Training Portal
+- Practice exams
+
+### Development Tools
+- AWS CLI
+- AWS SDKs
+- CloudFormation
+- Terraform
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+This is a personal study repository, but feel free to:
+- Report issues or suggest improvements
+- Share study tips and resources
+- Contribute examples and templates
 
-## 📝 License
+## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue in this repository
-- Check the [documentation](docs/)
-- Review the [FAQ](docs/faq.md)
+This project is for educational purposes. Feel free to use and adapt for your own learning journey.
 
 ## 🏷️ Tags
 
-`#AWS` `#CloudComputing` `#InfrastructureAsCode` `#DevOps` `#Automation` `#PowerShell` `#Python` `#CloudFormation` `#Terraform`
+`#AWS` `#CloudComputing` `#Study` `#Certification` `#Learning` `#HandsOn` `#Architecture` `#DevOps`
 
 ---
 
-**Note**: This repository follows AWS best practices and security guidelines. Always review and test configurations in a non-production environment first.
+**Disclaimer**: This repository is for personal learning and educational purposes. Always follow AWS best practices and test in non-production environments.
+
+**Happy Learning! 🚀**

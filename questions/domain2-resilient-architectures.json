@@ -1,0 +1,1086 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "D2RES-1001",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "multi-az-deployments",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: survive an Availability Zone failure without application outage. Which resilient architecture design capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Backup and point-in-time recovery"
+        },
+        {
+          "key": "B",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "C",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "D",
+          "text": "Route 53 health-check failover"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: survive an Availability Zone failure without application outage.",
+      "explanation": "Multi-AZ deployments is correct because they provide redundancy and automated failover across AZs.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Backup and point-in-time recovery is useful when you need to restore service data after accidental deletion or corruption, but it is not the best fit for this requirement.",
+        "B": "Correct. Multi-AZ deployments is the best choice because they provide redundancy and automated failover across AZs.",
+        "C": "Incorrect. Queue-based decoupling with SQS is useful when you need to buffer spikes and isolate failures between producer and consumer services, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1002",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "auto-scaling-across-azs",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: replace failed instances and match capacity to current demand. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Auto Scaling across AZs"
+        },
+        {
+          "key": "B",
+          "text": "Backup and point-in-time recovery"
+        },
+        {
+          "key": "C",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "D",
+          "text": "Cross-Region replication strategy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: replace failed instances and match capacity to current demand.",
+      "explanation": "Auto Scaling across AZs is correct because it improves both fault tolerance and elasticity.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Auto Scaling across AZs is the best choice because it improves both fault tolerance and elasticity.",
+        "B": "Incorrect. Backup and point-in-time recovery is useful when you need to restore service data after accidental deletion or corruption, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Queue-based decoupling with SQS is useful when you need to buffer spikes and isolate failures between producer and consumer services, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Cross-Region replication strategy is useful when you need to recover critical workloads from a full-Region disruption, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1003",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "route-53-health-check-failover",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: direct users to healthy endpoints when a primary endpoint fails. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Backup and point-in-time recovery"
+        },
+        {
+          "key": "B",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "C",
+          "text": "Route 53 health-check failover"
+        },
+        {
+          "key": "D",
+          "text": "Cross-Region replication strategy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: direct users to healthy endpoints when a primary endpoint fails.",
+      "explanation": "Route 53 health-check failover is correct because it automates DNS-level failover decisions.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Backup and point-in-time recovery is useful when you need to restore service data after accidental deletion or corruption, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Multi-AZ deployments is useful when you need to survive an Availability Zone failure without application outage, but it is not the best fit for this requirement.",
+        "C": "Correct. Route 53 health-check failover is the best choice because it automates DNS-level failover decisions.",
+        "D": "Incorrect. Cross-Region replication strategy is useful when you need to recover critical workloads from a full-Region disruption, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1004",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "queue-based-decoupling-with-sqs",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to buffer spikes and isolate failures between producer and consumer services. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "B",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "C",
+          "text": "Cross-Region replication strategy"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling across AZs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: buffer spikes and isolate failures between producer and consumer services.",
+      "explanation": "Queue-based decoupling with SQS is correct because it increases fault isolation and asynchronous resilience.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Queue-based decoupling with SQS is the best choice because it increases fault isolation and asynchronous resilience.",
+        "B": "Incorrect. Multi-AZ deployments is useful when you need to survive an Availability Zone failure without application outage, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Cross-Region replication strategy is useful when you need to recover critical workloads from a full-Region disruption, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Auto Scaling across AZs is useful when you need to replace failed instances and match capacity to current demand, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1005",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "backup-and-point-in-time-recovery",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: restore service data after accidental deletion or corruption. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 health-check failover"
+        },
+        {
+          "key": "C",
+          "text": "Auto Scaling across AZs"
+        },
+        {
+          "key": "D",
+          "text": "Backup and point-in-time recovery"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: restore service data after accidental deletion or corruption.",
+      "explanation": "Backup and point-in-time recovery is correct because it provides controlled recovery objectives for data durability.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Multi-AZ deployments is useful when you need to survive an Availability Zone failure without application outage, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Auto Scaling across AZs is useful when you need to replace failed instances and match capacity to current demand, but it is not the best fit for this requirement.",
+        "D": "Correct. Backup and point-in-time recovery is the best choice because it provides controlled recovery objectives for data durability."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1006",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "cross-region-replication-strategy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: recover critical workloads from a full-Region disruption. Which resilient architecture design capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "B",
+          "text": "Cross-Region replication strategy"
+        },
+        {
+          "key": "C",
+          "text": "Route 53 health-check failover"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling across AZs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: recover critical workloads from a full-Region disruption.",
+      "explanation": "Cross-Region replication strategy is correct because it extends disaster recovery capability beyond a single Region.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Queue-based decoupling with SQS is useful when you need to buffer spikes and isolate failures between producer and consumer services, but it is not the best fit for this requirement.",
+        "B": "Correct. Cross-Region replication strategy is the best choice because it extends disaster recovery capability beyond a single Region.",
+        "C": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Auto Scaling across AZs is useful when you need to replace failed instances and match capacity to current demand, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1007",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "multi-az-deployments",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: survive an Availability Zone failure without application outage. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cross-Region replication strategy"
+        },
+        {
+          "key": "B",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "C",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "D",
+          "text": "Backup and point-in-time recovery"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: survive an Availability Zone failure without application outage.",
+      "explanation": "Multi-AZ deployments is correct because they provide redundancy and automated failover across AZs.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Cross-Region replication strategy is useful when you need to recover critical workloads from a full-Region disruption, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Queue-based decoupling with SQS is useful when you need to buffer spikes and isolate failures between producer and consumer services, but it is not the best fit for this requirement.",
+        "C": "Correct. Multi-AZ deployments is the best choice because they provide redundancy and automated failover across AZs.",
+        "D": "Incorrect. Backup and point-in-time recovery is useful when you need to restore service data after accidental deletion or corruption, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1008",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "auto-scaling-across-azs",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: replace failed instances and match capacity to current demand. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cross-Region replication strategy"
+        },
+        {
+          "key": "B",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "C",
+          "text": "Backup and point-in-time recovery"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling across AZs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: replace failed instances and match capacity to current demand.",
+      "explanation": "Auto Scaling across AZs is correct because it improves both fault tolerance and elasticity.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Cross-Region replication strategy is useful when you need to recover critical workloads from a full-Region disruption, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Multi-AZ deployments is useful when you need to survive an Availability Zone failure without application outage, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Backup and point-in-time recovery is useful when you need to restore service data after accidental deletion or corruption, but it is not the best fit for this requirement.",
+        "D": "Correct. Auto Scaling across AZs is the best choice because it improves both fault tolerance and elasticity."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1009",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "route-53-health-check-failover",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to direct users to healthy endpoints when a primary endpoint fails. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cross-Region replication strategy"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 health-check failover"
+        },
+        {
+          "key": "C",
+          "text": "Auto Scaling across AZs"
+        },
+        {
+          "key": "D",
+          "text": "Multi-AZ deployments"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: direct users to healthy endpoints when a primary endpoint fails.",
+      "explanation": "Route 53 health-check failover is correct because it automates DNS-level failover decisions.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Cross-Region replication strategy is useful when you need to recover critical workloads from a full-Region disruption, but it is not the best fit for this requirement.",
+        "B": "Correct. Route 53 health-check failover is the best choice because it automates DNS-level failover decisions.",
+        "C": "Incorrect. Auto Scaling across AZs is useful when you need to replace failed instances and match capacity to current demand, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Multi-AZ deployments is useful when you need to survive an Availability Zone failure without application outage, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1010",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "queue-based-decoupling-with-sqs",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: buffer spikes and isolate failures between producer and consumer services. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Route 53 health-check failover"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling across AZs"
+        },
+        {
+          "key": "C",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "D",
+          "text": "Queue-based decoupling with SQS"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: buffer spikes and isolate failures between producer and consumer services.",
+      "explanation": "Queue-based decoupling with SQS is correct because it increases fault isolation and asynchronous resilience.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Auto Scaling across AZs is useful when you need to replace failed instances and match capacity to current demand, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Multi-AZ deployments is useful when you need to survive an Availability Zone failure without application outage, but it is not the best fit for this requirement.",
+        "D": "Correct. Queue-based decoupling with SQS is the best choice because it increases fault isolation and asynchronous resilience."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1011",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "backup-and-point-in-time-recovery",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: restore service data after accidental deletion or corruption. Which resilient architecture design capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Route 53 health-check failover"
+        },
+        {
+          "key": "B",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "C",
+          "text": "Backup and point-in-time recovery"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling across AZs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: restore service data after accidental deletion or corruption.",
+      "explanation": "Backup and point-in-time recovery is correct because it provides controlled recovery objectives for data durability.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Queue-based decoupling with SQS is useful when you need to buffer spikes and isolate failures between producer and consumer services, but it is not the best fit for this requirement.",
+        "C": "Correct. Backup and point-in-time recovery is the best choice because it provides controlled recovery objectives for data durability.",
+        "D": "Incorrect. Auto Scaling across AZs is useful when you need to replace failed instances and match capacity to current demand, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1012",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "cross-region-replication-strategy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: recover critical workloads from a full-Region disruption. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cross-Region replication strategy"
+        },
+        {
+          "key": "B",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "C",
+          "text": "Backup and point-in-time recovery"
+        },
+        {
+          "key": "D",
+          "text": "Route 53 health-check failover"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: recover critical workloads from a full-Region disruption.",
+      "explanation": "Cross-Region replication strategy is correct because it extends disaster recovery capability beyond a single Region.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Cross-Region replication strategy is the best choice because it extends disaster recovery capability beyond a single Region.",
+        "B": "Incorrect. Queue-based decoupling with SQS is useful when you need to buffer spikes and isolate failures between producer and consumer services, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Backup and point-in-time recovery is useful when you need to restore service data after accidental deletion or corruption, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1013",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "multi-az-deployments",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: survive an Availability Zone failure without application outage. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Auto Scaling across AZs"
+        },
+        {
+          "key": "B",
+          "text": "Cross-Region replication strategy"
+        },
+        {
+          "key": "C",
+          "text": "Backup and point-in-time recovery"
+        },
+        {
+          "key": "D",
+          "text": "Multi-AZ deployments"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: survive an Availability Zone failure without application outage.",
+      "explanation": "Multi-AZ deployments is correct because they provide redundancy and automated failover across AZs.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Auto Scaling across AZs is useful when you need to replace failed instances and match capacity to current demand, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Cross-Region replication strategy is useful when you need to recover critical workloads from a full-Region disruption, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Backup and point-in-time recovery is useful when you need to restore service data after accidental deletion or corruption, but it is not the best fit for this requirement.",
+        "D": "Correct. Multi-AZ deployments is the best choice because they provide redundancy and automated failover across AZs."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1014",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "auto-scaling-across-azs",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to replace failed instances and match capacity to current demand. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Route 53 health-check failover"
+        },
+        {
+          "key": "B",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "C",
+          "text": "Auto Scaling across AZs"
+        },
+        {
+          "key": "D",
+          "text": "Cross-Region replication strategy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: replace failed instances and match capacity to current demand.",
+      "explanation": "Auto Scaling across AZs is correct because it improves both fault tolerance and elasticity.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Multi-AZ deployments is useful when you need to survive an Availability Zone failure without application outage, but it is not the best fit for this requirement.",
+        "C": "Correct. Auto Scaling across AZs is the best choice because it improves both fault tolerance and elasticity.",
+        "D": "Incorrect. Cross-Region replication strategy is useful when you need to recover critical workloads from a full-Region disruption, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1015",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "route-53-health-check-failover",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: direct users to healthy endpoints when a primary endpoint fails. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 health-check failover"
+        },
+        {
+          "key": "C",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling across AZs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: direct users to healthy endpoints when a primary endpoint fails.",
+      "explanation": "Route 53 health-check failover is correct because it automates DNS-level failover decisions.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Queue-based decoupling with SQS is useful when you need to buffer spikes and isolate failures between producer and consumer services, but it is not the best fit for this requirement.",
+        "B": "Correct. Route 53 health-check failover is the best choice because it automates DNS-level failover decisions.",
+        "C": "Incorrect. Multi-AZ deployments is useful when you need to survive an Availability Zone failure without application outage, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Auto Scaling across AZs is useful when you need to replace failed instances and match capacity to current demand, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1016",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "queue-based-decoupling-with-sqs",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: buffer spikes and isolate failures between producer and consumer services. Which resilient architecture design capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Backup and point-in-time recovery"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling across AZs"
+        },
+        {
+          "key": "C",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "D",
+          "text": "Route 53 health-check failover"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: buffer spikes and isolate failures between producer and consumer services.",
+      "explanation": "Queue-based decoupling with SQS is correct because it increases fault isolation and asynchronous resilience.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Backup and point-in-time recovery is useful when you need to restore service data after accidental deletion or corruption, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Auto Scaling across AZs is useful when you need to replace failed instances and match capacity to current demand, but it is not the best fit for this requirement.",
+        "C": "Correct. Queue-based decoupling with SQS is the best choice because it increases fault isolation and asynchronous resilience.",
+        "D": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1017",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "backup-and-point-in-time-recovery",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: restore service data after accidental deletion or corruption. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Route 53 health-check failover"
+        },
+        {
+          "key": "B",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "C",
+          "text": "Cross-Region replication strategy"
+        },
+        {
+          "key": "D",
+          "text": "Backup and point-in-time recovery"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: restore service data after accidental deletion or corruption.",
+      "explanation": "Backup and point-in-time recovery is correct because it provides controlled recovery objectives for data durability.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Queue-based decoupling with SQS is useful when you need to buffer spikes and isolate failures between producer and consumer services, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Cross-Region replication strategy is useful when you need to recover critical workloads from a full-Region disruption, but it is not the best fit for this requirement.",
+        "D": "Correct. Backup and point-in-time recovery is the best choice because it provides controlled recovery objectives for data durability."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1018",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "cross-region-replication-strategy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: recover critical workloads from a full-Region disruption. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "B",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "C",
+          "text": "Cross-Region replication strategy"
+        },
+        {
+          "key": "D",
+          "text": "Backup and point-in-time recovery"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: recover critical workloads from a full-Region disruption.",
+      "explanation": "Cross-Region replication strategy is correct because it extends disaster recovery capability beyond a single Region.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Queue-based decoupling with SQS is useful when you need to buffer spikes and isolate failures between producer and consumer services, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Multi-AZ deployments is useful when you need to survive an Availability Zone failure without application outage, but it is not the best fit for this requirement.",
+        "C": "Correct. Cross-Region replication strategy is the best choice because it extends disaster recovery capability beyond a single Region.",
+        "D": "Incorrect. Backup and point-in-time recovery is useful when you need to restore service data after accidental deletion or corruption, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1019",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "multi-az-deployments",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to survive an Availability Zone failure without application outage. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "B",
+          "text": "Cross-Region replication strategy"
+        },
+        {
+          "key": "C",
+          "text": "Route 53 health-check failover"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling across AZs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: survive an Availability Zone failure without application outage.",
+      "explanation": "Multi-AZ deployments is correct because they provide redundancy and automated failover across AZs.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Multi-AZ deployments is the best choice because they provide redundancy and automated failover across AZs.",
+        "B": "Incorrect. Cross-Region replication strategy is useful when you need to recover critical workloads from a full-Region disruption, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Auto Scaling across AZs is useful when you need to replace failed instances and match capacity to current demand, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D2RES-1020",
+      "domain": "Domain 2 - Resilient Architectures",
+      "tags": [
+        "auto-scaling-across-azs",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: replace failed instances and match capacity to current demand. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Queue-based decoupling with SQS"
+        },
+        {
+          "key": "B",
+          "text": "Auto Scaling across AZs"
+        },
+        {
+          "key": "C",
+          "text": "Multi-AZ deployments"
+        },
+        {
+          "key": "D",
+          "text": "Route 53 health-check failover"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: replace failed instances and match capacity to current demand.",
+      "explanation": "Auto Scaling across AZs is correct because it improves both fault tolerance and elasticity.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Queue-based decoupling with SQS is useful when you need to buffer spikes and isolate failures between producer and consumer services, but it is not the best fit for this requirement.",
+        "B": "Correct. Auto Scaling across AZs is the best choice because it improves both fault tolerance and elasticity.",
+        "C": "Incorrect. Multi-AZ deployments is useful when you need to survive an Availability Zone failure without application outage, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Route 53 health-check failover is useful when you need to direct users to healthy endpoints when a primary endpoint fails, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Resilient Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    }
+  ]
+}

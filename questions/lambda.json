@@ -1,0 +1,2264 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "LAMBDA-001",
+      "domain": "Lambda",
+      "tags": [
+        "concurrency",
+        "performance",
+        "cold-start"
+      ],
+      "difficulty": 3,
+      "type": "multi",
+      "select": {
+        "min": 2,
+        "max": 2
+      },
+      "prompt": "A social media analytics company processes user-generated content using AWS Lambda. The function analyzes images and extracts metadata. Current configuration:\n\n- Runtime: Python 3.11\n- Memory: 512 MB\n- Timeout: 30 seconds\n- Average execution time: 8 seconds\n- Daily invocations: 1 million (spread throughout the day)\n- Current concurrency: Reserved capacity of 100\n\nDuring peak hours (6 PM - 9 PM), the company observes:\n- Request rate spikes to 60 requests/second\n- Throttling errors (429) occurring\n- Some requests timing out\n- Cold start delays of 2-3 seconds affecting user experience\n\nWhich combination of actions will resolve the performance issues? (Choose TWO)",
+      "options": [
+        {
+          "key": "A",
+          "text": "Increase the reserved concurrency limit from 100 to 500 to handle peak traffic"
+        },
+        {
+          "key": "B",
+          "text": "Enable Provisioned Concurrency with 200 warm instances during peak hours (6 PM - 9 PM) to eliminate cold starts"
+        },
+        {
+          "key": "C",
+          "text": "Increase the memory allocation from 512 MB to 1024 MB to improve execution performance and reduce cold start times"
+        },
+        {
+          "key": "D",
+          "text": "Reduce the timeout from 30 seconds to 10 seconds to fail faster and increase throughput"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A",
+          "B"
+        ]
+      },
+      "explanation": "**Why A and B together solve the problem:**\n\n**Problem Analysis:**\n\n1. **Throttling (429 errors):**\n   - Peak: 500 requests/second \u00d7 8 seconds = 480 concurrent executions needed\n   - Current: 100 reserved concurrency\n   - **Gap: 3,900 concurrent executions** \u2190 This causes throttling\n\n2. **Cold Starts:**\n   - 2-3 second delays hurting user experience\n   - Occurring when scaling up during peak\n\n**Solution A: Increase Reserved Concurrency**\n\n**Reserved Concurrency explained:**\n- Guarantees a function can scale to X concurrent executions\n- Prevents other functions from consuming this capacity\n- Does NOT keep instances warm (just reserves capacity)\n\n**Calculation:**\n```\nPeak requests/second: 500\nAverage duration: 8 seconds\nRequired concurrency = 500 \u00d7 8 = 480\n\nBut with Provisioned Concurrency (solution B):\nProvisioned: 200 (always warm)\nRemaining peak need: 500 - (200/8) = 475 req/sec\n475 \u00d7 8 = 3,800 concurrent\n\nRecommended reserved: 500 (provides buffer)\n```\n\n**Implementation:**\n```bash\naws lambda put-function-concurrency \\\n  --function-name ImageAnalyzer \\\n  --reserved-concurrent-executions 500\n```\n\n**Benefits:**\n- \u2705 Prevents throttling during peak\n- \u2705 Provides predictable scaling\n- \u2705 Isolates this function from others\n\n**Solution B: Provisioned Concurrency**\n\n**Provisioned Concurrency explained:**\n- Keeps N instances initialized and ready\n- Eliminates cold starts for provisioned capacity\n- Instances stay warm with runtime loaded\n\n**Why 200 instances:**\n```\nPeak: 500 requests/second\nExecution time: 8 seconds\n\nScenario 1 - Start of peak:\nProvisioned: 200 warm instances\nImmediate capacity: 200/8 = 25 requests/second (no cold start)\nRemaining 475 req/sec handled by scaling (with cold starts)\n\nScenario 2 - During peak:\nProvisioned: 200 instances (always warm)\nAdditional scaled: 300 instances (from reserved concurrency)\nTotal: 500 concurrent = 500/8 = 62.5 requests/second sustained\n```\n\n**Schedule Provisioned Concurrency:**\n```bash\n# Create Application Auto Scaling target\naws application-autoscaling register-scalable-target \\\n  --service-namespace lambda \\\n  --resource-id function:ImageAnalyzer:prod \\\n  --scalable-dimension lambda:function:ProvisionedConcurrentExecutions \\\n  --min-capacity 0 \\\n  --max-capacity 200\n\n# Schedule scale-up at 5:45 PM\naws application-autoscaling put-scheduled-action \\\n  --service-namespace lambda \\\n  --resource-id function:ImageAnalyzer:prod \\\n  --scalable-dimension lambda:function:ProvisionedConcurrentExecutions \\\n  --scheduled-action-name ScaleUpForPeak \\\n  --schedule \"cron(45 17 * * ? *)\" \\\n  --scalable-target-action MinCapacity=200,MaxCapacity=200\n\n# Schedule scale-down at 9:15 PM  \naws application-autoscaling put-scheduled-action \\\n  --service-namespace lambda \\\n  --resource-id function:ImageAnalyzer:prod \\\n  --scalable-dimension lambda:function:ProvisionedConcurrentExecutions \\\n  --scheduled-action-name ScaleDownAfterPeak \\\n  --schedule \"cron(15 21 * * ? *)\" \\\n  --scalable-target-action MinCapacity=0,MaxCapacity=0\n```\n\n**Benefits:**\n- \u2705 Eliminates cold starts for 200 concurrent executions\n- \u2705 Improves user experience (no 2-3 sec delays)\n- \u2705 Scheduled provisioning reduces costs (only during peak)\n\n**Combined Effect:**\n```\nTime: 6:00 PM (start of peak)\n\u251c\u2500 Provisioned: 200 warm instances (handle ~25 req/sec with no cold start)\n\u251c\u2500 Reserved: 500 total capacity (prevents throttling)\n\u2514\u2500 Auto-scale: Remaining 300 can scale up as needed\n\nResult:\n\u2705 No throttling (500 reserved concurrency)\n\u2705 Reduced cold starts (200 provisioned)\n\u2705 Better user experience\n```\n\n**Why other options are WRONG:**\n\n**Option C (Increase Memory):**\n\n\u274c **Doesn't solve throttling:**\n- Throttling is due to insufficient concurrent capacity\n- More memory doesn't increase concurrency limit\n- Would still hit 100 concurrent execution wall\n\n**Partial benefit:**\n- More memory = more CPU (proportional allocation)\n- Might reduce execution time from 8s to 6s\n- Cold start might improve from 3s to 2.5s\n- But doesn't address root cause\n\n**When to use:**\n- Function is CPU-bound\n- Need faster execution\n- Cost-benefit analysis shows savings\n\n```python\n# Memory vs execution time trade-off\n512 MB: $0.0000083 per GB-second \u00d7 8s = $0.0000664\n1024 MB: $0.0000083 per GB-second \u00d7 6s = $0.0000498 (saves money!)\n\nBut: Still throttles at 100 concurrent\n```\n\n**Option D (Reduce Timeout):**\n\n\u274c **Counterproductive:**\n- Average execution: 8 seconds\n- Reducing timeout to 10s: Only 2s buffer\n- Some invocations will timeout (especially cold starts)\n- Creates new problems instead of solving existing ones\n\n\u274c **Doesn't affect concurrency:**\n- Timeout doesn't change concurrent capacity\n- Still limited to 100 concurrent executions\n- Throttling continues\n\n**When to use:**\n- Function has runaway processes\n- Need cost protection\n- Current timeout is excessively high (e.g., 15 minutes for 1-second function)\n\n**Lambda Concurrency Types:**\n\n1. **Account Concurrency:**\n   - Default: 1,000 per region\n   - Shared across all functions\n   - Can request increase (up to tens of thousands)\n\n2. **Unreserved Concurrency:**\n   - Minimum 100 per account\n   - Shared by functions without reserved concurrency\n\n3. **Reserved Concurrency:**\n   - Dedicated to specific function\n   - Subtracts from account concurrency\n   - Prevents function from consuming all account capacity\n\n4. **Provisioned Concurrency:**\n   - Pre-initialized warm instances\n   - Counts toward reserved/account concurrency\n   - Additional charge: $0.0000041667 per GB-second\n\n**Cost Analysis:**\n\n**Before (Current):**\n- Invocations: 1M per day\n- Memory: 512 MB = 0.5 GB\n- Duration: 8 seconds\n- Cost: 1M \u00d7 0.5 GB \u00d7 8s \u00d7 $0.0000083 = $33.20/day\n\n**After (A + B):**\n- Regular invocations: Same as before = $33.20/day\n- Provisioned Concurrency: 200 \u00d7 0.5 GB \u00d7 3 hours \u00d7 3600s \u00d7 $0.0000041667 = $4.50/day\n- **Total: $37.70/day**\n- **Additional cost: $4.50/day** for better performance\n\n**Alternative Optimization:**\n```python\n# Reuse connections and SDK clients\nimport boto3\n\n# GOOD: Initialize outside handler (reused)\ns3 = boto3.client('s3')\n\ndef lambda_handler(event, context):\n    # Handler code using s3 client\n    return response\n```\n\nReferences:\n- Lambda Concurrency: https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html\n- Provisioned Concurrency: https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html\n- Lambda Performance: https://docs.aws.amazon.com/lambda/latest/operatorguide/perf-optimize.html",
+      "incorrect": "This option either doesn't address the root cause (throttling due to insufficient concurrent capacity), or creates new problems (timeouts). Increasing memory helps with execution time but doesn't solve the concurrency limit. Reducing timeout causes failures. The solution requires BOTH increasing reserved concurrency (to prevent throttling) AND enabling provisioned concurrency (to eliminate cold starts during peak).",
+      "hint": "Two problems need two solutions: throttling needs more capacity, cold starts need warm instances"
+    },
+    {
+      "id": "LAMBDA-002",
+      "domain": "Lambda",
+      "tags": [
+        "async",
+        "retries"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function is invoked asynchronously (for example, from S3 events). The function fails. What is the default retry behavior?",
+      "options": [
+        {
+          "key": "A",
+          "text": "No retries are attempted"
+        },
+        {
+          "key": "B",
+          "text": "Lambda retries twice with delays before sending to a DLQ/destination if configured"
+        },
+        {
+          "key": "C",
+          "text": "Lambda retries indefinitely until success"
+        },
+        {
+          "key": "D",
+          "text": "Lambda retries only if provisioned concurrency is enabled"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Async invocations have built-in retry attempts.",
+      "explanation": "For asynchronous invocations, Lambda retries failed executions (typically two retries with delays). You can configure a DLQ or destinations for failed events after retries.",
+      "incorrect": "Indefinite retry is not the default. Provisioned concurrency does not control retry behavior.",
+      "references": [
+        {
+          "label": "AWS Lambda Developer Guide",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-003",
+      "domain": "Lambda",
+      "tags": [
+        "destinations",
+        "dlq"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want successful asynchronous Lambda invocations to be sent to one target and failed invocations to another target without writing custom code.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lambda Destinations"
+        },
+        {
+          "key": "B",
+          "text": "Provisioned Concurrency"
+        },
+        {
+          "key": "C",
+          "text": "Lambda Layers"
+        },
+        {
+          "key": "D",
+          "text": "VPC endpoints"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Success and failure routing is exactly what destinations do.",
+      "explanation": "Lambda Destinations can route the result of an asynchronous invocation to different targets for on-success and on-failure (for example, SNS, SQS, EventBridge).",
+      "incorrect": "DLQs capture failures only; destinations support both success and failure routing.",
+      "references": [
+        {
+          "label": "Lambda Destinations",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async.html#invocation-async-destinations"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-004",
+      "domain": "Lambda",
+      "tags": [
+        "sqs",
+        "event-source-mapping"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function processes messages from an SQS queue. What is the standard integration mechanism that pulls batches from the queue?",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Event Notifications"
+        },
+        {
+          "key": "B",
+          "text": "Event source mapping"
+        },
+        {
+          "key": "C",
+          "text": "CloudWatch Logs subscription"
+        },
+        {
+          "key": "D",
+          "text": "Route 53"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "SQS to Lambda is typically configured with an event source mapping.",
+      "explanation": "Lambda uses an event source mapping to poll SQS, retrieve batches, and invoke the function. Scaling is managed by Lambda based on queue depth and concurrency limits.",
+      "incorrect": "S3 notifications and log subscriptions are unrelated to SQS polling.",
+      "references": [
+        {
+          "label": "SQS event source mapping",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-005",
+      "domain": "Lambda",
+      "tags": [
+        "sqs",
+        "batch-size"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function reads from SQS with batch size 10. One message in the batch fails processing. What happens to the batch by default?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Only the failed message is retried automatically"
+        },
+        {
+          "key": "B",
+          "text": "The entire batch is returned to the queue for retry unless partial batch response is used"
+        },
+        {
+          "key": "C",
+          "text": "Messages are deleted regardless of failure"
+        },
+        {
+          "key": "D",
+          "text": "The queue is paused"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Without partial batch response, success/failure is per batch.",
+      "explanation": "By default, if a batch fails, the batch is retried. To avoid reprocessing successful messages, you can use partial batch response (for supported sources) to report per-item failures.",
+      "incorrect": "SQS does not delete messages that were not successfully processed.",
+      "references": [
+        {
+          "label": "Lambda with SQS batching",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-006",
+      "domain": "Lambda",
+      "tags": [
+        "vpc",
+        "networking"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function must access an RDS instance in private subnets. What is required?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Attach the Lambda function to the VPC and ensure subnet and security group access"
+        },
+        {
+          "key": "B",
+          "text": "Make the RDS instance public"
+        },
+        {
+          "key": "C",
+          "text": "Use an Internet Gateway"
+        },
+        {
+          "key": "D",
+          "text": "Use S3 Transfer Acceleration"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Private RDS access requires Lambda to be in the VPC.",
+      "explanation": "To access resources in private subnets, configure the Lambda function with VPC subnets and security groups that allow connectivity to RDS.",
+      "incorrect": "Making RDS public is not required and reduces security.",
+      "references": [
+        {
+          "label": "Lambda in a VPC",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-007",
+      "domain": "Lambda",
+      "tags": [
+        "vpc",
+        "internet-egress"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function runs inside private subnets and needs outbound internet access to call an external API. What is the most common solution?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Attach an Internet Gateway directly to the subnet"
+        },
+        {
+          "key": "B",
+          "text": "Configure a NAT Gateway and route 0.0.0.0/0 from the Lambda subnets to the NAT Gateway"
+        },
+        {
+          "key": "C",
+          "text": "Use VPC peering"
+        },
+        {
+          "key": "D",
+          "text": "Enable S3 gateway endpoint"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Private subnets use NAT for outbound-only IPv4 internet access.",
+      "explanation": "When Lambda is configured in private subnets, it uses ENIs in those subnets. For outbound internet access, the subnets must route to a NAT Gateway in a public subnet.",
+      "incorrect": "IGW applies to public subnet routing; S3 endpoints do not provide general internet egress.",
+      "references": [
+        {
+          "label": "VPC concepts",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-008",
+      "domain": "Lambda",
+      "tags": [
+        "ephemeral-storage"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function needs 5 GB of temporary disk space during processing. Which configuration supports this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Increase /tmp ephemeral storage for the function"
+        },
+        {
+          "key": "B",
+          "text": "Increase memory only"
+        },
+        {
+          "key": "C",
+          "text": "Use provisioned concurrency"
+        },
+        {
+          "key": "D",
+          "text": "Enable SnapStart"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Lambda provides configurable ephemeral storage beyond the default.",
+      "explanation": "Lambda provides /tmp ephemeral storage that can be configured to larger sizes for workloads that need more temporary disk during execution.",
+      "incorrect": "Memory and provisioned concurrency do not directly increase /tmp size.",
+      "references": [
+        {
+          "label": "Lambda ephemeral storage",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-function-common.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-009",
+      "domain": "Lambda",
+      "tags": [
+        "layers",
+        "reuse"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Multiple Lambda functions share the same library dependencies. You want to package and manage these dependencies once and reuse them.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lambda Layers"
+        },
+        {
+          "key": "B",
+          "text": "Reserved Concurrency"
+        },
+        {
+          "key": "C",
+          "text": "CloudWatch Alarms"
+        },
+        {
+          "key": "D",
+          "text": "IAM Access Analyzer"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Layers are reusable code packages attached to functions.",
+      "explanation": "Lambda Layers let you package libraries and other dependencies separately from function code and reuse them across multiple functions.",
+      "incorrect": "Concurrency and monitoring features do not package code.",
+      "references": [
+        {
+          "label": "Lambda Layers",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-010",
+      "domain": "Lambda",
+      "tags": [
+        "versions",
+        "aliases"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to deploy a new Lambda version gradually (for example, 10% of traffic) and shift traffic over time. Which feature supports this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lambda Aliases with weighted traffic"
+        },
+        {
+          "key": "B",
+          "text": "Lambda Layers"
+        },
+        {
+          "key": "C",
+          "text": "S3 replication"
+        },
+        {
+          "key": "D",
+          "text": "VPC Flow Logs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Aliases can split traffic between versions.",
+      "explanation": "Lambda aliases can be configured with routing configurations (weights) to shift a percentage of invocations to a new version, enabling canary deployments.",
+      "incorrect": "Layers and VPC logs do not route traffic.",
+      "references": [
+        {
+          "label": "Lambda alias traffic shifting",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-traffic-shifting-using-aliases.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-011",
+      "domain": "Lambda",
+      "tags": [
+        "timeout",
+        "best-practice"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function occasionally runs longer than expected and gets terminated. Which configuration controls the maximum runtime?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Memory size"
+        },
+        {
+          "key": "B",
+          "text": "Function timeout"
+        },
+        {
+          "key": "C",
+          "text": "IAM role"
+        },
+        {
+          "key": "D",
+          "text": "VPC subnet"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "The timeout setting caps execution duration.",
+      "explanation": "The Lambda function timeout sets the maximum allowed execution time. If the function runs longer, Lambda terminates it.",
+      "incorrect": "Memory may impact performance but does not directly set maximum runtime.",
+      "references": [
+        {
+          "label": "AWS Lambda Developer Guide",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-012",
+      "domain": "Lambda",
+      "tags": [
+        "cloudwatch-logs"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Where do Lambda function logs written to stdout/stderr appear by default?",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3"
+        },
+        {
+          "key": "B",
+          "text": "CloudWatch Logs"
+        },
+        {
+          "key": "C",
+          "text": "CloudTrail"
+        },
+        {
+          "key": "D",
+          "text": "VPC Flow Logs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Lambda integrates automatically with CloudWatch Logs.",
+      "explanation": "Lambda sends stdout and stderr to CloudWatch Logs by default, creating a log group per function.",
+      "incorrect": "CloudTrail logs API calls, not function output logs.",
+      "references": [
+        {
+          "label": "Lambda logging",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-013",
+      "domain": "Lambda",
+      "tags": [
+        "x-ray",
+        "tracing"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need distributed tracing for Lambda to visualize end-to-end latency across downstream calls. Which AWS service helps?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS X-Ray"
+        },
+        {
+          "key": "B",
+          "text": "AWS Config"
+        },
+        {
+          "key": "C",
+          "text": "AWS Shield"
+        },
+        {
+          "key": "D",
+          "text": "Amazon Inspector"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Tracing is done with X-Ray.",
+      "explanation": "AWS X-Ray provides distributed tracing. Lambda can emit segments and subsegments for tracing requests through services.",
+      "incorrect": "Config, Shield, and Inspector serve different purposes.",
+      "references": [
+        {
+          "label": "Lambda with X-Ray",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-014",
+      "domain": "Lambda",
+      "tags": [
+        "permissions",
+        "resource-policy"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to allow an S3 bucket to invoke a Lambda function. Where is this permission defined?",
+      "options": [
+        {
+          "key": "A",
+          "text": "In the Lambda resource-based policy (AddPermission)"
+        },
+        {
+          "key": "B",
+          "text": "In the S3 bucket lifecycle rule"
+        },
+        {
+          "key": "C",
+          "text": "In the VPC route table"
+        },
+        {
+          "key": "D",
+          "text": "In CloudWatch metric filters"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "S3 needs permission in Lambda's resource policy to invoke it.",
+      "explanation": "To allow S3 to invoke a Lambda function, you add a permission statement to the function's resource-based policy that allows the S3 service (and optionally the bucket ARN) to invoke it.",
+      "incorrect": "Lifecycle rules and routing do not grant invoke permissions.",
+      "references": [
+        {
+          "label": "Lambda permissions",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/access-control-resource-based.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-015",
+      "domain": "Lambda",
+      "tags": [
+        "reserved-concurrency"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A single noisy Lambda function is consuming most of the account concurrency and starving other functions. What should you configure?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "B",
+          "text": "Reserved concurrency for the noisy function"
+        },
+        {
+          "key": "C",
+          "text": "Increase the function timeout"
+        },
+        {
+          "key": "D",
+          "text": "Enable S3 Transfer Acceleration"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Reserved concurrency also acts as a concurrency limit for that function.",
+      "explanation": "Reserved concurrency sets aside concurrency for a function and also caps that function's maximum concurrency, preventing it from consuming all account concurrency and protecting other functions.",
+      "incorrect": "Provisioned concurrency reduces cold starts but does not cap usage unless combined with reserved concurrency.",
+      "references": [
+        {
+          "label": "Reserved concurrency",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-016",
+      "domain": "Lambda",
+      "tags": [
+        "provisioned-concurrency",
+        "cold-start"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A latency-sensitive API uses Lambda and must minimize cold starts during predictable traffic peaks. Which feature is designed for this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned Concurrency"
+        },
+        {
+          "key": "B",
+          "text": "DLQ"
+        },
+        {
+          "key": "C",
+          "text": "S3 Intelligent-Tiering"
+        },
+        {
+          "key": "D",
+          "text": "EBS snapshots"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Provisioned concurrency keeps a set number of instances warm.",
+      "explanation": "Provisioned Concurrency keeps a configured number of Lambda execution environments initialized and ready to respond, reducing cold start latency during peaks.",
+      "incorrect": "DLQ handles failures and does not reduce cold start latency.",
+      "references": [
+        {
+          "label": "Provisioned Concurrency",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-017",
+      "domain": "Lambda",
+      "tags": [
+        "eventbridge"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to trigger a Lambda function on a schedule (for example, every 5 minutes) without managing servers. Which service should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon EventBridge Scheduler or EventBridge rule"
+        },
+        {
+          "key": "B",
+          "text": "S3 Lifecycle rules"
+        },
+        {
+          "key": "C",
+          "text": "VPC Flow Logs"
+        },
+        {
+          "key": "D",
+          "text": "AWS Direct Connect"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Scheduled triggers are handled by EventBridge.",
+      "explanation": "EventBridge (rules or Scheduler) can run on a cron-like schedule and invoke Lambda targets without server management.",
+      "incorrect": "S3 lifecycle and networking services do not provide scheduled triggers.",
+      "references": [
+        {
+          "label": "EventBridge schedules",
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-018",
+      "domain": "Lambda",
+      "tags": [
+        "api-gateway"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to expose a RESTful HTTPS endpoint that invokes a Lambda function. Which AWS service is commonly used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon API Gateway"
+        },
+        {
+          "key": "B",
+          "text": "Amazon S3"
+        },
+        {
+          "key": "C",
+          "text": "Amazon EBS"
+        },
+        {
+          "key": "D",
+          "text": "Amazon Route 53 Resolver"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "API Gateway is the managed HTTP front door for Lambda.",
+      "explanation": "Amazon API Gateway can expose HTTPS endpoints that integrate with Lambda for REST APIs or HTTP APIs.",
+      "incorrect": "S3 and EBS do not provide REST API front doors for Lambda.",
+      "references": [
+        {
+          "label": "API Gateway + Lambda",
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-getting-started-with-lambda-integration.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-019",
+      "domain": "Lambda",
+      "tags": [
+        "alb",
+        "integration"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to invoke Lambda directly from an Application Load Balancer target group (no API Gateway). Is this supported?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes, ALB can route to Lambda targets"
+        },
+        {
+          "key": "B",
+          "text": "No, only NLB supports Lambda"
+        },
+        {
+          "key": "C",
+          "text": "No, only CloudFront supports Lambda"
+        },
+        {
+          "key": "D",
+          "text": "Yes, but only for synchronous SQS events"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "ALB supports Lambda as a target type.",
+      "explanation": "Application Load Balancers support Lambda functions as a target type, allowing HTTP(S) requests to be routed to Lambda without API Gateway.",
+      "incorrect": "NLB does not route to Lambda in the same way as ALB.",
+      "references": [
+        {
+          "label": "ALB Lambda targets",
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-020",
+      "domain": "Lambda",
+      "tags": [
+        "efs",
+        "large-files"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function needs to access a shared file system larger than the /tmp storage limit to read and write files during execution. Which integration supports this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Mount Amazon EFS to Lambda"
+        },
+        {
+          "key": "B",
+          "text": "Attach an EBS volume to Lambda"
+        },
+        {
+          "key": "C",
+          "text": "Use instance store"
+        },
+        {
+          "key": "D",
+          "text": "Use placement groups"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Lambda can mount EFS for shared, larger storage.",
+      "explanation": "Lambda supports mounting Amazon EFS file systems, enabling access to large, shared, durable file storage during execution.",
+      "incorrect": "EBS and instance store are block devices for EC2, not Lambda.",
+      "references": [
+        {
+          "label": "Lambda with EFS",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-efs.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-021",
+      "domain": "Lambda",
+      "tags": [
+        "environment-variables",
+        "kms"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function uses environment variables to store configuration values. You want them encrypted at rest using a customer-managed KMS key.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Use S3 bucket policies"
+        },
+        {
+          "key": "B",
+          "text": "Configure a KMS key for Lambda environment variable encryption"
+        },
+        {
+          "key": "C",
+          "text": "Use CloudWatch dashboards"
+        },
+        {
+          "key": "D",
+          "text": "Disable versions"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Lambda can encrypt environment variables with KMS.",
+      "explanation": "Lambda encrypts environment variables at rest. You can specify a customer-managed KMS key for this encryption to meet compliance requirements.",
+      "incorrect": "S3 policies and dashboards do not encrypt Lambda environment variables.",
+      "references": [
+        {
+          "label": "Lambda environment variable encryption",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html"
+        }
+      ]
+    },
+    {
+      "id": "LAMBDA-1001",
+      "domain": "Lambda",
+      "tags": [
+        "concurrency",
+        "reserved"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You must guarantee that a specific Lambda function always has a portion of account concurrency available, even during spikes from other functions.\nWhat should you configure?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Reserved concurrency"
+        },
+        {
+          "key": "B",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "C",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Guarantee capacity isolation for one function.",
+      "explanation": "Reserved concurrency guarantees availability for a function and caps its max concurrency."
+    },
+    {
+      "id": "LAMBDA-1002",
+      "domain": "Lambda",
+      "tags": [
+        "cold-start",
+        "provisioned"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to reduce cold starts for a latency-sensitive Lambda function.\nWhat should you configure?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "B",
+          "text": "Reserved concurrency"
+        },
+        {
+          "key": "C",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Keep execution environments warm.",
+      "explanation": "Provisioned concurrency keeps pre-initialized environments ready to serve requests with minimal cold starts."
+    },
+    {
+      "id": "LAMBDA-1003",
+      "domain": "Lambda",
+      "tags": [
+        "async",
+        "destinations"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You invoke Lambda asynchronously and want failed events routed to an SQS queue or SNS topic automatically.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lambda Destinations"
+        },
+        {
+          "key": "B",
+          "text": "Security group rules"
+        },
+        {
+          "key": "C",
+          "text": "EBS snapshots"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Built-in routing for async success/failure.",
+      "explanation": "Lambda Destinations route async invocation results to services like SQS/SNS/EventBridge."
+    },
+    {
+      "id": "LAMBDA-1004",
+      "domain": "Lambda",
+      "tags": [
+        "vpc",
+        "outbound"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function runs inside a VPC and must call a public internet API.\nWhat is required for outbound internet access?",
+      "options": [
+        {
+          "key": "A",
+          "text": "NAT Gateway in a public subnet with route from Lambda subnets"
+        },
+        {
+          "key": "B",
+          "text": "Internet Gateway on the Lambda subnet"
+        },
+        {
+          "key": "C",
+          "text": "VPC peering"
+        },
+        {
+          "key": "D",
+          "text": "Placement group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Private subnets need NAT for outbound internet.",
+      "explanation": "Lambda in private subnets needs a NAT Gateway (or NAT instance) for outbound internet access."
+    },
+    {
+      "id": "LAMBDA-1005",
+      "domain": "Lambda",
+      "tags": [
+        "sqs",
+        "event-source"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want Lambda to automatically poll an SQS queue and invoke the function for incoming messages.\nWhat should you create?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Event source mapping"
+        },
+        {
+          "key": "B",
+          "text": "S3 event notification only"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront distribution"
+        },
+        {
+          "key": "D",
+          "text": "Auto Scaling group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Native integration between Lambda and streams/queues.",
+      "explanation": "Event source mappings connect Lambda to SQS and manage polling and batching."
+    },
+    {
+      "id": "LMB-1001",
+      "domain": "Lambda",
+      "tags": [
+        "provisioned-concurrency",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: minimize cold starts for latency-sensitive Lambda APIs. Which serverless application design capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "B",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "C",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "D",
+          "text": "Lambda destinations and DLQ"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: minimize cold starts for latency-sensitive Lambda APIs.",
+      "explanation": "Provisioned concurrency is correct because it keeps execution environments pre-initialized and ready.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Provisioned concurrency is the best choice because it keeps execution environments pre-initialized and ready.",
+        "B": "Incorrect. SQS event source mapping batch controls is useful when you need to tune throughput and failure handling when Lambda reads from queues, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Lambda layers is useful when you need to share common libraries across multiple Lambda functions, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1002",
+      "domain": "Lambda",
+      "tags": [
+        "reserved-concurrency",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: guarantee capacity for one function while limiting overall account impact. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "B",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "C",
+          "text": "Configurable /tmp ephemeral storage"
+        },
+        {
+          "key": "D",
+          "text": "Reserved concurrency"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: guarantee capacity for one function while limiting overall account impact.",
+      "explanation": "Reserved concurrency is correct because it sets dedicated and maximum concurrency for the function.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS event source mapping batch controls is useful when you need to tune throughput and failure handling when Lambda reads from queues, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Lambda layers is useful when you need to share common libraries across multiple Lambda functions, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Configurable /tmp ephemeral storage is useful when you need to process larger temporary files during Lambda execution, but it is not the best fit for this requirement.",
+        "D": "Correct. Reserved concurrency is the best choice because it sets dedicated and maximum concurrency for the function."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1003",
+      "domain": "Lambda",
+      "tags": [
+        "lambda-destinations-and-dlq",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: capture failed asynchronous invocations for investigation and replay. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "B",
+          "text": "Configurable /tmp ephemeral storage"
+        },
+        {
+          "key": "C",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "D",
+          "text": "Lambda destinations and DLQ"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: capture failed asynchronous invocations for investigation and replay.",
+      "explanation": "Lambda destinations and DLQ is correct because they preserve failed event context for reliable error handling.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS event source mapping batch controls is useful when you need to tune throughput and failure handling when Lambda reads from queues, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Configurable /tmp ephemeral storage is useful when you need to process larger temporary files during Lambda execution, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Provisioned concurrency is useful when you need to minimize cold starts for latency-sensitive Lambda APIs, but it is not the best fit for this requirement.",
+        "D": "Correct. Lambda destinations and DLQ is the best choice because they preserve failed event context for reliable error handling."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1004",
+      "domain": "Lambda",
+      "tags": [
+        "lambda-layers",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to share common libraries across multiple Lambda functions. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "B",
+          "text": "Reserved concurrency"
+        },
+        {
+          "key": "C",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "D",
+          "text": "Configurable /tmp ephemeral storage"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: share common libraries across multiple Lambda functions.",
+      "explanation": "Lambda layers is correct because they reduce deployment duplication and simplify dependency management.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Provisioned concurrency is useful when you need to minimize cold starts for latency-sensitive Lambda APIs, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Reserved concurrency is useful when you need to guarantee capacity for one function while limiting overall account impact, but it is not the best fit for this requirement.",
+        "C": "Correct. Lambda layers is the best choice because they reduce deployment duplication and simplify dependency management.",
+        "D": "Incorrect. Configurable /tmp ephemeral storage is useful when you need to process larger temporary files during Lambda execution, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1005",
+      "domain": "Lambda",
+      "tags": [
+        "sqs-event-source-mapping-batch-controls",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: tune throughput and failure handling when Lambda reads from queues. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "B",
+          "text": "Lambda destinations and DLQ"
+        },
+        {
+          "key": "C",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "D",
+          "text": "Reserved concurrency"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: tune throughput and failure handling when Lambda reads from queues.",
+      "explanation": "SQS event source mapping batch controls is correct because they control batch size, windowing, and retry behavior.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. SQS event source mapping batch controls is the best choice because they control batch size, windowing, and retry behavior.",
+        "B": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Provisioned concurrency is useful when you need to minimize cold starts for latency-sensitive Lambda APIs, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Reserved concurrency is useful when you need to guarantee capacity for one function while limiting overall account impact, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1006",
+      "domain": "Lambda",
+      "tags": [
+        "configurable-tmp-ephemeral-storage",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: process larger temporary files during Lambda execution. Which serverless application design capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "B",
+          "text": "Lambda destinations and DLQ"
+        },
+        {
+          "key": "C",
+          "text": "Reserved concurrency"
+        },
+        {
+          "key": "D",
+          "text": "Configurable /tmp ephemeral storage"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: process larger temporary files during Lambda execution.",
+      "explanation": "Configurable /tmp ephemeral storage is correct because it increases temporary local storage beyond the default allocation.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Lambda layers is useful when you need to share common libraries across multiple Lambda functions, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Reserved concurrency is useful when you need to guarantee capacity for one function while limiting overall account impact, but it is not the best fit for this requirement.",
+        "D": "Correct. Configurable /tmp ephemeral storage is the best choice because it increases temporary local storage beyond the default allocation."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1007",
+      "domain": "Lambda",
+      "tags": [
+        "provisioned-concurrency",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: minimize cold starts for latency-sensitive Lambda APIs. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "B",
+          "text": "Configurable /tmp ephemeral storage"
+        },
+        {
+          "key": "C",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "D",
+          "text": "SQS event source mapping batch controls"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: minimize cold starts for latency-sensitive Lambda APIs.",
+      "explanation": "Provisioned concurrency is correct because it keeps execution environments pre-initialized and ready.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Provisioned concurrency is the best choice because it keeps execution environments pre-initialized and ready.",
+        "B": "Incorrect. Configurable /tmp ephemeral storage is useful when you need to process larger temporary files during Lambda execution, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Lambda layers is useful when you need to share common libraries across multiple Lambda functions, but it is not the best fit for this requirement.",
+        "D": "Incorrect. SQS event source mapping batch controls is useful when you need to tune throughput and failure handling when Lambda reads from queues, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1008",
+      "domain": "Lambda",
+      "tags": [
+        "reserved-concurrency",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: guarantee capacity for one function while limiting overall account impact. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "B",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "C",
+          "text": "Configurable /tmp ephemeral storage"
+        },
+        {
+          "key": "D",
+          "text": "Reserved concurrency"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: guarantee capacity for one function while limiting overall account impact.",
+      "explanation": "Reserved concurrency is correct because it sets dedicated and maximum concurrency for the function.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS event source mapping batch controls is useful when you need to tune throughput and failure handling when Lambda reads from queues, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Provisioned concurrency is useful when you need to minimize cold starts for latency-sensitive Lambda APIs, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Configurable /tmp ephemeral storage is useful when you need to process larger temporary files during Lambda execution, but it is not the best fit for this requirement.",
+        "D": "Correct. Reserved concurrency is the best choice because it sets dedicated and maximum concurrency for the function."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1009",
+      "domain": "Lambda",
+      "tags": [
+        "lambda-destinations-and-dlq",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to capture failed asynchronous invocations for investigation and replay. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lambda destinations and DLQ"
+        },
+        {
+          "key": "B",
+          "text": "Reserved concurrency"
+        },
+        {
+          "key": "C",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "D",
+          "text": "Configurable /tmp ephemeral storage"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: capture failed asynchronous invocations for investigation and replay.",
+      "explanation": "Lambda destinations and DLQ is correct because they preserve failed event context for reliable error handling.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Lambda destinations and DLQ is the best choice because they preserve failed event context for reliable error handling.",
+        "B": "Incorrect. Reserved concurrency is useful when you need to guarantee capacity for one function while limiting overall account impact, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Provisioned concurrency is useful when you need to minimize cold starts for latency-sensitive Lambda APIs, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Configurable /tmp ephemeral storage is useful when you need to process larger temporary files during Lambda execution, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1010",
+      "domain": "Lambda",
+      "tags": [
+        "lambda-layers",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: share common libraries across multiple Lambda functions. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "B",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "C",
+          "text": "Reserved concurrency"
+        },
+        {
+          "key": "D",
+          "text": "Lambda destinations and DLQ"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: share common libraries across multiple Lambda functions.",
+      "explanation": "Lambda layers is correct because they reduce deployment duplication and simplify dependency management.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Lambda layers is the best choice because they reduce deployment duplication and simplify dependency management.",
+        "B": "Incorrect. Provisioned concurrency is useful when you need to minimize cold starts for latency-sensitive Lambda APIs, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Reserved concurrency is useful when you need to guarantee capacity for one function while limiting overall account impact, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1011",
+      "domain": "Lambda",
+      "tags": [
+        "sqs-event-source-mapping-batch-controls",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: tune throughput and failure handling when Lambda reads from queues. Which serverless application design capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Reserved concurrency"
+        },
+        {
+          "key": "B",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "C",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "D",
+          "text": "Lambda destinations and DLQ"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: tune throughput and failure handling when Lambda reads from queues.",
+      "explanation": "SQS event source mapping batch controls is correct because they control batch size, windowing, and retry behavior.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Reserved concurrency is useful when you need to guarantee capacity for one function while limiting overall account impact, but it is not the best fit for this requirement.",
+        "B": "Correct. SQS event source mapping batch controls is the best choice because they control batch size, windowing, and retry behavior.",
+        "C": "Incorrect. Lambda layers is useful when you need to share common libraries across multiple Lambda functions, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1012",
+      "domain": "Lambda",
+      "tags": [
+        "configurable-tmp-ephemeral-storage",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: process larger temporary files during Lambda execution. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Configurable /tmp ephemeral storage"
+        },
+        {
+          "key": "B",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "C",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "D",
+          "text": "Lambda destinations and DLQ"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: process larger temporary files during Lambda execution.",
+      "explanation": "Configurable /tmp ephemeral storage is correct because it increases temporary local storage beyond the default allocation.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Configurable /tmp ephemeral storage is the best choice because it increases temporary local storage beyond the default allocation.",
+        "B": "Incorrect. Lambda layers is useful when you need to share common libraries across multiple Lambda functions, but it is not the best fit for this requirement.",
+        "C": "Incorrect. SQS event source mapping batch controls is useful when you need to tune throughput and failure handling when Lambda reads from queues, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1013",
+      "domain": "Lambda",
+      "tags": [
+        "provisioned-concurrency",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: minimize cold starts for latency-sensitive Lambda APIs. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "B",
+          "text": "Reserved concurrency"
+        },
+        {
+          "key": "C",
+          "text": "Configurable /tmp ephemeral storage"
+        },
+        {
+          "key": "D",
+          "text": "Provisioned concurrency"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: minimize cold starts for latency-sensitive Lambda APIs.",
+      "explanation": "Provisioned concurrency is correct because it keeps execution environments pre-initialized and ready.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS event source mapping batch controls is useful when you need to tune throughput and failure handling when Lambda reads from queues, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Reserved concurrency is useful when you need to guarantee capacity for one function while limiting overall account impact, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Configurable /tmp ephemeral storage is useful when you need to process larger temporary files during Lambda execution, but it is not the best fit for this requirement.",
+        "D": "Correct. Provisioned concurrency is the best choice because it keeps execution environments pre-initialized and ready."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1014",
+      "domain": "Lambda",
+      "tags": [
+        "reserved-concurrency",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to guarantee capacity for one function while limiting overall account impact. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Reserved concurrency"
+        },
+        {
+          "key": "B",
+          "text": "Lambda destinations and DLQ"
+        },
+        {
+          "key": "C",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "D",
+          "text": "Configurable /tmp ephemeral storage"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: guarantee capacity for one function while limiting overall account impact.",
+      "explanation": "Reserved concurrency is correct because it sets dedicated and maximum concurrency for the function.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Reserved concurrency is the best choice because it sets dedicated and maximum concurrency for the function.",
+        "B": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Provisioned concurrency is useful when you need to minimize cold starts for latency-sensitive Lambda APIs, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Configurable /tmp ephemeral storage is useful when you need to process larger temporary files during Lambda execution, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1015",
+      "domain": "Lambda",
+      "tags": [
+        "lambda-destinations-and-dlq",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: capture failed asynchronous invocations for investigation and replay. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lambda destinations and DLQ"
+        },
+        {
+          "key": "B",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "C",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "D",
+          "text": "Reserved concurrency"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: capture failed asynchronous invocations for investigation and replay.",
+      "explanation": "Lambda destinations and DLQ is correct because they preserve failed event context for reliable error handling.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Lambda destinations and DLQ is the best choice because they preserve failed event context for reliable error handling.",
+        "B": "Incorrect. Provisioned concurrency is useful when you need to minimize cold starts for latency-sensitive Lambda APIs, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Lambda layers is useful when you need to share common libraries across multiple Lambda functions, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Reserved concurrency is useful when you need to guarantee capacity for one function while limiting overall account impact, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1016",
+      "domain": "Lambda",
+      "tags": [
+        "lambda-layers",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: share common libraries across multiple Lambda functions. Which serverless application design capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Reserved concurrency"
+        },
+        {
+          "key": "B",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "C",
+          "text": "Lambda destinations and DLQ"
+        },
+        {
+          "key": "D",
+          "text": "Lambda layers"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: share common libraries across multiple Lambda functions.",
+      "explanation": "Lambda layers is correct because they reduce deployment duplication and simplify dependency management.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Reserved concurrency is useful when you need to guarantee capacity for one function while limiting overall account impact, but it is not the best fit for this requirement.",
+        "B": "Incorrect. SQS event source mapping batch controls is useful when you need to tune throughput and failure handling when Lambda reads from queues, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement.",
+        "D": "Correct. Lambda layers is the best choice because they reduce deployment duplication and simplify dependency management."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1017",
+      "domain": "Lambda",
+      "tags": [
+        "sqs-event-source-mapping-batch-controls",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: tune throughput and failure handling when Lambda reads from queues. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "B",
+          "text": "Configurable /tmp ephemeral storage"
+        },
+        {
+          "key": "C",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "D",
+          "text": "Lambda destinations and DLQ"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: tune throughput and failure handling when Lambda reads from queues.",
+      "explanation": "SQS event source mapping batch controls is correct because they control batch size, windowing, and retry behavior.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. SQS event source mapping batch controls is the best choice because they control batch size, windowing, and retry behavior.",
+        "B": "Incorrect. Configurable /tmp ephemeral storage is useful when you need to process larger temporary files during Lambda execution, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Lambda layers is useful when you need to share common libraries across multiple Lambda functions, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1018",
+      "domain": "Lambda",
+      "tags": [
+        "configurable-tmp-ephemeral-storage",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: process larger temporary files during Lambda execution. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS event source mapping batch controls"
+        },
+        {
+          "key": "B",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "C",
+          "text": "Configurable /tmp ephemeral storage"
+        },
+        {
+          "key": "D",
+          "text": "Lambda layers"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: process larger temporary files during Lambda execution.",
+      "explanation": "Configurable /tmp ephemeral storage is correct because it increases temporary local storage beyond the default allocation.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS event source mapping batch controls is useful when you need to tune throughput and failure handling when Lambda reads from queues, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Provisioned concurrency is useful when you need to minimize cold starts for latency-sensitive Lambda APIs, but it is not the best fit for this requirement.",
+        "C": "Correct. Configurable /tmp ephemeral storage is the best choice because it increases temporary local storage beyond the default allocation.",
+        "D": "Incorrect. Lambda layers is useful when you need to share common libraries across multiple Lambda functions, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1019",
+      "domain": "Lambda",
+      "tags": [
+        "provisioned-concurrency",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to minimize cold starts for latency-sensitive Lambda APIs. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lambda destinations and DLQ"
+        },
+        {
+          "key": "B",
+          "text": "Configurable /tmp ephemeral storage"
+        },
+        {
+          "key": "C",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "D",
+          "text": "Reserved concurrency"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: minimize cold starts for latency-sensitive Lambda APIs.",
+      "explanation": "Provisioned concurrency is correct because it keeps execution environments pre-initialized and ready.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Configurable /tmp ephemeral storage is useful when you need to process larger temporary files during Lambda execution, but it is not the best fit for this requirement.",
+        "C": "Correct. Provisioned concurrency is the best choice because it keeps execution environments pre-initialized and ready.",
+        "D": "Incorrect. Reserved concurrency is useful when you need to guarantee capacity for one function while limiting overall account impact, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "LMB-1020",
+      "domain": "Lambda",
+      "tags": [
+        "reserved-concurrency",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: guarantee capacity for one function while limiting overall account impact. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lambda layers"
+        },
+        {
+          "key": "B",
+          "text": "Lambda destinations and DLQ"
+        },
+        {
+          "key": "C",
+          "text": "Provisioned concurrency"
+        },
+        {
+          "key": "D",
+          "text": "Reserved concurrency"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: guarantee capacity for one function while limiting overall account impact.",
+      "explanation": "Reserved concurrency is correct because it sets dedicated and maximum concurrency for the function.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Lambda layers is useful when you need to share common libraries across multiple Lambda functions, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Lambda destinations and DLQ is useful when you need to capture failed asynchronous invocations for investigation and replay, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Provisioned concurrency is useful when you need to minimize cold starts for latency-sensitive Lambda APIs, but it is not the best fit for this requirement.",
+        "D": "Correct. Reserved concurrency is the best choice because it sets dedicated and maximum concurrency for the function."
+      },
+      "references": [
+        {
+          "label": "Serverless Application Design documentation",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+        }
+      ]
+    }
+  ]
+}

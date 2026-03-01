@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "IAM-001",
+      "domain": "IAM",
+      "tags": ["policy-eval", "explicit-deny"],
+      "difficulty": 2,
+      "type": "single",
+      "select": { "min": 1, "max": 1 },
+
+      "prompt": "An IAM user is in two groups. One policy allows s3:GetObject on arn:aws:s3:::prod-bucket/*.\nAnother policy explicitly denies s3:GetObject on arn:aws:s3:::prod-bucket/private/*.\nThe user tries to download prod-bucket/private/file1.txt. What happens?",
+
+      "options": [
+        { "key": "A", "text": "Allowed because an Allow exists" },
+        { "key": "B", "text": "Allowed because group policies merge additively" },
+        { "key": "C", "text": "Denied because explicit Deny overrides Allow" },
+        { "key": "D", "text": "Denied only if a permissions boundary exists" }
+      ],
+
+      "answer": { "keys": ["C"] },
+      "hint": "Remember the policy evaluation rule ordering: explicit Deny wins.",
+      "explanation": "AWS policy evaluation: any explicit Deny overrides any Allow, regardless of where it appears (group, inline, managed).",
+      "references": [
+        {
+          "label": "IAM policy evaluation logic",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html"
+        }
+      ]
+    },
+
+    {
+      "id": "EC2-007",
+      "domain": "EC2",
+      "tags": ["credentials", "imds"],
+      "difficulty": 2,
+      "type": "multi",
+      "select": { "min": 2, "max": 2 },
+
+      "prompt": "An application on EC2 needs to call AWS APIs. The company wants to follow best practices and reduce credential leakage risk. Which options help achieve this? (Select TWO)",
+
+      "options": [
+        { "key": "A", "text": "Store access keys in EC2 user data and rotate weekly" },
+        { "key": "B", "text": "Attach an IAM role to the EC2 instance" },
+        { "key": "C", "text": "Use AWS Secrets Manager to store the access keys" },
+        { "key": "D", "text": "Use temporary credentials from the instance metadata service" },
+        { "key": "E", "text": "Use the root account access keys and restrict by IP" }
+      ],
+
+      "answer": { "keys": ["B", "D"] },
+      "hint": "Prefer instance roles + temporary credentials over static keys.",
+      "explanation": "An EC2 instance profile provides temporary credentials via IMDS; using static access keys increases leakage risk."
+    }
+  ]
+}

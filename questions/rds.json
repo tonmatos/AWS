@@ -1,0 +1,2457 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "RDS-001",
+      "domain": "RDS",
+      "tags": [
+        "multi-az",
+        "high-availability",
+        "failover"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An e-commerce company runs a MySQL database on Amazon RDS to store order and customer data. The database currently runs as a single-AZ deployment in us-east-1a. The business team has expressed concerns about potential downtime, as the application experienced a 45-minute outage last month during unplanned database maintenance.\n\nBusiness Requirements:\n- RPO (Recovery Point Objective): 0 seconds - no data loss acceptable\n- RTO (Recovery Time Objective): Less than 2 minutes\n- Minimize operational overhead\n- Maintain high data durability\n- Automatic failover without manual intervention\n- Support for both planned and unplanned outages\n\nWhich solution provides the MOST appropriate high availability configuration?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable Multi-AZ deployment for the RDS instance, which creates a synchronous standby replica in a different Availability Zone with automatic failover"
+        },
+        {
+          "key": "B",
+          "text": "Create Read Replicas in two additional Availability Zones and configure the application to automatically promote a Read Replica to master in case of failure"
+        },
+        {
+          "key": "C",
+          "text": "Take automated snapshots every 5 minutes and configure Lambda to restore from the latest snapshot to a new RDS instance if failure is detected"
+        },
+        {
+          "key": "D",
+          "text": "Deploy the application across multiple regions with RDS instances in each region, using Route 53 health checks to redirect traffic to healthy regions"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "**Why Multi-AZ is the correct solution:**\n\n**RDS Multi-AZ Architecture:**\n\n```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502         Application Tier                \u2502\n\u2502    (Connects to Single Endpoint)        \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n               \u2502 DNS: mydb.abc123.rds.amazonaws.com\n               \u2193\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502              us-east-1a                  \u2502\n\u2502   \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510            \u2502\n\u2502   \u2502  Primary RDS Instance  \u2502            \u2502\n\u2502   \u2502    (Read/Write)        \u2502            \u2502\n\u2502   \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518            \u2502\n\u2502              \u2502 Synchronous Replication  \u2502\n\u2502              \u2193                           \u2502\n\u2502   \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510            \u2502\n\u2502   \u2502  EBS Volume (Primary)  \u2502            \u2502\n\u2502   \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518            \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n               \u2193 Sync\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502              us-east-1b                  \u2502\n\u2502   \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510            \u2502\n\u2502   \u2502  Standby RDS Instance  \u2502            \u2502\n\u2502   \u2502    (No Read/Write)     \u2502            \u2502\n\u2502   \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518            \u2502\n\u2502              \u2502                           \u2502\n\u2502   \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510            \u2502\n\u2502   \u2502  EBS Volume (Standby)  \u2502            \u2502\n\u2502   \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518            \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n```\n\n**How Multi-AZ Works:**\n\n1. **Synchronous Replication:**\n   - Every write to primary is **synchronously** replicated to standby\n   - Transaction only commits after standby acknowledges receipt\n   - **RPO = 0 seconds** (no data loss) \u2713\n\n2. **Automatic Failover:**\n   - AWS detects failure (primary instance, AZ, or storage)\n   - Automatically promotes standby to primary\n   - Updates DNS record (endpoint stays the same)\n   - **RTO = 1-2 minutes typically** \u2713\n\n3. **Single Endpoint:**\n   - Application uses same endpoint before and after failover\n   - No application code changes needed\n   - DNS TTL is 30 seconds\n\n**Failover Triggers:**\n- Primary DB instance failure\n- Availability Zone failure\n- Primary instance server type change\n- Operating system patching\n- Manual failover initiated (for testing)\n- Primary DB instance storage failure\n- Primary network failure\n\n**Enabling Multi-AZ:**\n\n```bash\n# Enable Multi-AZ on existing instance\naws rds modify-db-instance \\\n  --db-instance-identifier mydb \\\n  --multi-az \\\n  --apply-immediately\n\n# Create new Multi-AZ instance\naws rds create-db-instance \\\n  --db-instance-identifier mydb \\\n  --db-instance-class db.t3.large \\\n  --engine mysql \\\n  --master-username admin \\\n  --master-user-password MyPassword123 \\\n  --allocated-storage 100 \\\n  --multi-az \\\n  --backup-retention-period 7\n```\n\n**Benefits of Multi-AZ:**\n\n\u2705 **Zero Data Loss (RPO = 0):** Synchronous replication\n\u2705 **Fast Recovery (RTO = 1-2 min):** Automatic failover\n\u2705 **No Manual Intervention:** Fully automated\n\u2705 **Transparent to Application:** Same endpoint\n\u2705 **Automatic Backups:** Taken from standby (no I/O impact)\n\u2705 **Planned Maintenance:** Zero-downtime patching\n\u2705 **High Durability:** Data in two AZs\n\n**Performance Considerations:**\n- ~5-10% write latency increase (due to sync replication)\n- No read scalability (standby not accessible for reads)\n- Doubles storage costs (data stored in two AZs)\n\n**Why other options are WRONG:**\n\n**Option B (Read Replicas):**\n\n\u274c **Asynchronous replication:**\n- Data loss possible during failover\n- **RPO > 0 seconds** (violates requirement)\n- Replication lag can be seconds to minutes\n\n\u274c **Manual promotion:**\n- Requires manual intervention or custom scripts\n- Takes several minutes to promote\n- Application must update endpoint\n- **RTO > 2 minutes** (violates requirement)\n\n\u274c **Application changes required:**\n- Must detect failure\n- Must trigger promotion\n- Must update connection string\n- Complex error handling\n\n**Read Replica Use Case (NOT HA):**\n```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  Async   \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502   Primary   \u2502 ------\u2192  \u2502 Read Replica\u2502\n\u2502 (us-east-1a)\u2502 Replication\u2502(us-east-1b)\u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518          \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n  Write traffic            Read traffic\n```\n\n**Option C (Snapshot Restoration):**\n\n\u274c **Data Loss:**\n- 5-minute snapshot interval = up to 5 minutes of data loss\n- **RPO = 5 minutes** (violates requirement)\n\n\u274c **Long Recovery Time:**\n- Snapshot restore takes 10-30 minutes for 100 GB database\n- Plus time for Lambda to detect failure\n- **RTO = 10-30 minutes** (violates requirement)\n\n\u274c **New Instance:**\n- Different endpoint (requires application update)\n- DNS propagation delay\n- Connection string changes\n\n\u274c **Cost:**\n- Snapshot storage costs\n- Lambda costs\n- Custom monitoring solution\n- High operational overhead\n\n**Option D (Multi-Region):**\n\n\u274c **Overkill for requirements:**\n- Disaster recovery solution, not HA\n- Much more complex\n- Significantly higher costs\n- Cross-region replication latency\n\n\u274c **Costs:**\n- Double infrastructure costs (two regions)\n- Cross-region data transfer: $0.02/GB\n- Route 53 health checks\n- Operational complexity\n\n\u274c **When to use:**\n- Disaster recovery (entire region failure)\n- Global read scalability\n- Data residency requirements\n- RTO/RPO > Multi-AZ capabilities\n\n**Multi-AZ vs Read Replicas vs Multi-Region:**\n\n| Feature | Multi-AZ | Read Replica | Multi-Region |\n|---------|----------|--------------|-------------|\n| Purpose | HA | Read scaling | DR |\n| Replication | Sync | Async | Async |\n| RPO | 0 seconds | Seconds-minutes | Minutes |\n| RTO | 1-2 minutes | 5-10 minutes | 10-30 minutes |\n| Failover | Automatic | Manual | Manual |\n| Endpoint | Same | Different | Different |\n| Read traffic | No | Yes | Yes |\n| Cost | ~2x | 1x per replica | 2x++ |\n| Use case | HA in same region | Read scaling | DR across regions |\n\n**Cost Comparison (db.t3.large, 100 GB):**\n\n- **Single-AZ:** ~$125/month\n- **Multi-AZ:** ~$250/month (2x storage + standby instance)\n- **Read Replica:** ~$125/month per replica\n- **Multi-Region:** ~$500/month (2 regions \u00d7 2 \u00d7 $125)\n\n**Testing Multi-AZ Failover:**\n\n```bash\n# Initiate failover for testing\naws rds reboot-db-instance \\\n  --db-instance-identifier mydb \\\n  --force-failover\n\n# Monitor failover\naws rds describe-db-instances \\\n  --db-instance-identifier mydb \\\n  --query 'DBInstances[0].DBInstanceStatus'\n```\n\n**Best Practices:**\n1. Enable Multi-AZ for production databases\n2. Test failover regularly\n3. Monitor RDS metrics (CPU, connections, lag)\n4. Use Enhanced Monitoring for OS-level metrics\n5. Configure CloudWatch alarms\n6. Set appropriate backup retention (7-35 days)\n7. Enable automated backups (required for Multi-AZ)\n\nReferences:\n- Multi-AZ Deployments: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html\n- RDS High Availability: https://aws.amazon.com/rds/features/multi-az/\n- RDS Failover: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html",
+      "incorrect": "This solution either cannot meet the RPO requirement of zero data loss (Read Replicas use asynchronous replication, snapshots have gaps), takes too long to recover (RTO > 2 minutes for snapshot restore or multi-region failover), or requires manual intervention (promoting Read Replicas). Multi-AZ provides synchronous replication (RPO=0), automatic failover in 1-2 minutes (RTO<2 min), and requires no application changes.",
+      "hint": "Which RDS feature provides synchronous replication with automatic failover and zero data loss?"
+    },
+    {
+      "id": "RDS-002",
+      "domain": "RDS",
+      "tags": [
+        "multi-az",
+        "ha"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A production database needs automatic failover within the same Region for high availability. Which RDS feature should be enabled?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Read Replica"
+        },
+        {
+          "key": "B",
+          "text": "Multi-AZ deployment"
+        },
+        {
+          "key": "C",
+          "text": "RDS snapshot copy"
+        },
+        {
+          "key": "D",
+          "text": "Manual backups only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Automatic failover in-region is Multi-AZ.",
+      "explanation": "Multi-AZ creates a synchronous standby in another AZ and provides automatic failover for high availability.",
+      "incorrect": "Read replicas are primarily for read scaling and use asynchronous replication.",
+      "references": [
+        {
+          "label": "Amazon RDS User Guide",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-003",
+      "domain": "RDS",
+      "tags": [
+        "read-replica",
+        "scaling"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A MySQL RDS instance has heavy read traffic. The team wants to scale reads without changing the writer instance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable Multi-AZ"
+        },
+        {
+          "key": "B",
+          "text": "Create one or more Read Replicas"
+        },
+        {
+          "key": "C",
+          "text": "Increase backup retention"
+        },
+        {
+          "key": "D",
+          "text": "Enable encryption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Read scaling uses read replicas.",
+      "explanation": "Read replicas provide asynchronous replication and can serve read-only traffic, reducing load on the primary instance.",
+      "incorrect": "Multi-AZ is for HA, not read scaling.",
+      "references": [
+        {
+          "label": "RDS Read Replicas",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-004",
+      "domain": "RDS",
+      "tags": [
+        "backups",
+        "pitr"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need the ability to restore an RDS database to any second within the last 7 days after an accidental delete. What must be enabled?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Manual snapshots only"
+        },
+        {
+          "key": "B",
+          "text": "Automated backups with a 7-day retention"
+        },
+        {
+          "key": "C",
+          "text": "Multi-AZ only"
+        },
+        {
+          "key": "D",
+          "text": "Read replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Point-in-time restore depends on automated backups.",
+      "explanation": "Automated backups enable point-in-time restore (PITR). Set the retention period to 7 days to restore to any time within that window.",
+      "incorrect": "Manual snapshots restore to a snapshot time only.",
+      "references": [
+        {
+          "label": "Amazon RDS User Guide",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-005",
+      "domain": "RDS",
+      "tags": [
+        "subnet-group",
+        "networking"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You are creating an RDS instance in a VPC and need it to be deployed across multiple AZs. What networking resource must you configure?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Internet Gateway"
+        },
+        {
+          "key": "B",
+          "text": "DB subnet group with subnets in multiple AZs"
+        },
+        {
+          "key": "C",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering connection"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "RDS uses a DB subnet group to choose subnets.",
+      "explanation": "A DB subnet group defines which subnets RDS can use. For Multi-AZ capability, include subnets in at least two AZs.",
+      "incorrect": "IGW/NAT/peering are not required just to place RDS in multiple AZs.",
+      "references": [
+        {
+          "label": "DB subnet groups",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html#USER_VPC.Subnets"
+        }
+      ]
+    },
+    {
+      "id": "RDS-006",
+      "domain": "RDS",
+      "tags": [
+        "encryption",
+        "kms"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A compliance policy requires encryption at rest for an RDS database using customer-managed keys. Which option meets this requirement?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable storage encryption with AWS KMS customer-managed key"
+        },
+        {
+          "key": "B",
+          "text": "Enable IAM user password rotation"
+        },
+        {
+          "key": "C",
+          "text": "Enable enhanced monitoring"
+        },
+        {
+          "key": "D",
+          "text": "Enable read replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "RDS at-rest encryption uses KMS.",
+      "explanation": "RDS storage encryption uses AWS KMS. You can select a customer-managed KMS key to meet compliance requirements.",
+      "incorrect": "Monitoring and replicas are not encryption controls.",
+      "references": [
+        {
+          "label": "Encrypting an RDS DB instance",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-007",
+      "domain": "RDS",
+      "tags": [
+        "rds-proxy",
+        "connections"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda function connects to RDS and causes too many database connections during spikes. You want connection pooling and improved failover handling.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "B",
+          "text": "Read Replica"
+        },
+        {
+          "key": "C",
+          "text": "Multi-AZ"
+        },
+        {
+          "key": "D",
+          "text": "Snapshot copy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Connection pooling between Lambda and RDS points to a managed proxy.",
+      "explanation": "RDS Proxy pools and shares database connections, reducing the number of open connections and improving application resilience during failovers.",
+      "incorrect": "Multi-AZ improves availability but does not solve connection storms.",
+      "references": [
+        {
+          "label": "RDS Proxy",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-008",
+      "domain": "RDS",
+      "tags": [
+        "maintenance",
+        "patching"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to control when RDS applies OS and database engine minor version patches. Which setting should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Preferred maintenance window"
+        },
+        {
+          "key": "B",
+          "text": "Backup retention period"
+        },
+        {
+          "key": "C",
+          "text": "DB subnet group"
+        },
+        {
+          "key": "D",
+          "text": "VPC route table"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Maintenance window controls patch timing.",
+      "explanation": "The preferred maintenance window defines when RDS can perform maintenance activities like OS and minor version updates.",
+      "incorrect": "Backup retention and networking resources do not schedule patching.",
+      "references": [
+        {
+          "label": "Amazon RDS User Guide",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-009",
+      "domain": "RDS",
+      "tags": [
+        "parameter-group"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to change a database engine configuration value (for example, max_connections) for an RDS instance. Where should you make this change?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Security group rules"
+        },
+        {
+          "key": "B",
+          "text": "DB parameter group"
+        },
+        {
+          "key": "C",
+          "text": "DB subnet group"
+        },
+        {
+          "key": "D",
+          "text": "Route table"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Engine parameters are changed via parameter groups.",
+      "explanation": "RDS uses DB parameter groups to configure engine settings. Apply a custom parameter group to the instance and reboot if required for static parameters.",
+      "incorrect": "Security and routing resources do not control engine parameters.",
+      "references": [
+        {
+          "label": "DB parameter groups",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-010",
+      "domain": "RDS",
+      "tags": [
+        "snapshots",
+        "sharing"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to share an RDS manual snapshot with another AWS account for migration.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Share the DB subnet group"
+        },
+        {
+          "key": "B",
+          "text": "Share the manual snapshot with the target account"
+        },
+        {
+          "key": "C",
+          "text": "Enable Multi-AZ"
+        },
+        {
+          "key": "D",
+          "text": "Enable read replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "RDS supports snapshot sharing for manual snapshots.",
+      "explanation": "You can share manual DB snapshots with other AWS accounts. The target account can then copy the snapshot and restore it.",
+      "incorrect": "Subnet groups and Multi-AZ do not perform cross-account data transfer.",
+      "references": [
+        {
+          "label": "Sharing DB snapshots",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ShareSnapshot.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-011",
+      "domain": "RDS",
+      "tags": [
+        "failover",
+        "read-replica"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You have an RDS Read Replica and want to use it as a standalone primary database after a disaster. What should you do?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable Multi-AZ on the replica"
+        },
+        {
+          "key": "B",
+          "text": "Promote the read replica"
+        },
+        {
+          "key": "C",
+          "text": "Delete the primary"
+        },
+        {
+          "key": "D",
+          "text": "Change the security group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "A read replica can be promoted to break replication.",
+      "explanation": "Promoting the read replica makes it a standalone DB instance. This is used during DR or when you want to repurpose the replica.",
+      "incorrect": "Multi-AZ is optional after promotion, but promotion is the key action.",
+      "references": [
+        {
+          "label": "Promoting a read replica",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html#USER_ReadRepl.Promote"
+        }
+      ]
+    },
+    {
+      "id": "RDS-012",
+      "domain": "RDS",
+      "tags": [
+        "monitoring",
+        "performance-insights"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to identify the most time-consuming SQL queries and wait events on an RDS database with minimal overhead.",
+      "options": [
+        {
+          "key": "A",
+          "text": "VPC Flow Logs"
+        },
+        {
+          "key": "B",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "C",
+          "text": "S3 Access Logs"
+        },
+        {
+          "key": "D",
+          "text": "CloudTrail"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Query-level performance analysis in RDS is Performance Insights.",
+      "explanation": "Performance Insights helps analyze database load, top SQL, and wait events with a managed experience.",
+      "incorrect": "Flow logs and CloudTrail are not query performance tools.",
+      "references": [
+        {
+          "label": "Performance Insights",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-013",
+      "domain": "RDS",
+      "tags": [
+        "iam-auth"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company wants to authenticate to MySQL on RDS without storing database passwords in application code. Which feature supports this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "IAM database authentication"
+        },
+        {
+          "key": "B",
+          "text": "S3 pre-signed URLs"
+        },
+        {
+          "key": "C",
+          "text": "EBS encryption"
+        },
+        {
+          "key": "D",
+          "text": "Route 53 health checks"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "IAM tokens can be used as temporary auth for supported engines.",
+      "explanation": "IAM database authentication allows applications to connect using short-lived IAM authentication tokens instead of long-lived passwords (supported for some engines like MySQL and PostgreSQL).",
+      "incorrect": "S3 and EBS features do not authenticate to RDS.",
+      "references": [
+        {
+          "label": "IAM database authentication",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-014",
+      "domain": "RDS",
+      "tags": [
+        "storage-autoscaling"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An RDS instance runs out of storage periodically. You want it to automatically increase storage when needed without downtime.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable storage autoscaling"
+        },
+        {
+          "key": "B",
+          "text": "Enable Multi-AZ"
+        },
+        {
+          "key": "C",
+          "text": "Enable read replicas"
+        },
+        {
+          "key": "D",
+          "text": "Enable public accessibility"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "This feature exists specifically for storage growth.",
+      "explanation": "Storage autoscaling automatically increases allocated storage when free space falls below a threshold, reducing the risk of running out of disk.",
+      "incorrect": "Multi-AZ and replicas do not automatically increase storage.",
+      "references": [
+        {
+          "label": "RDS storage autoscaling",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.StorageTypes.html#USER_PIOPS.StorageTypes.Autoscaling"
+        }
+      ]
+    },
+    {
+      "id": "RDS-015",
+      "domain": "RDS",
+      "tags": [
+        "option-group"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to enable an engine feature that is configured via an option (for example, Oracle advanced options or SQL Server features). Where do you configure this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Option group"
+        },
+        {
+          "key": "B",
+          "text": "Route table"
+        },
+        {
+          "key": "C",
+          "text": "Network ACL"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Some engines require option groups for specific features.",
+      "explanation": "Option groups are used to enable and configure additional features that are not controlled purely through parameter groups.",
+      "incorrect": "VPC components do not configure database engine options.",
+      "references": [
+        {
+          "label": "Option groups",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithOptionGroups.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-016",
+      "domain": "RDS",
+      "tags": [
+        "aurora",
+        "serverless"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A database workload is unpredictable with frequent idle periods. The team wants automatic scaling and pay-per-use characteristics.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Multi-AZ"
+        },
+        {
+          "key": "B",
+          "text": "Aurora Serverless"
+        },
+        {
+          "key": "C",
+          "text": "RDS Read Replica"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Unpredictable + idle periods suggest serverless database capacity.",
+      "explanation": "Aurora Serverless can automatically scale capacity based on demand and can be cost-effective for intermittent workloads.",
+      "incorrect": "Multi-AZ and replicas are about availability and scaling reads, not pay-per-use scaling of capacity.",
+      "references": [
+        {
+          "label": "Aurora Serverless",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-017",
+      "domain": "RDS",
+      "tags": [
+        "aurora",
+        "global-database"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need a globally distributed database with low-latency reads across Regions and fast disaster recovery with a secondary Region.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Multi-AZ"
+        },
+        {
+          "key": "B",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "C",
+          "text": "RDS snapshot sharing"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Multi-Region low-latency reads and DR points to Aurora Global Database.",
+      "explanation": "Aurora Global Database replicates to secondary Regions with low-latency global reads and supports faster regional recovery compared to snapshot-based approaches.",
+      "incorrect": "Multi-AZ is within a Region only.",
+      "references": [
+        {
+          "label": "Aurora Global Database",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-018",
+      "domain": "RDS",
+      "tags": [
+        "blue-green"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to perform a safer database engine version upgrade with minimal downtime by testing changes on a staging environment that stays in sync until switchover.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Read Replica"
+        },
+        {
+          "key": "B",
+          "text": "Blue/Green deployments for RDS"
+        },
+        {
+          "key": "C",
+          "text": "Manual snapshots"
+        },
+        {
+          "key": "D",
+          "text": "EBS snapshots"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "RDS has a feature specifically named for this.",
+      "explanation": "RDS Blue/Green Deployments create a synchronized staging environment and allow a controlled switchover, reducing downtime and risk during upgrades.",
+      "incorrect": "Read replicas can help, but Blue/Green deployments are purpose-built for controlled switchover workflows.",
+      "references": [
+        {
+          "label": "RDS Blue/Green Deployments",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/blue-green-deployments.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-019",
+      "domain": "RDS",
+      "tags": [
+        "public-access"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An RDS instance is deployed in private subnets but is marked as publicly accessible. Can it be reached from the internet?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes, because publicly accessible overrides subnet routing"
+        },
+        {
+          "key": "B",
+          "text": "No, routing and network controls must allow it; private subnet routing prevents internet reachability"
+        },
+        {
+          "key": "C",
+          "text": "Yes, if Multi-AZ is enabled"
+        },
+        {
+          "key": "D",
+          "text": "No, because RDS cannot be public"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Publicly accessible is necessary but not sufficient.",
+      "explanation": "Publicly accessible means RDS can get a public IP if in public subnets, but actual internet reachability still depends on subnet routing, security groups, and NACLs. If the instance is in private subnets without an IGW route, it is not reachable from the internet.",
+      "incorrect": "Multi-AZ does not determine public reachability.",
+      "references": [
+        {
+          "label": "Amazon RDS User Guide",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-020",
+      "domain": "RDS",
+      "tags": [
+        "backups",
+        "retention"
+      ],
+      "difficulty": 3,
+      "type": "multi",
+      "select": {
+        "min": 2,
+        "max": 2
+      },
+      "prompt": "Which TWO statements about RDS automated backups are correct? (Choose TWO)",
+      "options": [
+        {
+          "key": "A",
+          "text": "Automated backups enable point-in-time recovery within the retention window"
+        },
+        {
+          "key": "B",
+          "text": "Automated backups are stored in the same AZ only"
+        },
+        {
+          "key": "C",
+          "text": "You can set the retention period up to 35 days (engine dependent)"
+        },
+        {
+          "key": "D",
+          "text": "Automated backups require Multi-AZ"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A",
+          "C"
+        ]
+      },
+      "hint": "Automated backups provide PITR and have a configurable retention period.",
+      "explanation": "Automated backups enable point-in-time recovery within the retention window. The retention period can be configured (commonly up to 35 days depending on engine). They do not require Multi-AZ.",
+      "incorrect": "They are not limited to a single AZ in the way described. Multi-AZ is separate from backups.",
+      "references": [
+        {
+          "label": "Amazon RDS User Guide",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-021",
+      "domain": "RDS",
+      "tags": [
+        "enhanced-monitoring"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need real-time OS-level metrics (CPU, memory, file system) from an RDS instance at 1-second granularity.",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudTrail"
+        },
+        {
+          "key": "B",
+          "text": "Enhanced Monitoring"
+        },
+        {
+          "key": "C",
+          "text": "S3 Inventory"
+        },
+        {
+          "key": "D",
+          "text": "VPC Flow Logs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "OS-level metrics from RDS are provided by Enhanced Monitoring.",
+      "explanation": "Enhanced Monitoring provides OS-level metrics from the underlying host at configurable granularity, which can be as frequent as 1 second.",
+      "incorrect": "CloudTrail and flow logs do not provide OS-level database host metrics.",
+      "references": [
+        {
+          "label": "Enhanced Monitoring",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1001",
+      "domain": "RDS",
+      "tags": [
+        "ha",
+        "multi-az"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need high availability for a production RDS database with automatic failover.\nWhat should you enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Read Replicas only"
+        },
+        {
+          "key": "B",
+          "text": "Multi-AZ deployment"
+        },
+        {
+          "key": "C",
+          "text": "Bigger instance type only"
+        },
+        {
+          "key": "D",
+          "text": "Public subnet"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Automatic failover is the keyword.",
+      "explanation": "Multi-AZ provides a standby and automatic failover for HA."
+    },
+    {
+      "id": "RDS-1002",
+      "domain": "RDS",
+      "tags": [
+        "read-scaling"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Your database is read-heavy and needs to scale read throughput.\nWhat should you add?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Read Replicas"
+        },
+        {
+          "key": "B",
+          "text": "Multi-AZ only"
+        },
+        {
+          "key": "C",
+          "text": "Longer retention backups"
+        },
+        {
+          "key": "D",
+          "text": "Parameter group changes only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Scale reads by adding replicas.",
+      "explanation": "Read replicas offload read traffic from the primary instance."
+    },
+    {
+      "id": "RDS-1003",
+      "domain": "RDS",
+      "tags": [
+        "backups",
+        "pitr"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need point-in-time recovery for an RDS database.\nWhat must be enabled?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Automated backups"
+        },
+        {
+          "key": "B",
+          "text": "Manual snapshots only"
+        },
+        {
+          "key": "C",
+          "text": "Read replicas"
+        },
+        {
+          "key": "D",
+          "text": "Multi-AZ only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "PITR depends on continuous backups.",
+      "explanation": "Automated backups enable point-in-time restore within the retention window."
+    },
+    {
+      "id": "RDS-1004",
+      "domain": "RDS",
+      "tags": [
+        "aurora",
+        "dr"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need multi-Region disaster recovery for Aurora with low RPO and fast regional failover.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Global Database"
+        },
+        {
+          "key": "B",
+          "text": "Read replica in the same Region"
+        },
+        {
+          "key": "C",
+          "text": "Multi-AZ only"
+        },
+        {
+          "key": "D",
+          "text": "EBS snapshots"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Aurora feature built for cross-Region DR.",
+      "explanation": "Aurora Global Database replicates to secondary Regions with low lag and supports fast failover."
+    },
+    {
+      "id": "RDS-1005",
+      "domain": "RDS",
+      "tags": [
+        "connections",
+        "rds-proxy"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Lambda-based app opens too many DB connections and exhausts RDS limits.\nWhat should you use to pool and manage connections?",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "B",
+          "text": "Read Replicas"
+        },
+        {
+          "key": "C",
+          "text": "Multi-AZ"
+        },
+        {
+          "key": "D",
+          "text": "S3 event notifications"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Connection pooling for RDS.",
+      "explanation": "RDS Proxy pools and reuses connections, reducing connection storms from Lambda."
+    },
+    {
+      "id": "RDS-1006",
+      "domain": "RDS",
+      "tags": [
+        "encryption"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need encryption at rest for an RDS database.\nWhat should you enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable storage encryption (KMS) on the DB instance/cluster"
+        },
+        {
+          "key": "B",
+          "text": "Enable CloudFront"
+        },
+        {
+          "key": "C",
+          "text": "Enable Transfer Acceleration"
+        },
+        {
+          "key": "D",
+          "text": "Enable NAT Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "RDS uses KMS for encryption at rest.",
+      "explanation": "RDS storage encryption uses AWS KMS to encrypt data at rest."
+    },
+    {
+      "id": "RDS-1007",
+      "domain": "RDS",
+      "tags": [
+        "parameters"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to change a database engine setting (for example, max_connections) for RDS.\nWhere do you do this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "DB parameter group"
+        },
+        {
+          "key": "B",
+          "text": "Security group"
+        },
+        {
+          "key": "C",
+          "text": "Route table"
+        },
+        {
+          "key": "D",
+          "text": "NACL"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Engine configuration lives in one place.",
+      "explanation": "RDS engine settings are configured using DB parameter groups."
+    },
+    {
+      "id": "RDS-1008",
+      "domain": "RDS",
+      "tags": [
+        "storage-autoscaling"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "RDS storage is growing over time and you want automatic storage growth without downtime.\nWhat should you enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Storage autoscaling"
+        },
+        {
+          "key": "B",
+          "text": "Read replicas"
+        },
+        {
+          "key": "C",
+          "text": "CloudTrail"
+        },
+        {
+          "key": "D",
+          "text": "Enhanced monitoring only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Automatic storage increase.",
+      "explanation": "RDS storage autoscaling increases allocated storage automatically when needed."
+    },
+    {
+      "id": "RDS-1009",
+      "domain": "RDS",
+      "tags": [
+        "monitoring"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want detailed DB performance analysis (waits, SQL load) for RDS.\nWhat should you enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "B",
+          "text": "S3 Inventory"
+        },
+        {
+          "key": "C",
+          "text": "VPC Flow Logs"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront logs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Purpose-built RDS performance view.",
+      "explanation": "Performance Insights provides database performance metrics and analysis for troubleshooting."
+    },
+    {
+      "id": "RDS-1010",
+      "domain": "RDS",
+      "tags": [
+        "auth",
+        "iam-db-auth"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want users to authenticate to RDS MySQL/PostgreSQL using IAM instead of long-lived database passwords.\nWhat should you enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "IAM database authentication"
+        },
+        {
+          "key": "B",
+          "text": "SSE-KMS"
+        },
+        {
+          "key": "C",
+          "text": "Multi-AZ"
+        },
+        {
+          "key": "D",
+          "text": "Read replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Use IAM to generate auth tokens.",
+      "explanation": "IAM DB authentication allows authentication using short-lived IAM tokens instead of stored passwords."
+    },
+    {
+      "id": "RDS-1011",
+      "domain": "RDS",
+      "tags": [
+        "rds-multi-az-deployments",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: improve availability with synchronous standby failover in another AZ. Which relational database architecture capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "B",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "C",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "D",
+          "text": "RDS Multi-AZ deployments"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve availability with synchronous standby failover in another AZ.",
+      "explanation": "RDS Multi-AZ deployments is correct because it provides automatic failover for high availability.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Automated backups with point-in-time restore is useful when you need to recover the database to a specific moment after accidental data changes, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Aurora Serverless v2 is useful when you need to automatically scale relational capacity based on variable workload demand, but it is not the best fit for this requirement.",
+        "C": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement.",
+        "D": "Correct. RDS Multi-AZ deployments is the best choice because it provides automatic failover for high availability."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1012",
+      "domain": "RDS",
+      "tags": [
+        "rds-read-replicas",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: offload read-heavy traffic from the primary database instance. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "B",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "C",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "D",
+          "text": "RDS Read Replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: offload read-heavy traffic from the primary database instance.",
+      "explanation": "RDS Read Replicas is correct because they asynchronously replicate data for read scaling.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Aurora Serverless v2 is useful when you need to automatically scale relational capacity based on variable workload demand, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Performance Insights is useful when you need to identify top database waits and SQL bottlenecks quickly, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Automated backups with point-in-time restore is useful when you need to recover the database to a specific moment after accidental data changes, but it is not the best fit for this requirement.",
+        "D": "Correct. RDS Read Replicas is the best choice because they asynchronously replicate data for read scaling."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1013",
+      "domain": "RDS",
+      "tags": [
+        "rds-proxy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: stabilize database connections from spiky serverless or container clients. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "B",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "C",
+          "text": "RDS Multi-AZ deployments"
+        },
+        {
+          "key": "D",
+          "text": "Aurora Serverless v2"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: stabilize database connections from spiky serverless or container clients.",
+      "explanation": "RDS Proxy is correct because it pools and manages connections to protect database resources.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. RDS Proxy is the best choice because it pools and manages connections to protect database resources.",
+        "B": "Incorrect. Performance Insights is useful when you need to identify top database waits and SQL bottlenecks quickly, but it is not the best fit for this requirement.",
+        "C": "Incorrect. RDS Multi-AZ deployments is useful when you need to improve availability with synchronous standby failover in another AZ, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Aurora Serverless v2 is useful when you need to automatically scale relational capacity based on variable workload demand, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1014",
+      "domain": "RDS",
+      "tags": [
+        "automated-backups-with-point-in-time-res",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to recover the database to a specific moment after accidental data changes. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "B",
+          "text": "RDS Read Replicas"
+        },
+        {
+          "key": "C",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "D",
+          "text": "RDS Multi-AZ deployments"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: recover the database to a specific moment after accidental data changes.",
+      "explanation": "Automated backups with point-in-time restore is correct because it enables PITR within the retention window.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Automated backups with point-in-time restore is the best choice because it enables PITR within the retention window.",
+        "B": "Incorrect. RDS Read Replicas is useful when you need to offload read-heavy traffic from the primary database instance, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Performance Insights is useful when you need to identify top database waits and SQL bottlenecks quickly, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Multi-AZ deployments is useful when you need to improve availability with synchronous standby failover in another AZ, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1015",
+      "domain": "RDS",
+      "tags": [
+        "aurora-serverless-v2",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: automatically scale relational capacity based on variable workload demand. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "B",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "C",
+          "text": "RDS Multi-AZ deployments"
+        },
+        {
+          "key": "D",
+          "text": "RDS Read Replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: automatically scale relational capacity based on variable workload demand.",
+      "explanation": "Aurora Serverless v2 is correct because it adjusts Aurora compute incrementally without manual resizing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Aurora Serverless v2 is the best choice because it adjusts Aurora compute incrementally without manual resizing.",
+        "B": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement.",
+        "C": "Incorrect. RDS Multi-AZ deployments is useful when you need to improve availability with synchronous standby failover in another AZ, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Read Replicas is useful when you need to offload read-heavy traffic from the primary database instance, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1016",
+      "domain": "RDS",
+      "tags": [
+        "performance-insights",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: identify top database waits and SQL bottlenecks quickly. Which relational database architecture capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Read Replicas"
+        },
+        {
+          "key": "B",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "C",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: identify top database waits and SQL bottlenecks quickly.",
+      "explanation": "Performance Insights is correct because it provides database performance telemetry and root-cause visibility.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. RDS Read Replicas is useful when you need to offload read-heavy traffic from the primary database instance, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Automated backups with point-in-time restore is useful when you need to recover the database to a specific moment after accidental data changes, but it is not the best fit for this requirement.",
+        "C": "Correct. Performance Insights is the best choice because it provides database performance telemetry and root-cause visibility.",
+        "D": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1017",
+      "domain": "RDS",
+      "tags": [
+        "rds-multi-az-deployments",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: improve availability with synchronous standby failover in another AZ. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "B",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "C",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "D",
+          "text": "RDS Multi-AZ deployments"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve availability with synchronous standby failover in another AZ.",
+      "explanation": "RDS Multi-AZ deployments is correct because it provides automatic failover for high availability.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Aurora Serverless v2 is useful when you need to automatically scale relational capacity based on variable workload demand, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Performance Insights is useful when you need to identify top database waits and SQL bottlenecks quickly, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Automated backups with point-in-time restore is useful when you need to recover the database to a specific moment after accidental data changes, but it is not the best fit for this requirement.",
+        "D": "Correct. RDS Multi-AZ deployments is the best choice because it provides automatic failover for high availability."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1018",
+      "domain": "RDS",
+      "tags": [
+        "rds-read-replicas",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: offload read-heavy traffic from the primary database instance. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "B",
+          "text": "RDS Read Replicas"
+        },
+        {
+          "key": "C",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "D",
+          "text": "RDS Multi-AZ deployments"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: offload read-heavy traffic from the primary database instance.",
+      "explanation": "RDS Read Replicas is correct because they asynchronously replicate data for read scaling.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Performance Insights is useful when you need to identify top database waits and SQL bottlenecks quickly, but it is not the best fit for this requirement.",
+        "B": "Correct. RDS Read Replicas is the best choice because they asynchronously replicate data for read scaling.",
+        "C": "Incorrect. Aurora Serverless v2 is useful when you need to automatically scale relational capacity based on variable workload demand, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Multi-AZ deployments is useful when you need to improve availability with synchronous standby failover in another AZ, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1019",
+      "domain": "RDS",
+      "tags": [
+        "rds-proxy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to stabilize database connections from spiky serverless or container clients. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Multi-AZ deployments"
+        },
+        {
+          "key": "B",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "C",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "D",
+          "text": "RDS Read Replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: stabilize database connections from spiky serverless or container clients.",
+      "explanation": "RDS Proxy is correct because it pools and manages connections to protect database resources.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. RDS Multi-AZ deployments is useful when you need to improve availability with synchronous standby failover in another AZ, but it is not the best fit for this requirement.",
+        "B": "Correct. RDS Proxy is the best choice because it pools and manages connections to protect database resources.",
+        "C": "Incorrect. Performance Insights is useful when you need to identify top database waits and SQL bottlenecks quickly, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Read Replicas is useful when you need to offload read-heavy traffic from the primary database instance, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1020",
+      "domain": "RDS",
+      "tags": [
+        "automated-backups-with-point-in-time-res",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: recover the database to a specific moment after accidental data changes. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "B",
+          "text": "RDS Read Replicas"
+        },
+        {
+          "key": "C",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "D",
+          "text": "RDS Multi-AZ deployments"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: recover the database to a specific moment after accidental data changes.",
+      "explanation": "Automated backups with point-in-time restore is correct because it enables PITR within the retention window.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Automated backups with point-in-time restore is the best choice because it enables PITR within the retention window.",
+        "B": "Incorrect. RDS Read Replicas is useful when you need to offload read-heavy traffic from the primary database instance, but it is not the best fit for this requirement.",
+        "C": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Multi-AZ deployments is useful when you need to improve availability with synchronous standby failover in another AZ, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1021",
+      "domain": "RDS",
+      "tags": [
+        "aurora-serverless-v2",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: automatically scale relational capacity based on variable workload demand. Which relational database architecture capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "B",
+          "text": "RDS Read Replicas"
+        },
+        {
+          "key": "C",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: automatically scale relational capacity based on variable workload demand.",
+      "explanation": "Aurora Serverless v2 is correct because it adjusts Aurora compute incrementally without manual resizing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Aurora Serverless v2 is the best choice because it adjusts Aurora compute incrementally without manual resizing.",
+        "B": "Incorrect. RDS Read Replicas is useful when you need to offload read-heavy traffic from the primary database instance, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Automated backups with point-in-time restore is useful when you need to recover the database to a specific moment after accidental data changes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1022",
+      "domain": "RDS",
+      "tags": [
+        "performance-insights",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: identify top database waits and SQL bottlenecks quickly. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "B",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "C",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: identify top database waits and SQL bottlenecks quickly.",
+      "explanation": "Performance Insights is correct because it provides database performance telemetry and root-cause visibility.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Performance Insights is the best choice because it provides database performance telemetry and root-cause visibility.",
+        "B": "Incorrect. Aurora Serverless v2 is useful when you need to automatically scale relational capacity based on variable workload demand, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Automated backups with point-in-time restore is useful when you need to recover the database to a specific moment after accidental data changes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1023",
+      "domain": "RDS",
+      "tags": [
+        "rds-multi-az-deployments",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: improve availability with synchronous standby failover in another AZ. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Multi-AZ deployments"
+        },
+        {
+          "key": "B",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "C",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "D",
+          "text": "RDS Read Replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve availability with synchronous standby failover in another AZ.",
+      "explanation": "RDS Multi-AZ deployments is correct because it provides automatic failover for high availability.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. RDS Multi-AZ deployments is the best choice because it provides automatic failover for high availability.",
+        "B": "Incorrect. Performance Insights is useful when you need to identify top database waits and SQL bottlenecks quickly, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Aurora Serverless v2 is useful when you need to automatically scale relational capacity based on variable workload demand, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Read Replicas is useful when you need to offload read-heavy traffic from the primary database instance, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1024",
+      "domain": "RDS",
+      "tags": [
+        "rds-read-replicas",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to offload read-heavy traffic from the primary database instance. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "B",
+          "text": "RDS Read Replicas"
+        },
+        {
+          "key": "C",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "D",
+          "text": "RDS Multi-AZ deployments"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: offload read-heavy traffic from the primary database instance.",
+      "explanation": "RDS Read Replicas is correct because they asynchronously replicate data for read scaling.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement.",
+        "B": "Correct. RDS Read Replicas is the best choice because they asynchronously replicate data for read scaling.",
+        "C": "Incorrect. Performance Insights is useful when you need to identify top database waits and SQL bottlenecks quickly, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Multi-AZ deployments is useful when you need to improve availability with synchronous standby failover in another AZ, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1025",
+      "domain": "RDS",
+      "tags": [
+        "rds-proxy",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: stabilize database connections from spiky serverless or container clients. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Read Replicas"
+        },
+        {
+          "key": "B",
+          "text": "RDS Proxy"
+        },
+        {
+          "key": "C",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "D",
+          "text": "RDS Multi-AZ deployments"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: stabilize database connections from spiky serverless or container clients.",
+      "explanation": "RDS Proxy is correct because it pools and manages connections to protect database resources.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. RDS Read Replicas is useful when you need to offload read-heavy traffic from the primary database instance, but it is not the best fit for this requirement.",
+        "B": "Correct. RDS Proxy is the best choice because it pools and manages connections to protect database resources.",
+        "C": "Incorrect. Automated backups with point-in-time restore is useful when you need to recover the database to a specific moment after accidental data changes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Multi-AZ deployments is useful when you need to improve availability with synchronous standby failover in another AZ, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1026",
+      "domain": "RDS",
+      "tags": [
+        "automated-backups-with-point-in-time-res",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: recover the database to a specific moment after accidental data changes. Which relational database architecture capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Read Replicas"
+        },
+        {
+          "key": "B",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "C",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: recover the database to a specific moment after accidental data changes.",
+      "explanation": "Automated backups with point-in-time restore is correct because it enables PITR within the retention window.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. RDS Read Replicas is useful when you need to offload read-heavy traffic from the primary database instance, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Aurora Serverless v2 is useful when you need to automatically scale relational capacity based on variable workload demand, but it is not the best fit for this requirement.",
+        "C": "Correct. Automated backups with point-in-time restore is the best choice because it enables PITR within the retention window.",
+        "D": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1027",
+      "domain": "RDS",
+      "tags": [
+        "aurora-serverless-v2",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: automatically scale relational capacity based on variable workload demand. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "B",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "C",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: automatically scale relational capacity based on variable workload demand.",
+      "explanation": "Aurora Serverless v2 is correct because it adjusts Aurora compute incrementally without manual resizing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Performance Insights is useful when you need to identify top database waits and SQL bottlenecks quickly, but it is not the best fit for this requirement.",
+        "B": "Correct. Aurora Serverless v2 is the best choice because it adjusts Aurora compute incrementally without manual resizing.",
+        "C": "Incorrect. Automated backups with point-in-time restore is useful when you need to recover the database to a specific moment after accidental data changes, but it is not the best fit for this requirement.",
+        "D": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1028",
+      "domain": "RDS",
+      "tags": [
+        "performance-insights",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: identify top database waits and SQL bottlenecks quickly. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Multi-AZ deployments"
+        },
+        {
+          "key": "B",
+          "text": "Aurora Serverless v2"
+        },
+        {
+          "key": "C",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "D",
+          "text": "Performance Insights"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: identify top database waits and SQL bottlenecks quickly.",
+      "explanation": "Performance Insights is correct because it provides database performance telemetry and root-cause visibility.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. RDS Multi-AZ deployments is useful when you need to improve availability with synchronous standby failover in another AZ, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Aurora Serverless v2 is useful when you need to automatically scale relational capacity based on variable workload demand, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Automated backups with point-in-time restore is useful when you need to recover the database to a specific moment after accidental data changes, but it is not the best fit for this requirement.",
+        "D": "Correct. Performance Insights is the best choice because it provides database performance telemetry and root-cause visibility."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1029",
+      "domain": "RDS",
+      "tags": [
+        "rds-multi-az-deployments",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to improve availability with synchronous standby failover in another AZ. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Read Replicas"
+        },
+        {
+          "key": "B",
+          "text": "Performance Insights"
+        },
+        {
+          "key": "C",
+          "text": "RDS Multi-AZ deployments"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve availability with synchronous standby failover in another AZ.",
+      "explanation": "RDS Multi-AZ deployments is correct because it provides automatic failover for high availability.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. RDS Read Replicas is useful when you need to offload read-heavy traffic from the primary database instance, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Performance Insights is useful when you need to identify top database waits and SQL bottlenecks quickly, but it is not the best fit for this requirement.",
+        "C": "Correct. RDS Multi-AZ deployments is the best choice because it provides automatic failover for high availability.",
+        "D": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "RDS-1030",
+      "domain": "RDS",
+      "tags": [
+        "rds-read-replicas",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: offload read-heavy traffic from the primary database instance. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "RDS Multi-AZ deployments"
+        },
+        {
+          "key": "B",
+          "text": "Automated backups with point-in-time restore"
+        },
+        {
+          "key": "C",
+          "text": "RDS Read Replicas"
+        },
+        {
+          "key": "D",
+          "text": "RDS Proxy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: offload read-heavy traffic from the primary database instance.",
+      "explanation": "RDS Read Replicas is correct because they asynchronously replicate data for read scaling.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. RDS Multi-AZ deployments is useful when you need to improve availability with synchronous standby failover in another AZ, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Automated backups with point-in-time restore is useful when you need to recover the database to a specific moment after accidental data changes, but it is not the best fit for this requirement.",
+        "C": "Correct. RDS Read Replicas is the best choice because they asynchronously replicate data for read scaling.",
+        "D": "Incorrect. RDS Proxy is useful when you need to stabilize database connections from spiky serverless or container clients, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Relational Database Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html"
+        }
+      ]
+    }
+  ]
+}

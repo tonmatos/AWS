@@ -1,0 +1,22 @@
+{
+    "schemaVersion": "1.0",
+    "deckId": "aws-saa",
+    "title": "AWS SAA-C03 — Full Exam Coverage Question Bank",
+    "version": "2026-01-31",
+    "files": [
+        "ec2.json",
+        "vpc.json",
+        "s3.json",
+        "rds.json",
+        "lambda.json",
+        "iam.json",
+        "ecs.json",
+        "compute-scale.json",
+        "edge-networking.json",
+        "storage-advanced.json",
+        "database-advanced.json",
+        "integration.json",
+        "security-ops.json"
+    ],
+    "shuffleDefault": { "questions": false, "options": false }
+}

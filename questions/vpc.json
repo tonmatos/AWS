@@ -1,0 +1,2464 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "VPC-001",
+      "domain": "VPC",
+      "tags": [
+        "nat",
+        "internet-gateway",
+        "connectivity"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company has deployed a web application in AWS with the following architecture:\n- VPC: 10.0.0.0/16\n- Public Subnet A: 10.0.1.0/24 (us-east-1a) with an Internet Gateway\n- Private Subnet B: 10.0.10.0/24 (us-east-1a)\n- EC2 instances in Private Subnet B need to download security patches from the internet\n- EC2 instances in Private Subnet B should NOT be directly accessible from the internet\n- The solution must be highly available within a single Availability Zone\n- Cost should be minimized\n\nThe instances in Private Subnet B currently cannot access the internet. What should the Solutions Architect do to enable internet access while meeting all requirements?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Deploy a NAT Gateway in Public Subnet A, create an Elastic IP and associate it with the NAT Gateway, update the Private Subnet B route table to route 0.0.0.0/0 to the NAT Gateway"
+        },
+        {
+          "key": "B",
+          "text": "Move the EC2 instances from Private Subnet B to Public Subnet A and associate Elastic IPs with each instance to enable internet access"
+        },
+        {
+          "key": "C",
+          "text": "Deploy a NAT instance (EC2) in Private Subnet B, attach an Elastic IP, and configure the instance as a NAT device"
+        },
+        {
+          "key": "D",
+          "text": "Attach an additional Internet Gateway to Private Subnet B and update the route table to route 0.0.0.0/0 to the new Internet Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "**Why NAT Gateway in Public Subnet is correct:**\n\n**NAT Gateway Overview:**\nNAT (Network Address Translation) Gateway is a managed AWS service that enables instances in private subnets to connect to the internet or other AWS services while preventing the internet from initiating connections to those instances.\n\n**Correct Architecture:**\n\n```\nInternet\n    |\n    v\n[Internet Gateway]\n    |\n    v\n[Public Subnet 10.0.1.0/24]\n    |\n    v\n[NAT Gateway + Elastic IP]\n    |\n    v\n[Private Subnet 10.0.10.0/24]\n    |\n    v\n[EC2 Instances]\n```\n\n**Implementation Steps:**\n\n1. **Create NAT Gateway:**\n```bash\n# Allocate Elastic IP\naws ec2 allocate-address --domain vpc\n# Output: \"AllocationId\": \"eipalloc-12345\"\n\n# Create NAT Gateway in public subnet\naws ec2 create-nat-gateway \\\n  --subnet-id subnet-public-a \\\n  --allocation-id eipalloc-12345\n# Output: \"NatGatewayId\": \"nat-0a12b34c56d78e90f\"\n```\n\n2. **Update Private Subnet Route Table:**\n```bash\n# Add route to NAT Gateway\naws ec2 create-route \\\n  --route-table-id rtb-private-b \\\n  --destination-cidr-block 0.0.0.0/0 \\\n  --nat-gateway-id nat-0a12b34c56d78e90f\n```\n\n**Route Table Configuration:**\n\nPublic Subnet Route Table:\n```\nDestination       Target\n10.0.0.0/16      local\n0.0.0.0/0        igw-12345 (Internet Gateway)\n```\n\nPrivate Subnet Route Table:\n```\nDestination       Target\n10.0.0.0/16      local\n0.0.0.0/0        nat-0a12b34c56d78e90f (NAT Gateway)\n```\n\n**How it works:**\n1. Private instance initiates outbound connection (e.g., yum update)\n2. Traffic routes to NAT Gateway via route table\n3. NAT Gateway translates source IP to its Elastic IP\n4. Traffic goes through Internet Gateway to internet\n5. Response comes back to NAT Gateway's Elastic IP\n6. NAT Gateway forwards response to private instance\n\n**Why this meets all requirements:**\n\n\u2705 **Internet Access:** Private instances can download patches\n\u2705 **Not Directly Accessible:** No inbound internet connections possible\n\u2705 **Single AZ High Availability:** NAT Gateway is redundant within the AZ\n\u2705 **Cost Optimized:** Managed service, no EC2 costs\n\n**NAT Gateway Benefits:**\n- Managed by AWS (no patching, no management)\n- Scales automatically up to 45 Gbps\n- Highly available within an AZ (redundant)\n- Supports up to 55,000 simultaneous connections\n- No security groups required\n\n**Pricing (us-east-1):**\n- $0.045 per hour (~$32.40/month)\n- $0.045 per GB data processed\n\n**Why other options are WRONG:**\n\n**Option B (Move to Public Subnet):**\n- \u274c Violates requirement: instances become directly accessible from internet\n- \u274c Each instance needs Elastic IP (costs $0.005/hour per IP when associated)\n- \u274c Security risk: instances have public IPs\n- \u274c Requires security group to block inbound (defense in depth lost)\n\n**Option C (NAT Instance in Private Subnet):**\n- \u274c **Critical Error:** NAT instance must be in PUBLIC subnet, not private\n- A private subnet cannot access internet without NAT\n- Chicken-and-egg problem: NAT device needs internet to provide internet\n- Even if in public subnet: requires manual management, patching, scaling\n\n**Option D (Additional Internet Gateway):**\n- \u274c **Not possible:** Only one Internet Gateway per VPC\n- \u274c Internet Gateway attachment is at VPC level, not subnet level\n- \u274c Even if possible, would make private instances publicly accessible\n\n**Multi-AZ High Availability Pattern:**\n\nFor true HA across multiple AZs, deploy:\n```\nPublic Subnet A (AZ-A): NAT Gateway A\nPublic Subnet B (AZ-B): NAT Gateway B\n\nPrivate Subnet A Route: 0.0.0.0/0 \u2192 NAT Gateway A\nPrivate Subnet B Route: 0.0.0.0/0 \u2192 NAT Gateway B\n```\n\n**NAT Gateway vs NAT Instance:**\n\n| Feature | NAT Gateway | NAT Instance |\n|---------|-------------|-------------|\n| Managed | Yes | No |\n| Availability | Redundant within AZ | Single point of failure |\n| Bandwidth | Up to 45 Gbps | Depends on instance type |\n| Maintenance | AWS managed | Manual patching |\n| Security Groups | Not supported | Supported |\n| Bastion | No | Can be used as bastion |\n| Port Forwarding | No | Yes |\n| Cost | Higher | Lower |\n\n**Troubleshooting Tips:**\n\nIf private instances still can't access internet:\n1. Check route table has 0.0.0.0/0 \u2192 NAT Gateway\n2. Verify NAT Gateway is in \"available\" state\n3. Confirm NAT Gateway is in a PUBLIC subnet\n4. Check public subnet has route to Internet Gateway\n5. Verify security groups allow outbound traffic\n6. Check NACLs aren't blocking traffic\n\nReferences:\n- NAT Gateways: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html\n- VPC Routing: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html\n- NAT Gateway vs NAT Instance: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-comparison.html",
+      "incorrect": "This option either violates the security requirement (making instances publicly accessible), places the NAT device in the wrong subnet (private instead of public), or attempts an impossible configuration (multiple Internet Gateways per VPC). NAT Gateway must be deployed in a PUBLIC subnet with an Elastic IP, and the private subnet route table must point internet-bound traffic (0.0.0.0/0) to the NAT Gateway.",
+      "hint": "Private instances need outbound internet access but should not be reachable from the internet. What AWS managed service provides this capability?"
+    },
+    {
+      "id": "VPC-002",
+      "domain": "VPC",
+      "tags": [
+        "subnets",
+        "routing"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which statement best describes a public subnet in a VPC?",
+      "options": [
+        {
+          "key": "A",
+          "text": "A subnet with instances that have public IPs"
+        },
+        {
+          "key": "B",
+          "text": "A subnet whose route table has a route to an Internet Gateway"
+        },
+        {
+          "key": "C",
+          "text": "A subnet with a NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "A subnet in a public Availability Zone"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Public vs private depends on routing, not on public IP assignment.",
+      "explanation": "A subnet is considered public when its route table has a route to an Internet Gateway, allowing outbound and inbound internet connectivity (subject to security controls).",
+      "incorrect": "Instances can have public IPs in a private subnet but still not be reachable without an IGW route.",
+      "references": [
+        {
+          "label": "VPC concepts",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-003",
+      "domain": "VPC",
+      "tags": [
+        "nat-gateway",
+        "high-availability"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Instances in private subnets need outbound internet access for patching. The solution must be highly available and require minimal management.",
+      "options": [
+        {
+          "key": "A",
+          "text": "NAT Instance in one AZ"
+        },
+        {
+          "key": "B",
+          "text": "Internet Gateway"
+        },
+        {
+          "key": "C",
+          "text": "NAT Gateway in each AZ with routes from private subnets to the local AZ NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "For HA, avoid a single AZ NAT instance.",
+      "explanation": "A NAT Gateway is a managed service and is AZ-scoped. For high availability, deploy a NAT Gateway per AZ and route each private subnet to the NAT Gateway in the same AZ.",
+      "incorrect": "An Internet Gateway is for public subnets. VPC peering does not provide internet egress by itself.",
+      "references": [
+        {
+          "label": "NAT Gateways",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-004",
+      "domain": "VPC",
+      "tags": [
+        "endpoints",
+        "s3"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Private subnets must access Amazon S3 without traversing the public internet. Which VPC feature is the best fit?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Interface VPC Endpoint for S3"
+        },
+        {
+          "key": "B",
+          "text": "Gateway VPC Endpoint for S3"
+        },
+        {
+          "key": "C",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "Internet Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "S3 and DynamoDB support gateway endpoints.",
+      "explanation": "A gateway VPC endpoint for S3 keeps S3 traffic within the AWS network and avoids NAT and internet routing. It is the standard, cost-effective approach for S3 from private subnets.",
+      "incorrect": "Interface endpoints are used for many AWS services, but S3 typically uses gateway endpoints for VPC routing use cases.",
+      "references": [
+        {
+          "label": "VPC endpoints",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-endpoints.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-005",
+      "domain": "VPC",
+      "tags": [
+        "security-groups",
+        "nacl"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which statement correctly compares security groups and network ACLs?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Both are stateful"
+        },
+        {
+          "key": "B",
+          "text": "Security groups are stateless; NACLs are stateful"
+        },
+        {
+          "key": "C",
+          "text": "Security groups are stateful; NACLs are stateless"
+        },
+        {
+          "key": "D",
+          "text": "Both apply only at instance level"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Remember: SG is stateful at ENI, NACL is stateless at subnet.",
+      "explanation": "Security groups are stateful and apply to ENIs/instances. Network ACLs are stateless and apply at the subnet boundary, requiring explicit inbound and outbound rules.",
+      "incorrect": "They do not both apply at instance level; NACLs are subnet level.",
+      "references": [
+        {
+          "label": "Security groups vs NACLs",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Security.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-006",
+      "domain": "VPC",
+      "tags": [
+        "peering",
+        "transitive"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "VPC A is peered with VPC B, and VPC B is peered with VPC C. Can instances in VPC A reach instances in VPC C via VPC B?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes, peering is transitive by default"
+        },
+        {
+          "key": "B",
+          "text": "Yes, if route tables are updated"
+        },
+        {
+          "key": "C",
+          "text": "No, VPC peering does not support transitive routing"
+        },
+        {
+          "key": "D",
+          "text": "Yes, if security groups allow it"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Transitive routing is a common trick question.",
+      "explanation": "VPC peering does not support transitive routing. Even if routes are added, traffic cannot traverse one peering connection to reach another VPC.",
+      "incorrect": "To connect multiple VPCs with transitive routing, use Transit Gateway or a shared hub network architecture.",
+      "references": [
+        {
+          "label": "VPC peering limitations",
+          "url": "https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-basics.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-007",
+      "domain": "VPC",
+      "tags": [
+        "tgw",
+        "hub-spoke"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company needs to connect 20 VPCs across multiple accounts with transitive routing and centralized control. Which service is the best fit?",
+      "options": [
+        {
+          "key": "A",
+          "text": "VPC peering mesh"
+        },
+        {
+          "key": "B",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "C",
+          "text": "Internet Gateway"
+        },
+        {
+          "key": "D",
+          "text": "NAT Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Many VPCs plus transitive routing points to a managed hub.",
+      "explanation": "AWS Transit Gateway provides a hub-and-spoke model to connect many VPCs and on-prem networks with transitive routing and centralized route management.",
+      "incorrect": "A peering mesh becomes operationally complex and still does not support transitive routing.",
+      "references": [
+        {
+          "label": "Transit Gateway",
+          "url": "https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-008",
+      "domain": "VPC",
+      "tags": [
+        "ipv6",
+        "egress-only-igw"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Instances in a private subnet use IPv6 and need outbound-only internet access. They must not be reachable from the internet inbound over IPv6.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Internet Gateway"
+        },
+        {
+          "key": "B",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "C",
+          "text": "Egress-only Internet Gateway"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "IPv6 outbound-only has a specific gateway type.",
+      "explanation": "An egress-only Internet Gateway allows outbound-only IPv6 traffic from a VPC and blocks inbound-initiated IPv6 connections, similar to NAT behavior for IPv6.",
+      "incorrect": "NAT Gateways are for IPv4, not IPv6.",
+      "references": [
+        {
+          "label": "Egress-only IGW",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/egress-only-internet-gateway.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-009",
+      "domain": "VPC",
+      "tags": [
+        "dns",
+        "resolver"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An application in a VPC must resolve public DNS names and also resolve private hosted zones in Route 53. Which VPC setting must be enabled?",
+      "options": [
+        {
+          "key": "A",
+          "text": "enableDnsSupport and enableDnsHostnames"
+        },
+        {
+          "key": "B",
+          "text": "Disable DNS resolution"
+        },
+        {
+          "key": "C",
+          "text": "Only enable flow logs"
+        },
+        {
+          "key": "D",
+          "text": "Only enable NACLs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "DNS behavior in a VPC depends on VPC attributes.",
+      "explanation": "To use the Amazon-provided DNS resolver and assign DNS hostnames, enableDnsSupport and enableDnsHostnames must be enabled on the VPC.",
+      "incorrect": "Flow logs and NACLs do not enable DNS resolution.",
+      "references": [
+        {
+          "label": "VPC DNS attributes",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-dns.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-010",
+      "domain": "VPC",
+      "tags": [
+        "flow-logs",
+        "troubleshooting"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to capture accepted and rejected network traffic metadata at the VPC level for troubleshooting. Which feature should you enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "key": "B",
+          "text": "VPC Flow Logs"
+        },
+        {
+          "key": "C",
+          "text": "CloudWatch Logs Insights only"
+        },
+        {
+          "key": "D",
+          "text": "Route 53 query logging"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "You need network flow metadata, not API calls.",
+      "explanation": "VPC Flow Logs capture IP traffic metadata for network interfaces, subnets, or the entire VPC and can be delivered to CloudWatch Logs or S3 for analysis.",
+      "incorrect": "CloudTrail logs API calls, not packet flow metadata.",
+      "references": [
+        {
+          "label": "VPC Flow Logs",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-011",
+      "domain": "VPC",
+      "tags": [
+        "private-subnet",
+        "s3",
+        "endpoints"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Private subnets access S3 using a gateway endpoint. What must you update to direct traffic to the endpoint?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Security group inbound rules"
+        },
+        {
+          "key": "B",
+          "text": "Subnet CIDR blocks"
+        },
+        {
+          "key": "C",
+          "text": "Route tables for the subnets"
+        },
+        {
+          "key": "D",
+          "text": "DHCP options set"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Gateway endpoints are implemented through routes.",
+      "explanation": "Gateway endpoints add a prefix-list target route in route tables. You must associate the endpoint with the route tables used by the subnets that need S3 access.",
+      "incorrect": "Security groups and DHCP options are not the routing mechanism for gateway endpoints.",
+      "references": [
+        {
+          "label": "Gateway endpoint routing",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpce-gateway.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-012",
+      "domain": "VPC",
+      "tags": [
+        "private-link",
+        "saas"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You provide a private service to many customer VPCs without requiring VPC peering, and you want customers to connect privately using their own VPC endpoints.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "B",
+          "text": "Internet Gateway"
+        },
+        {
+          "key": "C",
+          "text": "VPC peering"
+        },
+        {
+          "key": "D",
+          "text": "NAT Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Look for private, scalable, non-peering connectivity.",
+      "explanation": "AWS PrivateLink lets consumers create interface endpoints to privately access your service via an endpoint service, without peering and without exposing traffic to the public internet.",
+      "incorrect": "VPC peering is one-to-one and does not scale as cleanly for many customers.",
+      "references": [
+        {
+          "label": "AWS PrivateLink",
+          "url": "https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-013",
+      "domain": "VPC",
+      "tags": [
+        "vpn",
+        "dx"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company needs a consistent, private, high-bandwidth network connection from on-premises to AWS with predictable latency. Which is the best choice?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Site-to-Site VPN only"
+        },
+        {
+          "key": "B",
+          "text": "AWS Direct Connect"
+        },
+        {
+          "key": "C",
+          "text": "VPC peering"
+        },
+        {
+          "key": "D",
+          "text": "Internet Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Dedicated private connectivity points to Direct Connect.",
+      "explanation": "AWS Direct Connect provides dedicated private connectivity from on-premises to AWS, typically with more consistent latency and higher bandwidth than internet-based VPN.",
+      "incorrect": "VPN is encrypted over the internet and is less predictable.",
+      "references": [
+        {
+          "label": "Direct Connect",
+          "url": "https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-014",
+      "domain": "VPC",
+      "tags": [
+        "nacl",
+        "ordering"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A network ACL has multiple rules. How are rules evaluated?",
+      "options": [
+        {
+          "key": "A",
+          "text": "All rules are evaluated and combined"
+        },
+        {
+          "key": "B",
+          "text": "Rules are evaluated in order, starting with the lowest rule number, and the first match wins"
+        },
+        {
+          "key": "C",
+          "text": "Rules are evaluated randomly"
+        },
+        {
+          "key": "D",
+          "text": "Rules are evaluated only for inbound traffic"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "NACLs are stateless and ordered.",
+      "explanation": "Network ACL rules are evaluated in order by rule number, and the first matching rule decides allow or deny.",
+      "incorrect": "Security groups are not ordered; NACLs are.",
+      "references": [
+        {
+          "label": "NACL rule evaluation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-015",
+      "domain": "VPC",
+      "tags": [
+        "route-tables",
+        "local"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Every VPC route table includes a route with destination equal to the VPC CIDR block and target 'local'. What does this route do?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Sends traffic to the internet"
+        },
+        {
+          "key": "B",
+          "text": "Enables routing within the VPC between subnets"
+        },
+        {
+          "key": "C",
+          "text": "Sends traffic to a NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "Blocks all traffic by default"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Local routing is always present for intra-VPC communication.",
+      "explanation": "The local route enables instances within the VPC CIDR to communicate with each other across subnets (subject to security groups and NACLs).",
+      "incorrect": "Internet and NAT routes are separate and explicit.",
+      "references": [
+        {
+          "label": "Route tables - local route",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-016",
+      "domain": "VPC",
+      "tags": [
+        "endpoints",
+        "interface"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A private subnet must call AWS Secrets Manager without using NAT. Which VPC feature should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Gateway endpoint"
+        },
+        {
+          "key": "B",
+          "text": "Interface endpoint"
+        },
+        {
+          "key": "C",
+          "text": "Internet Gateway"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Most AWS services use interface endpoints.",
+      "explanation": "Secrets Manager is accessed through an interface VPC endpoint (powered by AWS PrivateLink), enabling private connectivity without NAT.",
+      "incorrect": "Gateway endpoints are only for S3 and DynamoDB.",
+      "references": [
+        {
+          "label": "Interface endpoints",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpce-interface.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-017",
+      "domain": "VPC",
+      "tags": [
+        "routing",
+        "nat"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A private subnet route table points 0.0.0.0/0 to an Internet Gateway. Instances still cannot reach the internet. Why?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Internet Gateway does not support IPv4"
+        },
+        {
+          "key": "B",
+          "text": "Internet Gateway requires instances to have public IPs and the subnet to be public"
+        },
+        {
+          "key": "C",
+          "text": "Security groups cannot allow outbound"
+        },
+        {
+          "key": "D",
+          "text": "NAT Gateway is required for public subnets"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Private subnets should not route directly to an IGW for outbound.",
+      "explanation": "To use an Internet Gateway, instances generally need a public IP (or Elastic IP) and the subnet must be configured as public with correct routing. Private subnets typically use a NAT Gateway for outbound-only access.",
+      "incorrect": "Security groups allow outbound by default; NAT is not required for public subnets.",
+      "references": [
+        {
+          "label": "VPC concepts",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-018",
+      "domain": "VPC",
+      "tags": [
+        "reachability-analyzer"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to analyze why an EC2 instance cannot reach an RDS instance in the same VPC. You want a tool that simulates the path and identifies which configuration blocks it.",
+      "options": [
+        {
+          "key": "A",
+          "text": "VPC Reachability Analyzer"
+        },
+        {
+          "key": "B",
+          "text": "CloudTrail"
+        },
+        {
+          "key": "C",
+          "text": "S3 Access Analyzer"
+        },
+        {
+          "key": "D",
+          "text": "AWS Shield"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "There is a specific VPC tool for path analysis.",
+      "explanation": "VPC Reachability Analyzer checks network configurations (routes, security groups, NACLs) and helps determine if a path between two endpoints is reachable and what blocks it.",
+      "incorrect": "CloudTrail is for API auditing; Access Analyzer is for resource access policies.",
+      "references": [
+        {
+          "label": "Reachability Analyzer",
+          "url": "https://docs.aws.amazon.com/vpc/latest/reachability/what-is-reachability-analyzer.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-019",
+      "domain": "VPC",
+      "tags": [
+        "sg",
+        "reference"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Two tiers of an application communicate within a VPC. You want to allow inbound traffic to the database tier only from the application tier instances, even if the application tier IPs change. What is the best approach?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Allow inbound from 0.0.0.0/0 on the DB security group"
+        },
+        {
+          "key": "B",
+          "text": "Allow inbound from the application tier security group on the DB security group"
+        },
+        {
+          "key": "C",
+          "text": "Allow inbound from the VPC CIDR block"
+        },
+        {
+          "key": "D",
+          "text": "Use a NACL allow rule"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Security groups can reference other security groups.",
+      "explanation": "You can reference the application tier security group as the source in the database security group inbound rule. This allows traffic from instances that are members of that security group, regardless of their IPs.",
+      "incorrect": "Opening to the VPC CIDR or 0.0.0.0/0 is broader than needed. NACL rules are not identity-based.",
+      "references": [
+        {
+          "label": "Security group rules - referencing",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-020",
+      "domain": "VPC",
+      "tags": [
+        "subnets",
+        "az"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A VPC spans 3 Availability Zones. How should you design subnets for high availability?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Create one subnet and stretch it across AZs"
+        },
+        {
+          "key": "B",
+          "text": "Create at least one subnet per AZ for each tier that needs HA"
+        },
+        {
+          "key": "C",
+          "text": "Use one subnet for public and private resources"
+        },
+        {
+          "key": "D",
+          "text": "Subnets are not tied to AZs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "A subnet is always within a single AZ.",
+      "explanation": "Subnets are AZ-scoped. For HA, create subnets in each AZ for the tiers that must be highly available and place resources across them.",
+      "incorrect": "You cannot stretch a subnet across AZs.",
+      "references": [
+        {
+          "label": "VPC concepts",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-021",
+      "domain": "VPC",
+      "tags": [
+        "endpoints",
+        "security"
+      ],
+      "difficulty": 4,
+      "type": "multi",
+      "select": {
+        "min": 2,
+        "max": 2
+      },
+      "prompt": "A company creates an interface VPC endpoint for Amazon SQS. They want to restrict access so only one specific IAM role from the VPC can call SQS through that endpoint. Which TWO controls help achieve this? (Choose TWO)",
+      "options": [
+        {
+          "key": "A",
+          "text": "Security group on the endpoint ENIs to allow only required sources"
+        },
+        {
+          "key": "B",
+          "text": "Endpoint policy to restrict allowed principals/actions"
+        },
+        {
+          "key": "C",
+          "text": "Route table entries for SQS prefix lists"
+        },
+        {
+          "key": "D",
+          "text": "Enable an Internet Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A",
+          "B"
+        ]
+      },
+      "hint": "Interface endpoints use endpoint ENI security groups plus an optional endpoint policy.",
+      "explanation": "Interface endpoints can be restricted by (1) the security group attached to the endpoint ENIs and (2) an endpoint policy that limits allowed actions and principals. Together, they constrain who can use the endpoint and what they can do.",
+      "incorrect": "Route tables are not the control plane for interface endpoints. Internet gateways are unrelated to private endpoint usage.",
+      "references": [
+        {
+          "label": "Interface endpoint policies",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-endpoints-access.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1001",
+      "domain": "VPC",
+      "tags": [
+        "public-subnet"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A subnet must host internet-facing resources and allow inbound traffic from the internet.\nWhat is required?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Route to an Internet Gateway (0.0.0.0/0) and public IPs"
+        },
+        {
+          "key": "B",
+          "text": "Route to a NAT Gateway"
+        },
+        {
+          "key": "C",
+          "text": "No route table changes needed"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Public subnet needs IGW route.",
+      "explanation": "A public subnet requires a route to an IGW and instances need public IPs to be reachable."
+    },
+    {
+      "id": "VPC-1002",
+      "domain": "VPC",
+      "tags": [
+        "private-subnet",
+        "nat"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Instances in private subnets must download updates from the internet. Inbound traffic must remain blocked.\nWhat should you add?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Internet Gateway on the private subnet"
+        },
+        {
+          "key": "B",
+          "text": "NAT Gateway in a public subnet with routes from private subnets"
+        },
+        {
+          "key": "C",
+          "text": "VPC peering to another VPC"
+        },
+        {
+          "key": "D",
+          "text": "Customer Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Outbound-only internet from private subnets.",
+      "explanation": "Private subnets use a NAT Gateway (in a public subnet) for outbound internet access."
+    },
+    {
+      "id": "VPC-1003",
+      "domain": "VPC",
+      "tags": [
+        "nacl",
+        "security"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which statement is correct about Network ACLs (NACLs)?",
+      "options": [
+        {
+          "key": "A",
+          "text": "They are stateful"
+        },
+        {
+          "key": "B",
+          "text": "They attach to instances"
+        },
+        {
+          "key": "C",
+          "text": "They are stateless and support allow and deny rules"
+        },
+        {
+          "key": "D",
+          "text": "They only control outbound traffic"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Subnet-level, stateless.",
+      "explanation": "NACLs are stateless, apply at the subnet level, and support allow and deny rules."
+    },
+    {
+      "id": "VPC-1004",
+      "domain": "VPC",
+      "tags": [
+        "security-groups"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which statement is correct about Security Groups?",
+      "options": [
+        {
+          "key": "A",
+          "text": "They are stateless and support deny rules"
+        },
+        {
+          "key": "B",
+          "text": "They are stateful and do not support explicit deny"
+        },
+        {
+          "key": "C",
+          "text": "They attach to subnets"
+        },
+        {
+          "key": "D",
+          "text": "They only work for IPv6"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Instance-level and stateful.",
+      "explanation": "Security Groups are stateful and only have allow rules (no explicit deny)."
+    },
+    {
+      "id": "VPC-1005",
+      "domain": "VPC",
+      "tags": [
+        "endpoints",
+        "s3"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Private subnet instances must access S3 without using NAT or the public internet.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "B",
+          "text": "Internet Gateway"
+        },
+        {
+          "key": "C",
+          "text": "Customer Gateway"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering to S3"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "S3 uses a gateway endpoint.",
+      "explanation": "A Gateway VPC endpoint for S3 provides private connectivity without NAT/IGW."
+    },
+    {
+      "id": "VPC-1006",
+      "domain": "VPC",
+      "tags": [
+        "privatelink"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to expose an internal service in VPC A to many other VPCs without peering them and without opening it to the internet.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS PrivateLink (endpoint service + interface endpoints)"
+        },
+        {
+          "key": "B",
+          "text": "VPC peering"
+        },
+        {
+          "key": "C",
+          "text": "Internet Gateway"
+        },
+        {
+          "key": "D",
+          "text": "NAT Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Private service exposure across VPCs.",
+      "explanation": "PrivateLink lets consumers connect via interface endpoints to a provider endpoint service without VPC peering."
+    },
+    {
+      "id": "VPC-1007",
+      "domain": "VPC",
+      "tags": [
+        "peering"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "VPC A is peered with VPC B. VPC B is peered with VPC C. Can VPC A route traffic to VPC C through VPC B using peering?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Yes, peering is transitive"
+        },
+        {
+          "key": "B",
+          "text": "Yes, if routes are added"
+        },
+        {
+          "key": "C",
+          "text": "No, peering is not transitive"
+        },
+        {
+          "key": "D",
+          "text": "Only with an Internet Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Peering never provides transitive routing.",
+      "explanation": "VPC peering is non-transitive, so A cannot reach C via B."
+    },
+    {
+      "id": "VPC-1008",
+      "domain": "VPC",
+      "tags": [
+        "transit-gateway"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company needs hub-and-spoke connectivity between 20 VPCs and on-prem networks with simplified routing management.\nWhat should they use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "B",
+          "text": "VPC peering between every VPC"
+        },
+        {
+          "key": "C",
+          "text": "One NAT Gateway per VPC"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Central routing hub for many VPCs.",
+      "explanation": "Transit Gateway provides scalable hub-and-spoke connectivity between many VPCs and on-prem."
+    },
+    {
+      "id": "VPC-1009",
+      "domain": "VPC",
+      "tags": [
+        "vpn",
+        "dx"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need dedicated, consistent low-latency private connectivity from on-prem to AWS.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Direct Connect"
+        },
+        {
+          "key": "B",
+          "text": "Site-to-Site VPN only"
+        },
+        {
+          "key": "C",
+          "text": "VPC peering"
+        },
+        {
+          "key": "D",
+          "text": "NAT Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Dedicated private circuit.",
+      "explanation": "Direct Connect provides dedicated private connectivity with consistent performance."
+    },
+    {
+      "id": "VPC-1010",
+      "domain": "VPC",
+      "tags": [
+        "endpoints",
+        "interface"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Private subnet instances must call AWS Secrets Manager without traversing the internet.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Interface VPC endpoint (PrivateLink) for Secrets Manager"
+        },
+        {
+          "key": "B",
+          "text": "Gateway endpoint for Secrets Manager"
+        },
+        {
+          "key": "C",
+          "text": "Internet Gateway"
+        },
+        {
+          "key": "D",
+          "text": "Public IPs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Most AWS services use interface endpoints.",
+      "explanation": "Secrets Manager is accessed privately using an Interface VPC endpoint (PrivateLink)."
+    },
+    {
+      "id": "VPC-1011",
+      "domain": "VPC",
+      "tags": [
+        "nat-gateway",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: allow private subnet instances to reach the internet without inbound exposure. Which VPC networking architecture capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "VPC peering non-transitive design"
+        },
+        {
+          "key": "B",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "C",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "AWS Transit Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: allow private subnet instances to reach the internet without inbound exposure.",
+      "explanation": "NAT Gateway is correct because it provides managed outbound internet access for private subnets.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. VPC peering non-transitive design is useful when you need to connect two VPCs directly when only point-to-point routing is required, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement.",
+        "C": "Correct. NAT Gateway is the best choice because it provides managed outbound internet access for private subnets.",
+        "D": "Incorrect. AWS Transit Gateway is useful when you need to connect many VPCs and on-prem networks with transitive routing, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1012",
+      "domain": "VPC",
+      "tags": [
+        "gateway-vpc-endpoint-for-s3",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: access Amazon S3 privately from a VPC without using NAT. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "B",
+          "text": "Egress-only internet gateway for IPv6"
+        },
+        {
+          "key": "C",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering non-transitive design"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: access Amazon S3 privately from a VPC without using NAT.",
+      "explanation": "Gateway VPC endpoint for S3 is correct because it routes S3 traffic through private AWS networking.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Transit Gateway is useful when you need to connect many VPCs and on-prem networks with transitive routing, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Egress-only internet gateway for IPv6 is useful when you need to allow outbound IPv6 internet access while blocking inbound-initiated traffic, but it is not the best fit for this requirement.",
+        "C": "Correct. Gateway VPC endpoint for S3 is the best choice because it routes S3 traffic through private AWS networking.",
+        "D": "Incorrect. VPC peering non-transitive design is useful when you need to connect two VPCs directly when only point-to-point routing is required, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1013",
+      "domain": "VPC",
+      "tags": [
+        "interface-vpc-endpoint",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: access supported AWS services privately from subnets without internet routing. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "VPC peering non-transitive design"
+        },
+        {
+          "key": "B",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "C",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "D",
+          "text": "Egress-only internet gateway for IPv6"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: access supported AWS services privately from subnets without internet routing.",
+      "explanation": "Interface VPC endpoint is correct because it creates private ENIs in your VPC for service access.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. VPC peering non-transitive design is useful when you need to connect two VPCs directly when only point-to-point routing is required, but it is not the best fit for this requirement.",
+        "B": "Incorrect. NAT Gateway is useful when you need to allow private subnet instances to reach the internet without inbound exposure, but it is not the best fit for this requirement.",
+        "C": "Correct. Interface VPC endpoint is the best choice because it creates private ENIs in your VPC for service access.",
+        "D": "Incorrect. Egress-only internet gateway for IPv6 is useful when you need to allow outbound IPv6 internet access while blocking inbound-initiated traffic, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1014",
+      "domain": "VPC",
+      "tags": [
+        "aws-transit-gateway",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to connect many VPCs and on-prem networks with transitive routing. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "B",
+          "text": "Egress-only internet gateway for IPv6"
+        },
+        {
+          "key": "C",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "D",
+          "text": "NAT Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: connect many VPCs and on-prem networks with transitive routing.",
+      "explanation": "AWS Transit Gateway is correct because it provides a scalable hub-and-spoke routing architecture.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Gateway VPC endpoint for S3 is useful when you need to access Amazon S3 privately from a VPC without using NAT, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Egress-only internet gateway for IPv6 is useful when you need to allow outbound IPv6 internet access while blocking inbound-initiated traffic, but it is not the best fit for this requirement.",
+        "C": "Correct. AWS Transit Gateway is the best choice because it provides a scalable hub-and-spoke routing architecture.",
+        "D": "Incorrect. NAT Gateway is useful when you need to allow private subnet instances to reach the internet without inbound exposure, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1015",
+      "domain": "VPC",
+      "tags": [
+        "vpc-peering-non-transitive-design",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: connect two VPCs directly when only point-to-point routing is required. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "VPC peering non-transitive design"
+        },
+        {
+          "key": "B",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "C",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "Interface VPC endpoint"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: connect two VPCs directly when only point-to-point routing is required.",
+      "explanation": "VPC peering non-transitive design is correct because it enables private connectivity but does not provide transitive routing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. VPC peering non-transitive design is the best choice because it enables private connectivity but does not provide transitive routing.",
+        "B": "Incorrect. Gateway VPC endpoint for S3 is useful when you need to access Amazon S3 privately from a VPC without using NAT, but it is not the best fit for this requirement.",
+        "C": "Incorrect. NAT Gateway is useful when you need to allow private subnet instances to reach the internet without inbound exposure, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1016",
+      "domain": "VPC",
+      "tags": [
+        "egress-only-internet-gateway-for-ipv6",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: allow outbound IPv6 internet access while blocking inbound-initiated traffic. Which VPC networking architecture capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "B",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "C",
+          "text": "Egress-only internet gateway for IPv6"
+        },
+        {
+          "key": "D",
+          "text": "Gateway VPC endpoint for S3"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: allow outbound IPv6 internet access while blocking inbound-initiated traffic.",
+      "explanation": "Egress-only internet gateway for IPv6 is correct because it provides outbound-only internet connectivity for IPv6 workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Transit Gateway is useful when you need to connect many VPCs and on-prem networks with transitive routing, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement.",
+        "C": "Correct. Egress-only internet gateway for IPv6 is the best choice because it provides outbound-only internet connectivity for IPv6 workloads.",
+        "D": "Incorrect. Gateway VPC endpoint for S3 is useful when you need to access Amazon S3 privately from a VPC without using NAT, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1017",
+      "domain": "VPC",
+      "tags": [
+        "nat-gateway",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: allow private subnet instances to reach the internet without inbound exposure. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "VPC peering non-transitive design"
+        },
+        {
+          "key": "B",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "C",
+          "text": "Egress-only internet gateway for IPv6"
+        },
+        {
+          "key": "D",
+          "text": "NAT Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: allow private subnet instances to reach the internet without inbound exposure.",
+      "explanation": "NAT Gateway is correct because it provides managed outbound internet access for private subnets.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. VPC peering non-transitive design is useful when you need to connect two VPCs directly when only point-to-point routing is required, but it is not the best fit for this requirement.",
+        "B": "Incorrect. AWS Transit Gateway is useful when you need to connect many VPCs and on-prem networks with transitive routing, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Egress-only internet gateway for IPv6 is useful when you need to allow outbound IPv6 internet access while blocking inbound-initiated traffic, but it is not the best fit for this requirement.",
+        "D": "Correct. NAT Gateway is the best choice because it provides managed outbound internet access for private subnets."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1018",
+      "domain": "VPC",
+      "tags": [
+        "gateway-vpc-endpoint-for-s3",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: access Amazon S3 privately from a VPC without using NAT. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "B",
+          "text": "VPC peering non-transitive design"
+        },
+        {
+          "key": "C",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "Egress-only internet gateway for IPv6"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: access Amazon S3 privately from a VPC without using NAT.",
+      "explanation": "Gateway VPC endpoint for S3 is correct because it routes S3 traffic through private AWS networking.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Gateway VPC endpoint for S3 is the best choice because it routes S3 traffic through private AWS networking.",
+        "B": "Incorrect. VPC peering non-transitive design is useful when you need to connect two VPCs directly when only point-to-point routing is required, but it is not the best fit for this requirement.",
+        "C": "Incorrect. NAT Gateway is useful when you need to allow private subnet instances to reach the internet without inbound exposure, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Egress-only internet gateway for IPv6 is useful when you need to allow outbound IPv6 internet access while blocking inbound-initiated traffic, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1019",
+      "domain": "VPC",
+      "tags": [
+        "interface-vpc-endpoint",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to access supported AWS services privately from subnets without internet routing. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "B",
+          "text": "Egress-only internet gateway for IPv6"
+        },
+        {
+          "key": "C",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "Gateway VPC endpoint for S3"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: access supported AWS services privately from subnets without internet routing.",
+      "explanation": "Interface VPC endpoint is correct because it creates private ENIs in your VPC for service access.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Interface VPC endpoint is the best choice because it creates private ENIs in your VPC for service access.",
+        "B": "Incorrect. Egress-only internet gateway for IPv6 is useful when you need to allow outbound IPv6 internet access while blocking inbound-initiated traffic, but it is not the best fit for this requirement.",
+        "C": "Incorrect. NAT Gateway is useful when you need to allow private subnet instances to reach the internet without inbound exposure, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Gateway VPC endpoint for S3 is useful when you need to access Amazon S3 privately from a VPC without using NAT, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1020",
+      "domain": "VPC",
+      "tags": [
+        "aws-transit-gateway",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: connect many VPCs and on-prem networks with transitive routing. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "B",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "C",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "D",
+          "text": "Interface VPC endpoint"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: connect many VPCs and on-prem networks with transitive routing.",
+      "explanation": "AWS Transit Gateway is correct because it provides a scalable hub-and-spoke routing architecture.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. AWS Transit Gateway is the best choice because it provides a scalable hub-and-spoke routing architecture.",
+        "B": "Incorrect. NAT Gateway is useful when you need to allow private subnet instances to reach the internet without inbound exposure, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Gateway VPC endpoint for S3 is useful when you need to access Amazon S3 privately from a VPC without using NAT, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1021",
+      "domain": "VPC",
+      "tags": [
+        "vpc-peering-non-transitive-design",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: connect two VPCs directly when only point-to-point routing is required. Which VPC networking architecture capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "B",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "C",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering non-transitive design"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: connect two VPCs directly when only point-to-point routing is required.",
+      "explanation": "VPC peering non-transitive design is correct because it enables private connectivity but does not provide transitive routing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Gateway VPC endpoint for S3 is useful when you need to access Amazon S3 privately from a VPC without using NAT, but it is not the best fit for this requirement.",
+        "C": "Incorrect. AWS Transit Gateway is useful when you need to connect many VPCs and on-prem networks with transitive routing, but it is not the best fit for this requirement.",
+        "D": "Correct. VPC peering non-transitive design is the best choice because it enables private connectivity but does not provide transitive routing."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1022",
+      "domain": "VPC",
+      "tags": [
+        "egress-only-internet-gateway-for-ipv6",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: allow outbound IPv6 internet access while blocking inbound-initiated traffic. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Egress-only internet gateway for IPv6"
+        },
+        {
+          "key": "B",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "C",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering non-transitive design"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: allow outbound IPv6 internet access while blocking inbound-initiated traffic.",
+      "explanation": "Egress-only internet gateway for IPv6 is correct because it provides outbound-only internet connectivity for IPv6 workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Egress-only internet gateway for IPv6 is the best choice because it provides outbound-only internet connectivity for IPv6 workloads.",
+        "B": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement.",
+        "C": "Incorrect. AWS Transit Gateway is useful when you need to connect many VPCs and on-prem networks with transitive routing, but it is not the best fit for this requirement.",
+        "D": "Incorrect. VPC peering non-transitive design is useful when you need to connect two VPCs directly when only point-to-point routing is required, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1023",
+      "domain": "VPC",
+      "tags": [
+        "nat-gateway",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: allow private subnet instances to reach the internet without inbound exposure. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "B",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "C",
+          "text": "Egress-only internet gateway for IPv6"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering non-transitive design"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: allow private subnet instances to reach the internet without inbound exposure.",
+      "explanation": "NAT Gateway is correct because it provides managed outbound internet access for private subnets.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. NAT Gateway is the best choice because it provides managed outbound internet access for private subnets.",
+        "B": "Incorrect. Gateway VPC endpoint for S3 is useful when you need to access Amazon S3 privately from a VPC without using NAT, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Egress-only internet gateway for IPv6 is useful when you need to allow outbound IPv6 internet access while blocking inbound-initiated traffic, but it is not the best fit for this requirement.",
+        "D": "Incorrect. VPC peering non-transitive design is useful when you need to connect two VPCs directly when only point-to-point routing is required, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1024",
+      "domain": "VPC",
+      "tags": [
+        "gateway-vpc-endpoint-for-s3",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to access Amazon S3 privately from a VPC without using NAT. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "B",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "C",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "Egress-only internet gateway for IPv6"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: access Amazon S3 privately from a VPC without using NAT.",
+      "explanation": "Gateway VPC endpoint for S3 is correct because it routes S3 traffic through private AWS networking.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement.",
+        "B": "Correct. Gateway VPC endpoint for S3 is the best choice because it routes S3 traffic through private AWS networking.",
+        "C": "Incorrect. NAT Gateway is useful when you need to allow private subnet instances to reach the internet without inbound exposure, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Egress-only internet gateway for IPv6 is useful when you need to allow outbound IPv6 internet access while blocking inbound-initiated traffic, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1025",
+      "domain": "VPC",
+      "tags": [
+        "interface-vpc-endpoint",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: access supported AWS services privately from subnets without internet routing. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "B",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "C",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "D",
+          "text": "NAT Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: access supported AWS services privately from subnets without internet routing.",
+      "explanation": "Interface VPC endpoint is correct because it creates private ENIs in your VPC for service access.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Transit Gateway is useful when you need to connect many VPCs and on-prem networks with transitive routing, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Gateway VPC endpoint for S3 is useful when you need to access Amazon S3 privately from a VPC without using NAT, but it is not the best fit for this requirement.",
+        "C": "Correct. Interface VPC endpoint is the best choice because it creates private ENIs in your VPC for service access.",
+        "D": "Incorrect. NAT Gateway is useful when you need to allow private subnet instances to reach the internet without inbound exposure, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1026",
+      "domain": "VPC",
+      "tags": [
+        "aws-transit-gateway",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: connect many VPCs and on-prem networks with transitive routing. Which VPC networking architecture capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "B",
+          "text": "VPC peering non-transitive design"
+        },
+        {
+          "key": "C",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "D",
+          "text": "Gateway VPC endpoint for S3"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: connect many VPCs and on-prem networks with transitive routing.",
+      "explanation": "AWS Transit Gateway is correct because it provides a scalable hub-and-spoke routing architecture.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. AWS Transit Gateway is the best choice because it provides a scalable hub-and-spoke routing architecture.",
+        "B": "Incorrect. VPC peering non-transitive design is useful when you need to connect two VPCs directly when only point-to-point routing is required, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Gateway VPC endpoint for S3 is useful when you need to access Amazon S3 privately from a VPC without using NAT, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1027",
+      "domain": "VPC",
+      "tags": [
+        "vpc-peering-non-transitive-design",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: connect two VPCs directly when only point-to-point routing is required. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "B",
+          "text": "VPC peering non-transitive design"
+        },
+        {
+          "key": "C",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "D",
+          "text": "Egress-only internet gateway for IPv6"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: connect two VPCs directly when only point-to-point routing is required.",
+      "explanation": "VPC peering non-transitive design is correct because it enables private connectivity but does not provide transitive routing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement.",
+        "B": "Correct. VPC peering non-transitive design is the best choice because it enables private connectivity but does not provide transitive routing.",
+        "C": "Incorrect. AWS Transit Gateway is useful when you need to connect many VPCs and on-prem networks with transitive routing, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Egress-only internet gateway for IPv6 is useful when you need to allow outbound IPv6 internet access while blocking inbound-initiated traffic, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1028",
+      "domain": "VPC",
+      "tags": [
+        "egress-only-internet-gateway-for-ipv6",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: allow outbound IPv6 internet access while blocking inbound-initiated traffic. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Egress-only internet gateway for IPv6"
+        },
+        {
+          "key": "B",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "C",
+          "text": "VPC peering non-transitive design"
+        },
+        {
+          "key": "D",
+          "text": "AWS Transit Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: allow outbound IPv6 internet access while blocking inbound-initiated traffic.",
+      "explanation": "Egress-only internet gateway for IPv6 is correct because it provides outbound-only internet connectivity for IPv6 workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Egress-only internet gateway for IPv6 is the best choice because it provides outbound-only internet connectivity for IPv6 workloads.",
+        "B": "Incorrect. NAT Gateway is useful when you need to allow private subnet instances to reach the internet without inbound exposure, but it is not the best fit for this requirement.",
+        "C": "Incorrect. VPC peering non-transitive design is useful when you need to connect two VPCs directly when only point-to-point routing is required, but it is not the best fit for this requirement.",
+        "D": "Incorrect. AWS Transit Gateway is useful when you need to connect many VPCs and on-prem networks with transitive routing, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1029",
+      "domain": "VPC",
+      "tags": [
+        "nat-gateway",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to allow private subnet instances to reach the internet without inbound exposure. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "NAT Gateway"
+        },
+        {
+          "key": "B",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "C",
+          "text": "Egress-only internet gateway for IPv6"
+        },
+        {
+          "key": "D",
+          "text": "Interface VPC endpoint"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: allow private subnet instances to reach the internet without inbound exposure.",
+      "explanation": "NAT Gateway is correct because it provides managed outbound internet access for private subnets.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. NAT Gateway is the best choice because it provides managed outbound internet access for private subnets.",
+        "B": "Incorrect. Gateway VPC endpoint for S3 is useful when you need to access Amazon S3 privately from a VPC without using NAT, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Egress-only internet gateway for IPv6 is useful when you need to allow outbound IPv6 internet access while blocking inbound-initiated traffic, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    },
+    {
+      "id": "VPC-1030",
+      "domain": "VPC",
+      "tags": [
+        "gateway-vpc-endpoint-for-s3",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: access Amazon S3 privately from a VPC without using NAT. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Gateway VPC endpoint for S3"
+        },
+        {
+          "key": "B",
+          "text": "AWS Transit Gateway"
+        },
+        {
+          "key": "C",
+          "text": "Interface VPC endpoint"
+        },
+        {
+          "key": "D",
+          "text": "NAT Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: access Amazon S3 privately from a VPC without using NAT.",
+      "explanation": "Gateway VPC endpoint for S3 is correct because it routes S3 traffic through private AWS networking.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Gateway VPC endpoint for S3 is the best choice because it routes S3 traffic through private AWS networking.",
+        "B": "Incorrect. AWS Transit Gateway is useful when you need to connect many VPCs and on-prem networks with transitive routing, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Interface VPC endpoint is useful when you need to access supported AWS services privately from subnets without internet routing, but it is not the best fit for this requirement.",
+        "D": "Incorrect. NAT Gateway is useful when you need to allow private subnet instances to reach the internet without inbound exposure, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Vpc Networking Architecture documentation",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+        }
+      ]
+    }
+  ]
+}

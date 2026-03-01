@@ -1,0 +1,2000 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "IAM-001",
+      "domain": "IAM",
+      "tags": [
+        "policy-eval",
+        "explicit-deny"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company has an S3 bucket named prod-bucket containing sensitive customer data. An IAM user named DataAnalyst is a member of two IAM groups: DataTeam and Analysts. The DataTeam group has an attached policy that allows s3:GetObject and s3:ListBucket on arn:aws:s3:::prod-bucket/* to enable data access. However, the Analysts group has a policy with an explicit Deny for s3:GetObject on arn:aws:s3:::prod-bucket/private/*. The DataAnalyst user attempts to download the file s3://prod-bucket/private/customer-pii.csv using the AWS CLI. What will be the result of this request?",
+      "options": [
+        {
+          "key": "A",
+          "text": "The request will be allowed because the DataTeam group policy grants s3:GetObject permission and IAM evaluates allow statements with higher precedence"
+        },
+        {
+          "key": "B",
+          "text": "The request will be allowed because group policies are evaluated independently and at least one allows the action"
+        },
+        {
+          "key": "C",
+          "text": "The request will be denied because an explicit deny in any attached policy overrides all allow statements regardless of their source"
+        },
+        {
+          "key": "D",
+          "text": "The request will be denied only if the user has a permissions boundary attached that restricts S3 access"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "explanation": "In AWS IAM policy evaluation logic, an explicit Deny always takes precedence over any Allow statements. When IAM evaluates a request, it follows this logic:\n\n1. By default, all requests are implicitly denied\n2. An explicit Allow overrides the default implicit deny\n3. An explicit Deny overrides any allows\n\nIn this scenario, even though the DataTeam group policy explicitly allows s3:GetObject on all objects in prod-bucket, the Analysts group policy contains an explicit Deny for objects under the /private/ prefix. According to the IAM policy evaluation logic documented in the AWS IAM Policy Evaluation Guide, the explicit Deny will override the Allow, and the request will be denied.\n\nThis is a fundamental security principle in AWS - explicit denies cannot be overridden, ensuring that security restrictions are always enforced regardless of how many policies might grant permissions.\n\nReference: AWS IAM Policy Evaluation Logic - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html",
+      "incorrect": "This option incorrectly assumes that Allow statements can override or coexist with explicit Deny statements. In IAM, explicit Deny always wins, making it impossible to accidentally grant access that should be restricted. This is a critical security control in AWS that prevents privilege escalation through policy combination.",
+      "hint": "Remember the IAM policy evaluation rule: Explicit Deny > Explicit Allow > Default Deny (implicit)"
+    },
+    {
+      "id": "IAM-002",
+      "domain": "IAM",
+      "tags": [
+        "resource-policy",
+        "s3"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A user in Account A has no identity-based S3 permissions. A bucket policy on an S3 bucket in the same account explicitly allows that user to read objects. What happens?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Access is allowed because the bucket policy grants it"
+        },
+        {
+          "key": "B",
+          "text": "Access is denied because identity policies are required"
+        },
+        {
+          "key": "C",
+          "text": "Access is denied unless a permissions boundary allows it"
+        },
+        {
+          "key": "D",
+          "text": "Access is allowed only if MFA is enabled"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "A resource-based policy can grant access directly unless there is an explicit deny.",
+      "incorrect": "This option overlooks that a resource policy can grant access without an identity policy."
+    },
+    {
+      "id": "IAM-003",
+      "domain": "IAM",
+      "tags": [
+        "root",
+        "best-practice"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A new AWS account is created. Which action is a best practice for the root user?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Create access keys and use them for daily admin tasks"
+        },
+        {
+          "key": "B",
+          "text": "Enable MFA and avoid using the root user for daily tasks"
+        },
+        {
+          "key": "C",
+          "text": "Attach AdministratorAccess to the root user"
+        },
+        {
+          "key": "D",
+          "text": "Share the root credentials with the operations team"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Root should be protected with MFA and used only for account-level tasks.",
+      "incorrect": "This choice increases risk by relying on the root account for daily work."
+    },
+    {
+      "id": "IAM-004",
+      "domain": "IAM",
+      "tags": [
+        "roles",
+        "ec2",
+        "instance-profile"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A Solutions Architect is designing a web application that will run on Amazon EC2 instances. The application needs to upload processed files to an S3 bucket, send messages to an SQS queue, and write logs to CloudWatch Logs. The security team requires that credentials should never be stored on the EC2 instances and should automatically rotate. The solution should follow AWS security best practices and minimize operational overhead. What is the MOST secure and operationally efficient way to provide the necessary AWS permissions to the application?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Generate IAM user access keys with the required S3, SQS, and CloudWatch permissions, store them encrypted in the EC2 user data, and configure the application to read them on startup. Implement a Lambda function to rotate the keys every 30 days"
+        },
+        {
+          "key": "B",
+          "text": "Create an IAM role with a policy granting the required S3, SQS, and CloudWatch permissions, attach the role to the EC2 instances using an instance profile, and configure the application to use the AWS SDK with the default credential provider chain"
+        },
+        {
+          "key": "C",
+          "text": "Create IAM user access keys, embed them in the application AMI during the build process, and use AWS Secrets Manager to encrypt and decrypt the keys at runtime"
+        },
+        {
+          "key": "D",
+          "text": "Use AWS root account credentials and store them in AWS Systems Manager Parameter Store with encryption enabled. Configure the application to retrieve credentials from Parameter Store at startup"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Using an IAM role attached to EC2 instances via an instance profile is the recommended AWS best practice for granting permissions to applications running on EC2. Here's why this is the best solution:\n\n**How it works:**\n1. The IAM role defines what permissions the application has (S3, SQS, CloudWatch)\n2. The instance profile is attached to the EC2 instances, making the role's permissions available to applications running on those instances\n3. The AWS SDK automatically retrieves temporary security credentials from the EC2 instance metadata service (IMDS) at http://169.254.169.254/latest/meta-data/iam/security-credentials/\n4. These credentials are temporary and automatically rotated by AWS every few hours\n\n**Security benefits:**\n- No long-lived credentials are stored on the instance\n- Credentials are temporary and automatically rotated by AWS\n- No manual key management or rotation required\n- Credentials are never exposed in code, configuration files, or user data\n- Access can be easily revoked by detaching the role or modifying the role's permissions\n\n**Operational benefits:**\n- Zero operational overhead for credential management\n- AWS handles all credential rotation automatically\n- Easy to audit and monitor using CloudTrail\n- Simple to modify permissions by updating the role policy\n\nReference:\n- IAM Roles for Amazon EC2: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html\n- Using Instance Profiles: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html",
+      "incorrect": "This approach stores long-lived credentials on the EC2 instance, which violates AWS security best practices. Long-lived credentials (access keys) can be accidentally exposed through logs, snapshots, or compromised instances. Even when encrypted or stored in Secrets Manager/Parameter Store, you still need to manage retrieval, rotation, and storage of these credentials. Using IAM roles eliminates these risks entirely by providing temporary, automatically-rotated credentials through the instance metadata service.",
+      "hint": "Think about AWS best practices: what mechanism provides temporary credentials to EC2 instances without storing them?"
+    },
+    {
+      "id": "IAM-005",
+      "domain": "IAM",
+      "tags": [
+        "sts",
+        "assume-role",
+        "cross-account"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company operates multiple AWS accounts for different departments. The central security team in Account A (AWS Account ID: 111122223333) needs to audit S3 buckets across all accounts. Account B (AWS Account ID: 444455556666) has created an IAM role called SecurityAuditRole with a policy that grants read-only access to S3 (s3:GetObject, s3:ListBucket). The security team has an IAM user named AuditUser in Account A. The user attempts to assume SecurityAuditRole in Account B using the AWS CLI command:\n\naws sts assume-role --role-arn arn:aws:iam::444455556666:role/SecurityAuditRole --role-session-name audit-session\n\nThe command fails with an AccessDenied error. What are the TWO required configurations to enable AuditUser to successfully assume the SecurityAuditRole? (Choose TWO)",
+      "options": [
+        {
+          "key": "A",
+          "text": "Account B must add a permissions boundary to SecurityAuditRole that allows Account A principals"
+        },
+        {
+          "key": "B",
+          "text": "SecurityAuditRole in Account B must have a trust policy (assume role policy) that allows the principal arn:aws:iam::111122223333:user/AuditUser or arn:aws:iam::111122223333:root to assume the role"
+        },
+        {
+          "key": "C",
+          "text": "AuditUser in Account A must have an identity-based policy that allows sts:AssumeRole on the resource arn:aws:iam::444455556666:role/SecurityAuditRole"
+        },
+        {
+          "key": "D",
+          "text": "Both accounts must be in the same AWS Organization and have an SCP that allows cross-account role assumption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B",
+          "C"
+        ]
+      },
+      "explanation": "Cross-account role assumption requires a two-way trust establishment:\n\n**1. Trust Policy in Account B (answer B):**\nThe SecurityAuditRole must have a trust policy (also called assume role policy) that explicitly allows principals from Account A to assume it. This trust policy might look like:\n\n```json\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Effect\": \"Allow\",\n    \"Principal\": {\n      \"AWS\": \"arn:aws:iam::111122223333:user/AuditUser\"\n    },\n    \"Action\": \"sts:AssumeRole\"\n  }]\n}\n```\n\nOr more broadly:\n```json\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Effect\": \"Allow\",\n    \"Principal\": {\n      \"AWS\": \"arn:aws:iam::111122223333:root\"\n    },\n    \"Action\": \"sts:AssumeRole\",\n    \"Condition\": {\n      \"StringEquals\": {\n        \"sts:ExternalId\": \"unique-external-id-123\"\n      }\n    }\n  }]\n}\n```\n\n**2. Identity-based Policy in Account A (answer C):**\nAuditUser must have permissions to call sts:AssumeRole on the specific role ARN:\n\n```json\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Effect\": \"Allow\",\n    \"Action\": \"sts:AssumeRole\",\n    \"Resource\": \"arn:aws:iam::444455556666:role/SecurityAuditRole\"\n  }]\n}\n```\n\n**Why both are needed:**\n- The trust policy establishes that Account B trusts Account A (Resource-side trust)\n- The identity policy grants Account A user permission to assume roles (Identity-side permission)\n- Both must be in place for cross-account access to work\n\n**Why other options are incorrect:**\n- A: Permissions boundaries limit maximum permissions but don't grant cross-account trust\n- D: AWS Organizations and SCPs are not required for cross-account role assumption, though they can provide additional controls\n\nReference:\n- Tutorial: Delegate Access Across AWS Accounts Using IAM Roles: https://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_cross-account-with-roles.html\n- How to use trust policies with IAM roles: https://aws.amazon.com/blogs/security/how-to-use-trust-policies-with-iam-roles/",
+      "incorrect": "Cross-account role assumption requires both sides to explicitly grant permissions. The trusting account (Account B) must allow the external principal via a trust policy, AND the external user (in Account A) must have permission to call sts:AssumeRole. Missing either piece will result in AccessDenied. Permissions boundaries and SCPs are additional controls but not requirements for basic cross-account access.",
+      "hint": "Cross-account access requires two things: trust from the role being assumed, and permission from the user doing the assuming",
+      "type": "multi",
+      "select": {
+        "min": 2,
+        "max": 2
+      }
+    },
+    {
+      "id": "IAM-006",
+      "domain": "IAM",
+      "tags": [
+        "permissions-boundary"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Your security team enforces permissions boundaries on IAM roles. What is the effect of a permissions boundary?",
+      "options": [
+        {
+          "key": "A",
+          "text": "It grants permissions not otherwise allowed"
+        },
+        {
+          "key": "B",
+          "text": "It defines the maximum permissions the principal can obtain"
+        },
+        {
+          "key": "C",
+          "text": "It replaces identity-based policies"
+        },
+        {
+          "key": "D",
+          "text": "It only applies to resource-based policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "A permissions boundary limits the maximum permissions a principal can receive.",
+      "incorrect": "This choice treats a boundary as a grant or replacement, which it is not."
+    },
+    {
+      "id": "IAM-007",
+      "domain": "IAM",
+      "tags": [
+        "organizations",
+        "scp"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Your organization applies SCPs to production accounts. Which statement is true about SCPs?",
+      "options": [
+        {
+          "key": "A",
+          "text": "SCPs grant permissions to IAM users"
+        },
+        {
+          "key": "B",
+          "text": "SCPs define the maximum available permissions for accounts"
+        },
+        {
+          "key": "C",
+          "text": "SCPs are evaluated after resource-based policies"
+        },
+        {
+          "key": "D",
+          "text": "SCPs apply only to AWS managed policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "SCPs are guardrails that limit the maximum permissions for accounts.",
+      "incorrect": "This choice treats SCPs as grants rather than guardrails."
+    },
+    {
+      "id": "IAM-008",
+      "domain": "IAM",
+      "tags": [
+        "policies",
+        "inline"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which statement best describes inline IAM policies?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Inline policies can be attached to multiple identities"
+        },
+        {
+          "key": "B",
+          "text": "Managed policies are embedded directly in a single identity"
+        },
+        {
+          "key": "C",
+          "text": "Inline policies are attached to a single identity and deleted with it"
+        },
+        {
+          "key": "D",
+          "text": "Managed policies cannot be versioned"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "explanation": "Inline policies are tied to one identity and removed when that identity is deleted.",
+      "incorrect": "This option assumes inline policies are reusable, which is not correct."
+    },
+    {
+      "id": "IAM-009",
+      "domain": "IAM",
+      "tags": [
+        "mfa-delete",
+        "s3"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A security team wants to enable MFA Delete on an S3 bucket. Who can enable it?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Any IAM user with s3:PutBucketVersioning"
+        },
+        {
+          "key": "B",
+          "text": "Only the AWS account root user"
+        },
+        {
+          "key": "C",
+          "text": "Any IAM role in the account"
+        },
+        {
+          "key": "D",
+          "text": "The S3 service-linked role"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "MFA Delete can only be enabled using the root user credentials.",
+      "incorrect": "This option assumes standard IAM permissions are sufficient for MFA Delete."
+    },
+    {
+      "id": "IAM-010",
+      "domain": "IAM",
+      "tags": [
+        "access-keys",
+        "rotation"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You must rotate an IAM user access key with minimal downtime. What is the recommended approach?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Rotate only after a security incident"
+        },
+        {
+          "key": "B",
+          "text": "Create a second key, update apps, then deactivate and delete the old key"
+        },
+        {
+          "key": "C",
+          "text": "Delete the key and recreate it immediately without testing"
+        },
+        {
+          "key": "D",
+          "text": "Rotate access keys for the root user only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Use a staged rotation to avoid breaking applications.",
+      "incorrect": "This option does not provide a safe transition period for rotation."
+    },
+    {
+      "id": "IAM-011",
+      "domain": "IAM",
+      "tags": [
+        "policy-version"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "How many versions can a customer managed IAM policy store at one time?",
+      "options": [
+        {
+          "key": "A",
+          "text": "3"
+        },
+        {
+          "key": "B",
+          "text": "5"
+        },
+        {
+          "key": "C",
+          "text": "8"
+        },
+        {
+          "key": "D",
+          "text": "10"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Customer managed policies can have up to five versions.",
+      "incorrect": "This option does not match the policy version limit."
+    },
+    {
+      "id": "IAM-012",
+      "domain": "IAM",
+      "tags": [
+        "sts",
+        "session"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What is the default maximum session duration for an IAM role session?",
+      "options": [
+        {
+          "key": "A",
+          "text": "15 minutes"
+        },
+        {
+          "key": "B",
+          "text": "1 hour"
+        },
+        {
+          "key": "C",
+          "text": "6 hours"
+        },
+        {
+          "key": "D",
+          "text": "12 hours"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Role sessions default to one hour unless you configure a longer duration.",
+      "incorrect": "This choice does not match the default session duration."
+    },
+    {
+      "id": "IAM-013",
+      "domain": "IAM",
+      "tags": [
+        "groups"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which statement about IAM groups is correct?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Groups can contain other groups"
+        },
+        {
+          "key": "B",
+          "text": "Groups can be used to assign permissions to users"
+        },
+        {
+          "key": "C",
+          "text": "Groups can be referenced as principals in resource policies"
+        },
+        {
+          "key": "D",
+          "text": "Groups can have access keys"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Groups simplify permission management by attaching policies to multiple users.",
+      "incorrect": "This option misrepresents how groups are used for permissions."
+    },
+    {
+      "id": "IAM-014",
+      "domain": "IAM",
+      "tags": [
+        "conditions",
+        "mfa"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company requires MFA for API calls to sensitive services. Which condition key should be used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "aws:RequestedRegion"
+        },
+        {
+          "key": "B",
+          "text": "aws:MultiFactorAuthPresent"
+        },
+        {
+          "key": "C",
+          "text": "aws:PrincipalOrgID"
+        },
+        {
+          "key": "D",
+          "text": "aws:SourceVpce"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Use aws:MultiFactorAuthPresent to require MFA for API calls.",
+      "incorrect": "This condition does not verify MFA usage."
+    },
+    {
+      "id": "IAM-015",
+      "domain": "IAM",
+      "tags": [
+        "federation",
+        "oidc"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A mobile app uses an external OIDC identity provider and needs temporary AWS credentials. Which STS API should it call?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AssumeRole"
+        },
+        {
+          "key": "B",
+          "text": "AssumeRoleWithSAML"
+        },
+        {
+          "key": "C",
+          "text": "AssumeRoleWithWebIdentity"
+        },
+        {
+          "key": "D",
+          "text": "GetFederationToken"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "explanation": "OIDC federation uses AssumeRoleWithWebIdentity.",
+      "incorrect": "This API is for a different federation or credential flow."
+    },
+    {
+      "id": "IAM-016",
+      "domain": "IAM",
+      "tags": [
+        "identity-center",
+        "sso"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which AWS service provides centralized workforce SSO to multiple AWS accounts?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "B",
+          "text": "IAM Identity Center"
+        },
+        {
+          "key": "C",
+          "text": "AWS Directory Service"
+        },
+        {
+          "key": "D",
+          "text": "AWS Config"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "IAM Identity Center (formerly AWS SSO) provides centralized access and SSO.",
+      "incorrect": "This service does not provide centralized AWS account SSO."
+    },
+    {
+      "id": "IAM-017",
+      "domain": "IAM",
+      "tags": [
+        "access-analyzer"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What does IAM Access Analyzer help you identify?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Unused EC2 instances"
+        },
+        {
+          "key": "B",
+          "text": "Resources accessible from outside your account"
+        },
+        {
+          "key": "C",
+          "text": "Expired SSL certificates"
+        },
+        {
+          "key": "D",
+          "text": "CloudWatch log anomalies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Access Analyzer highlights resources that are shared externally or publicly.",
+      "incorrect": "This service does not focus on external access paths to resources."
+    },
+    {
+      "id": "IAM-018",
+      "domain": "IAM",
+      "tags": [
+        "trust-policy"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which policy element specifies who can assume an IAM role?",
+      "options": [
+        {
+          "key": "A",
+          "text": "The role permissions policy"
+        },
+        {
+          "key": "B",
+          "text": "The role trust policy Principal"
+        },
+        {
+          "key": "C",
+          "text": "An SCP"
+        },
+        {
+          "key": "D",
+          "text": "A permissions boundary"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The trust policy Principal defines who can assume the role.",
+      "incorrect": "This choice refers to permissions, not who is trusted to assume the role."
+    },
+    {
+      "id": "IAM-019",
+      "domain": "IAM",
+      "tags": [
+        "passrole"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A user needs to assign an IAM role to an ECS task. Which permission is required?",
+      "options": [
+        {
+          "key": "A",
+          "text": "iam:AttachRolePolicy"
+        },
+        {
+          "key": "B",
+          "text": "iam:PassRole"
+        },
+        {
+          "key": "C",
+          "text": "sts:AssumeRole"
+        },
+        {
+          "key": "D",
+          "text": "iam:CreateServiceLinkedRole"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "iam:PassRole is required to pass a role to an AWS service.",
+      "incorrect": "This option does not allow passing a role to a service."
+    },
+    {
+      "id": "IAM-020",
+      "domain": "IAM",
+      "tags": [
+        "external-id",
+        "cross-account"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A SaaS provider assumes a role in your account. How do you prevent the confused deputy problem?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable MFA for the provider"
+        },
+        {
+          "key": "B",
+          "text": "Use an ExternalId condition in the trust policy"
+        },
+        {
+          "key": "C",
+          "text": "Use a permissions boundary on the role"
+        },
+        {
+          "key": "D",
+          "text": "Attach AdministratorAccess to the role"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "ExternalId binds the trust relationship to a unique identifier and prevents confused deputy.",
+      "incorrect": "This choice does not bind the request to a unique external identifier."
+    },
+    {
+      "id": "IAM-021",
+      "domain": "IAM",
+      "tags": [
+        "best-practice",
+        "admin"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What is the recommended approach for administrative access to AWS?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Use the root user for all admin actions"
+        },
+        {
+          "key": "B",
+          "text": "Create individual IAM users or roles with admin permissions and MFA"
+        },
+        {
+          "key": "C",
+          "text": "Share one admin access key among all admins"
+        },
+        {
+          "key": "D",
+          "text": "Use an IAM group without policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Use individual identities with MFA rather than shared or root credentials.",
+      "incorrect": "This option relies on shared or root credentials and does not follow best practices."
+    },
+    {
+      "id": "IAM-022",
+      "domain": "IAM",
+      "tags": [
+        "managed-policy"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What is a benefit of customer managed IAM policies?",
+      "options": [
+        {
+          "key": "A",
+          "text": "They cannot be attached to multiple identities"
+        },
+        {
+          "key": "B",
+          "text": "They can be versioned and reused across identities"
+        },
+        {
+          "key": "C",
+          "text": "They are updated automatically by AWS"
+        },
+        {
+          "key": "D",
+          "text": "They are limited to a single region"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Customer managed policies are reusable and support versioning.",
+      "incorrect": "This choice ignores the reusability and versioning advantages."
+    },
+    {
+      "id": "IAM-023",
+      "domain": "IAM",
+      "tags": [
+        "policy-simulator"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which tool can you use to test how IAM policies affect access?",
+      "options": [
+        {
+          "key": "A",
+          "text": "IAM Policy Simulator"
+        },
+        {
+          "key": "B",
+          "text": "AWS Config"
+        },
+        {
+          "key": "C",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "key": "D",
+          "text": "Amazon Inspector"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "The IAM Policy Simulator evaluates effective permissions.",
+      "incorrect": "This service is for auditing or monitoring, not policy evaluation."
+    },
+    {
+      "id": "IAM-024",
+      "domain": "IAM",
+      "tags": [
+        "resource-policy",
+        "lambda"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want another AWS account to invoke your Lambda function. Which policy type do you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Identity-based policy on the other account"
+        },
+        {
+          "key": "B",
+          "text": "Resource-based policy on the Lambda function"
+        },
+        {
+          "key": "C",
+          "text": "Permissions boundary on the Lambda role"
+        },
+        {
+          "key": "D",
+          "text": "SCP in the other account"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Cross-account Lambda invocation is granted through the function resource policy.",
+      "incorrect": "This option does not grant permission on the function itself."
+    },
+    {
+      "id": "IAM-025",
+      "domain": "IAM",
+      "tags": [
+        "service-linked-role"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What is an AWS service-linked role?",
+      "options": [
+        {
+          "key": "A",
+          "text": "A role created and managed by an AWS service for its access needs"
+        },
+        {
+          "key": "B",
+          "text": "A role that can be assumed only by root"
+        },
+        {
+          "key": "C",
+          "text": "A role that grants permissions across regions"
+        },
+        {
+          "key": "D",
+          "text": "A role that replaces identity-based policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Service-linked roles are created and managed by AWS services.",
+      "incorrect": "This description does not match a role managed by an AWS service."
+    },
+    {
+      "id": "IAM-026",
+      "domain": "IAM",
+      "tags": [
+        "role-chaining"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "When role chaining is used, what is the maximum session duration?",
+      "options": [
+        {
+          "key": "A",
+          "text": "15 minutes"
+        },
+        {
+          "key": "B",
+          "text": "1 hour"
+        },
+        {
+          "key": "C",
+          "text": "6 hours"
+        },
+        {
+          "key": "D",
+          "text": "12 hours"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Role chaining limits sessions to a maximum of one hour.",
+      "incorrect": "This duration exceeds the maximum allowed in role chaining."
+    },
+    {
+      "id": "IAM-027",
+      "domain": "IAM",
+      "tags": [
+        "abac",
+        "tags"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which approach best implements ABAC in IAM?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Use SAML federation only"
+        },
+        {
+          "key": "B",
+          "text": "Use resource and principal tags in policy conditions"
+        },
+        {
+          "key": "C",
+          "text": "Use only inline policies"
+        },
+        {
+          "key": "D",
+          "text": "Use AWS Organizations SCPs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "ABAC relies on tags in policy conditions to drive authorization.",
+      "incorrect": "This option does not use attributes or tags for authorization."
+    },
+    {
+      "id": "IAM-028",
+      "domain": "IAM",
+      "tags": [
+        "federation",
+        "saml"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which STS API is used for SAML-based federation?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AssumeRole"
+        },
+        {
+          "key": "B",
+          "text": "AssumeRoleWithSAML"
+        },
+        {
+          "key": "C",
+          "text": "AssumeRoleWithWebIdentity"
+        },
+        {
+          "key": "D",
+          "text": "GetSessionToken"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "SAML federation uses AssumeRoleWithSAML.",
+      "incorrect": "This API is for a different federation type."
+    },
+    {
+      "id": "IAM-029",
+      "domain": "IAM",
+      "tags": [
+        "org-id",
+        "conditions"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to restrict access to principals from your AWS Organization. Which condition key is used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "aws:PrincipalOrgID"
+        },
+        {
+          "key": "B",
+          "text": "aws:SourceIp"
+        },
+        {
+          "key": "C",
+          "text": "aws:MultiFactorAuthPresent"
+        },
+        {
+          "key": "D",
+          "text": "aws:TokenIssueTime"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "aws:PrincipalOrgID restricts access to principals in the same organization.",
+      "incorrect": "This condition does not restrict access by organization membership."
+    },
+    {
+      "id": "IAM-030",
+      "domain": "IAM",
+      "tags": [
+        "cross-account",
+        "s3"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Account A owns an S3 bucket. A user in Account B needs read access. What is required?",
+      "options": [
+        {
+          "key": "A",
+          "text": "An identity policy on the user only"
+        },
+        {
+          "key": "B",
+          "text": "A bucket policy in Account A allowing the user from Account B"
+        },
+        {
+          "key": "C",
+          "text": "An SCP in Account A"
+        },
+        {
+          "key": "D",
+          "text": "A permissions boundary on the user"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Cross-account S3 access requires a bucket policy on the owning account.",
+      "incorrect": "This option does not grant access from the bucket-owning account."
+    },
+    {
+      "id": "IAM-031",
+      "domain": "IAM",
+      "tags": [
+        "access-advisor"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What does IAM Access Advisor provide?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Estimated monthly IAM costs"
+        },
+        {
+          "key": "B",
+          "text": "Services last accessed by a user, group, or role"
+        },
+        {
+          "key": "C",
+          "text": "Current open support cases"
+        },
+        {
+          "key": "D",
+          "text": "Number of IAM policies per user"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Access Advisor shows the services last accessed by an identity.",
+      "incorrect": "This feature reports access history, not billing or support data."
+    },
+    {
+      "id": "IAM-032",
+      "domain": "IAM",
+      "tags": [
+        "session-tags"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to pass temporary session tags when assuming a role. Which STS feature enables this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "MFA Delete"
+        },
+        {
+          "key": "B",
+          "text": "Session policies"
+        },
+        {
+          "key": "C",
+          "text": "AssumeRole with TagSession"
+        },
+        {
+          "key": "D",
+          "text": "IAM user tags only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "explanation": "Session tags are passed during AssumeRole with TagSession.",
+      "incorrect": "This option does not pass session tags during role assumption."
+    },
+    {
+      "id": "IAM-033",
+      "domain": "IAM",
+      "tags": [
+        "conditions",
+        "vpce"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An S3 bucket policy should allow access only via a specific VPC endpoint. Which condition key is used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "aws:SourceVpce"
+        },
+        {
+          "key": "B",
+          "text": "aws:SourceIp"
+        },
+        {
+          "key": "C",
+          "text": "aws:RequestedRegion"
+        },
+        {
+          "key": "D",
+          "text": "aws:SecureTransport"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "aws:SourceVpce restricts access to a specified VPC endpoint.",
+      "incorrect": "This condition does not enforce access through a specific VPC endpoint."
+    },
+    {
+      "id": "IAM-034",
+      "domain": "IAM",
+      "tags": [
+        "conditions",
+        "ip"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to restrict API access to a fixed corporate IP range. Which condition key is used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "aws:SourceIp"
+        },
+        {
+          "key": "B",
+          "text": "aws:RequestedRegion"
+        },
+        {
+          "key": "C",
+          "text": "aws:PrincipalOrgID"
+        },
+        {
+          "key": "D",
+          "text": "aws:TokenIssueTime"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "aws:SourceIp restricts access based on the source IP address.",
+      "incorrect": "This condition does not limit access by source IP."
+    },
+    {
+      "id": "IAM-035",
+      "domain": "IAM",
+      "tags": [
+        "conditions",
+        "mfa"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A policy should allow actions only if MFA is present. Which condition should be used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Bool aws:MultiFactorAuthPresent"
+        },
+        {
+          "key": "B",
+          "text": "StringEquals aws:PrincipalOrgID"
+        },
+        {
+          "key": "C",
+          "text": "NumericEquals aws:TokenIssueTime"
+        },
+        {
+          "key": "D",
+          "text": "StringLike aws:SourceIp"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "aws:MultiFactorAuthPresent with a Bool condition enforces MFA usage.",
+      "incorrect": "This condition does not verify that MFA was used."
+    },
+    {
+      "id": "IAM-036",
+      "domain": "IAM",
+      "tags": [
+        "least-privilege"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which practice best supports least privilege?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Grant wildcard (*) permissions for speed"
+        },
+        {
+          "key": "B",
+          "text": "Use resource-specific ARNs in policies"
+        },
+        {
+          "key": "C",
+          "text": "Attach AdministratorAccess to all users"
+        },
+        {
+          "key": "D",
+          "text": "Share one IAM user among developers"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Least privilege requires scoping actions and resources to the minimum necessary.",
+      "incorrect": "This option grants overly broad access or shares credentials."
+    },
+    {
+      "id": "IAM-037",
+      "domain": "IAM",
+      "tags": [
+        "trust-policy",
+        "service"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You are creating a Lambda execution role. Which service principal belongs in the trust policy?",
+      "options": [
+        {
+          "key": "A",
+          "text": "ec2.amazonaws.com"
+        },
+        {
+          "key": "B",
+          "text": "lambda.amazonaws.com"
+        },
+        {
+          "key": "C",
+          "text": "ecs.amazonaws.com"
+        },
+        {
+          "key": "D",
+          "text": "logs.amazonaws.com"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The Lambda service principal (lambda.amazonaws.com) must be trusted to assume the role.",
+      "incorrect": "This principal does not match the service that needs to assume the role."
+    },
+    {
+      "id": "IAM-038",
+      "domain": "IAM",
+      "tags": [
+        "conditions",
+        "secure-transport"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which condition key enforces HTTPS-only access to S3?",
+      "options": [
+        {
+          "key": "A",
+          "text": "aws:SecureTransport"
+        },
+        {
+          "key": "B",
+          "text": "aws:SourceVpce"
+        },
+        {
+          "key": "C",
+          "text": "aws:RequestedRegion"
+        },
+        {
+          "key": "D",
+          "text": "aws:SourceAccount"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "aws:SecureTransport requires TLS (HTTPS) for requests.",
+      "incorrect": "This condition does not enforce TLS/HTTPS."
+    },
+    {
+      "id": "IAM-039",
+      "domain": "IAM",
+      "tags": [
+        "iam",
+        "cloudtrail"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which AWS service records IAM API calls for auditing?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "key": "B",
+          "text": "AWS Config"
+        },
+        {
+          "key": "C",
+          "text": "AWS Trusted Advisor"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "CloudTrail records management API calls across AWS services.",
+      "incorrect": "This service does not provide a management API call audit trail."
+    },
+    {
+      "id": "IAM-040",
+      "domain": "IAM",
+      "tags": [
+        "roles",
+        "ec2"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "How does an EC2 instance retrieve temporary credentials for its IAM role?",
+      "options": [
+        {
+          "key": "A",
+          "text": "From root access keys"
+        },
+        {
+          "key": "B",
+          "text": "From the instance metadata service"
+        },
+        {
+          "key": "C",
+          "text": "From the AWS Management Console"
+        },
+        {
+          "key": "D",
+          "text": "From an SCP"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Instance profiles deliver credentials through the Instance Metadata Service.",
+      "incorrect": "This option does not provide role credentials to EC2 instances."
+    },
+    {
+      "id": "IAM-041",
+      "domain": "IAM",
+      "tags": [
+        "session-policy"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What is the effect of a session policy when assuming a role?",
+      "options": [
+        {
+          "key": "A",
+          "text": "It increases permissions beyond the role policy"
+        },
+        {
+          "key": "B",
+          "text": "It limits the permissions of the role session"
+        },
+        {
+          "key": "C",
+          "text": "It replaces the trust policy"
+        },
+        {
+          "key": "D",
+          "text": "It applies only to resource-based policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Session policies further restrict the permissions of the role session.",
+      "incorrect": "This choice assumes session policies expand permissions, which they do not."
+    },
+    {
+      "id": "IAM-042",
+      "domain": "IAM",
+      "tags": [
+        "notaction"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What does the NotAction element in an IAM policy do?",
+      "options": [
+        {
+          "key": "A",
+          "text": "It denies all actions listed"
+        },
+        {
+          "key": "B",
+          "text": "It matches all actions except those listed"
+        },
+        {
+          "key": "C",
+          "text": "It applies only to resource policies"
+        },
+        {
+          "key": "D",
+          "text": "It restricts by region"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "NotAction is an inverse match of actions.",
+      "incorrect": "This option misinterprets NotAction as a deny list."
+    },
+    {
+      "id": "IAM-043",
+      "domain": "IAM",
+      "tags": [
+        "resource-policy",
+        "kms"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which AWS service primarily uses a resource-based key policy as the main permissions control?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS KMS"
+        },
+        {
+          "key": "B",
+          "text": "AWS IAM"
+        },
+        {
+          "key": "C",
+          "text": "Amazon EC2"
+        },
+        {
+          "key": "D",
+          "text": "Amazon RDS"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "KMS key policies are the primary authorization mechanism for KMS keys.",
+      "incorrect": "This service does not rely primarily on a key policy for access control."
+    },
+    {
+      "id": "IAM-044",
+      "domain": "IAM",
+      "tags": [
+        "credentials",
+        "temporary"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which credential type is recommended for short-term access?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Root access keys"
+        },
+        {
+          "key": "B",
+          "text": "IAM user access keys"
+        },
+        {
+          "key": "C",
+          "text": "Temporary security credentials from STS"
+        },
+        {
+          "key": "D",
+          "text": "Long-lived shared keys"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "explanation": "STS temporary credentials reduce risk compared to long-lived keys.",
+      "incorrect": "This option uses long-lived credentials instead of temporary sessions."
+    },
+    {
+      "id": "IAM-045",
+      "domain": "IAM",
+      "tags": [
+        "policy-eval",
+        "deny"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "If no applicable Allow policy is found, what is the IAM decision?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Allowed"
+        },
+        {
+          "key": "B",
+          "text": "Implicitly denied"
+        },
+        {
+          "key": "C",
+          "text": "Explicitly denied"
+        },
+        {
+          "key": "D",
+          "text": "Allowed if MFA is present"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Without an explicit Allow, IAM defaults to implicit deny.",
+      "incorrect": "This choice ignores the default implicit deny behavior."
+    },
+    {
+      "id": "IAM-046",
+      "domain": "IAM",
+      "tags": [
+        "iam",
+        "limits"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "How many active access keys can an IAM user have?",
+      "options": [
+        {
+          "key": "A",
+          "text": "1"
+        },
+        {
+          "key": "B",
+          "text": "2"
+        },
+        {
+          "key": "C",
+          "text": "5"
+        },
+        {
+          "key": "D",
+          "text": "10"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "IAM users can have up to two active access keys.",
+      "incorrect": "This exceeds or does not match the IAM access key limit."
+    },
+    {
+      "id": "IAM-047",
+      "domain": "IAM",
+      "tags": [
+        "password-policy"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which IAM feature enforces minimum password length and complexity?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Permissions boundary"
+        },
+        {
+          "key": "B",
+          "text": "Account password policy"
+        },
+        {
+          "key": "C",
+          "text": "SCP"
+        },
+        {
+          "key": "D",
+          "text": "Trust policy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The account password policy defines password requirements.",
+      "incorrect": "This option does not control account password complexity or length."
+    },
+    {
+      "id": "IAM-048",
+      "domain": "IAM",
+      "tags": [
+        "policy-eval",
+        "resource"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which policy type can grant cross-account access without any identity policy in the target account?",
+      "options": [
+        {
+          "key": "A",
+          "text": "SCP"
+        },
+        {
+          "key": "B",
+          "text": "Resource-based policy"
+        },
+        {
+          "key": "C",
+          "text": "Permissions boundary"
+        },
+        {
+          "key": "D",
+          "text": "Session policy"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Resource-based policies can grant access directly to external principals.",
+      "incorrect": "This policy type does not directly grant cross-account access to a resource."
+    },
+    {
+      "id": "IAM-049",
+      "domain": "IAM",
+      "tags": [
+        "temporary-credentials"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which STS API returns temporary credentials for an IAM user with MFA?",
+      "options": [
+        {
+          "key": "A",
+          "text": "GetSessionToken"
+        },
+        {
+          "key": "B",
+          "text": "AssumeRole"
+        },
+        {
+          "key": "C",
+          "text": "AssumeRoleWithSAML"
+        },
+        {
+          "key": "D",
+          "text": "GetFederationToken"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "GetSessionToken provides temporary credentials for an IAM user with MFA.",
+      "incorrect": "This option is for a different STS flow and does not return MFA user sessions."
+    },
+    {
+      "id": "IAM-050",
+      "domain": "IAM",
+      "tags": [
+        "iam",
+        "policy"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which policy element specifies the AWS resources a statement applies to?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Action"
+        },
+        {
+          "key": "B",
+          "text": "Resource"
+        },
+        {
+          "key": "C",
+          "text": "Effect"
+        },
+        {
+          "key": "D",
+          "text": "Sid"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The Resource element specifies the ARNs the statement applies to.",
+      "incorrect": "This element does not define the ARN scope of the statement."
+    }
+  ]
+}

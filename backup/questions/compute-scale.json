@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "ELB-001",
+      "domain": "ELB",
+      "tags": ["alb", "l7", "routing", "waf"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A retail company runs multiple HTTP microservices behind a single endpoint. They need **host-based routing**, **path-based routing**, HTTP/2 support, and WebSocket connections. They also want to integrate AWS WAF for application-layer protection and terminate TLS at the load balancer. Which load balancer should they use?",
+      "options": [
+        {"key": "A", "text": "Network Load Balancer"},
+        {"key": "B", "text": "Application Load Balancer"},
+        {"key": "C", "text": "Classic Load Balancer"},
+        {"key": "D", "text": "Gateway Load Balancer"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Application Load Balancer (ALB)** is the only option that provides Layer 7 features like host-based and path-based routing, native HTTP/2, WebSockets, and tight integration with AWS WAF. ALB also supports TLS termination and routing to multiple target groups for microservices architectures.\n\n**Why ALB fits the requirements:**\n- Layer 7 (HTTP/HTTPS) routing with rules based on host/path/headers\n- HTTP/2 and WebSocket support\n- Native integration with AWS WAF\n- TLS termination with ACM certificates\n- Target groups for microservices, containers, or EC2 instances\n\nThis makes ALB the correct choice for modern web applications that need intelligent routing and application-level features.",
+      "incorrect": "- **Network Load Balancer** is Layer 4 only (TCP/UDP/TLS) and cannot do host/path routing or WAF integration.\n- **Classic Load Balancer** is legacy and lacks advanced routing rules and modern HTTP features.\n- **Gateway Load Balancer** is designed for inserting network appliances (firewalls/IDS) and is not used for HTTP routing.\n\nOnly ALB satisfies all application-layer requirements.",
+      "hint": "Look for Layer 7 features like host/path routing, HTTP/2, WebSockets, and WAF integration."
+    },
+    {
+      "id": "ELB-002",
+      "domain": "ELB",
+      "tags": ["nlb", "tcp", "static-ip"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A gaming company runs a latency-sensitive TCP service on port 443. Clients must connect using **static IP addresses** that are allow-listed by partners, and the service must preserve the **original client IP**. Which AWS load balancer meets these requirements?",
+      "options": [
+        {"key": "A", "text": "Application Load Balancer"},
+        {"key": "B", "text": "Network Load Balancer"},
+        {"key": "C", "text": "Classic Load Balancer"},
+        {"key": "D", "text": "Gateway Load Balancer"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Network Load Balancer (NLB)** provides static IP addresses (or Elastic IPs), preserves the source client IP at the target, and operates at Layer 4 for TCP/TLS. This is ideal for low-latency, high-throughput TCP services that require IP allow-listing.\n\nKey capabilities of NLB:\n- Static IPs per AZ (or EIPs) for allow-lists\n- Source IP preservation\n- TCP, UDP, and TLS pass-through or termination\n- Ultra-low latency and high throughput\n\nThis aligns exactly with the requirements.",
+      "incorrect": "- **ALB** is Layer 7 and does not provide static IPs or source IP preservation by default.\n- **CLB** is legacy and does not provide the same static IP and performance characteristics.\n- **GWLB** is for inserting appliances, not for fronting client traffic directly.\n\nOnly NLB meets the static IP + TCP + client IP preservation requirements.",
+      "hint": "Static IPs and source IP preservation for TCP traffic point to a Layer 4 load balancer."
+    },
+    {
+      "id": "ASG-001",
+      "domain": "Auto Scaling",
+      "tags": ["autoscaling", "sqs", "target-tracking"],
+      "difficulty": 4,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A processing fleet reads jobs from an Amazon SQS queue. The team wants to keep the queue depth near **100 messages per instance** and scale in or out automatically as traffic changes. What is the MOST appropriate Auto Scaling policy?",
+      "options": [
+        {"key": "A", "text": "Scheduled scaling to add 5 instances every hour"},
+        {"key": "B", "text": "Target tracking scaling based on a custom metric: SQS messages per in-service instance"},
+        {"key": "C", "text": "Step scaling based only on average CPU utilization"},
+        {"key": "D", "text": "Use Spot Fleet without Auto Scaling policies"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Target tracking scaling** is designed to maintain a metric at a desired target value. By publishing or using a metric such as **queue depth per instance** (e.g., `ApproximateNumberOfMessagesVisible / InServiceInstances`), Auto Scaling can continuously adjust capacity to keep the backlog around the desired level.\n\nWhy this is best:\n- Directly aligns scaling with the workload (queue depth)\n- Automatically scales in and out to keep near the target (100 msgs/instance)\n- Works well for variable demand without manual schedules\n\nThis provides the most stable, workload-aware scaling behavior.",
+      "incorrect": "- **Scheduled scaling** does not respond to real-time demand.\n- **CPU-only step scaling** is an indirect signal for queue-backed workloads and often leads to lag or over-scaling.\n- **Spot Fleet without policies** does not manage capacity relative to queue depth.\n\nTarget tracking on queue depth per instance directly meets the requirement.",
+      "hint": "Use a policy that maintains a metric at a desired target value rather than guessing schedules."
+    },
+    {
+      "id": "ASG-002",
+      "domain": "Auto Scaling",
+      "tags": ["launch-template", "instance-refresh", "rolling-update"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "An Auto Scaling group must roll out a new AMI version with **zero downtime**. Instances are behind an Application Load Balancer and must pass health checks before receiving traffic. What is the BEST approach?",
+      "options": [
+        {"key": "A", "text": "Edit the existing launch configuration and manually terminate all instances"},
+        {"key": "B", "text": "Create a new launch template version and start an instance refresh with health checks"},
+        {"key": "C", "text": "Stop all instances, create a new AMI, and start them"},
+        {"key": "D", "text": "Disable the load balancer and replace instances in bulk"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Instance Refresh** with a new launch template version performs a controlled rolling update. Auto Scaling replaces instances in batches, waits for ALB health checks to pass, and maintains capacity during the rollout.\n\nWhy this is best:\n- Zero downtime with health-check gating\n- Automated rolling replacement\n- Works with launch templates and ALB integration\n- Easy rollback by reverting the template version\n\nThis is the recommended method for safe AMI updates.",
+      "incorrect": "- **Launch configuration edits** are not supported (they are immutable), and manual termination risks downtime.\n- **Stopping all instances** causes outage and violates zero-downtime requirements.\n- **Disabling the load balancer** breaks traffic routing and health checks.\n\nInstance Refresh is purpose-built for safe rolling updates.",
+      "hint": "Use the Auto Scaling feature that replaces instances gradually while respecting ALB health checks."
+    },
+    {
+      "id": "EKS-001",
+      "domain": "EKS",
+      "tags": ["kubernetes", "containers", "managed-control-plane"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A company wants to run **Kubernetes** workloads on AWS with a managed control plane, automated patching for the control plane, and tight IAM integration. Which service should they choose?",
+      "options": [
+        {"key": "A", "text": "Amazon ECS"},
+        {"key": "B", "text": "Amazon EKS"},
+        {"key": "C", "text": "Run Kubernetes manually on EC2"},
+        {"key": "D", "text": "AWS Elastic Beanstalk"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Amazon EKS** provides a fully managed Kubernetes control plane, with AWS handling control-plane availability, upgrades, and patching. It also integrates with IAM for authentication and authorization.\n\nThis directly matches the requirement for managed Kubernetes with AWS-native security integration.",
+      "incorrect": "- **ECS** is AWS-native orchestration but not Kubernetes.\n- **Self-managed Kubernetes on EC2** requires you to manage and patch the control plane.\n- **Elastic Beanstalk** is a PaaS service and does not provide Kubernetes.\n\nOnly EKS is managed Kubernetes.",
+      "hint": "The requirement is managed Kubernetes with AWS-managed control plane."
+    },
+    {
+      "id": "FARGATE-001",
+      "domain": "Fargate",
+      "tags": ["fargate", "serverless-containers", "ecs"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A startup runs containerized batch jobs that spike unpredictably. They want to avoid managing EC2 instances and only pay for CPU/memory used while jobs run. Which compute option is BEST?",
+      "options": [
+        {"key": "A", "text": "ECS on EC2 with fixed cluster size"},
+        {"key": "B", "text": "ECS on Fargate"},
+        {"key": "C", "text": "EKS on EC2 managed node groups"},
+        {"key": "D", "text": "AWS Lambda"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS Fargate** is serverless container compute for ECS or EKS. It removes the need to manage EC2 instances and bills only for vCPU and memory used during task execution, making it ideal for bursty or unpredictable container workloads.\n\nThis meets the requirement to avoid instance management and pay only for usage.",
+      "incorrect": "- **ECS on EC2** and **EKS on EC2** require cluster capacity management.\n- **Lambda** is not suitable for long-running or containerized batch jobs with custom runtimes beyond Lambda limits.\n\nFargate is purpose-built for serverless containers.",
+      "hint": "Look for serverless containers that remove EC2 management overhead."
+    }
+  ]
+}

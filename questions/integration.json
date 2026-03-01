@@ -1,0 +1,1338 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "SQS-001",
+      "domain": "SQS",
+      "tags": [
+        "fifo",
+        "ordering",
+        "exactly-once"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An order processing system requires messages to be processed **in order** and **exactly once**. Which SQS queue type should be used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Standard queue"
+        },
+        {
+          "key": "B",
+          "text": "FIFO queue"
+        },
+        {
+          "key": "C",
+          "text": "Delay queue"
+        },
+        {
+          "key": "D",
+          "text": "Dead-letter queue"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**SQS FIFO** guarantees strict ordering and exactly-once processing (with deduplication). This is the correct queue type for ordered, non-duplicated processing.\n\nStandard queues provide at-least-once delivery and best-effort ordering, which does not meet the requirements.",
+      "incorrect": "- **Standard queues** do not guarantee ordering or exactly-once delivery.\n- **Delay queues** only postpone messages.\n- **Dead-letter queues** are for failed messages, not primary processing.\n\nFIFO is the only SQS option that meets both requirements.",
+      "hint": "Look for a queue type that guarantees order and deduplication."
+    },
+    {
+      "id": "SNS-001",
+      "domain": "SNS",
+      "tags": [
+        "fanout",
+        "pub-sub",
+        "sqs"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A service publishes events that must be delivered to **multiple downstream systems** in parallel, each with its own queue. Which pattern is BEST?",
+      "options": [
+        {
+          "key": "A",
+          "text": "One SQS queue polled by all consumers"
+        },
+        {
+          "key": "B",
+          "text": "SNS topic with multiple SQS subscriptions (fanout)"
+        },
+        {
+          "key": "C",
+          "text": "EventBridge rule with no targets"
+        },
+        {
+          "key": "D",
+          "text": "Direct HTTP calls from the publisher to all consumers"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The **SNS fanout pattern** delivers a published message to multiple SQS queues in parallel. Each downstream system reads from its own queue, decoupling processing and improving reliability.\n\nThis is the standard AWS pattern for parallel event delivery.",
+      "incorrect": "- **One SQS queue** means consumers compete, not parallel fanout.\n- **EventBridge with no targets** does not deliver messages.\n- **Direct HTTP calls** tightly couple systems and reduce reliability.\n\nSNS + SQS fanout is the correct solution.",
+      "hint": "Use a pub/sub service with SQS subscriptions to fan out messages."
+    },
+    {
+      "id": "EVENTBRIDGE-001",
+      "domain": "EventBridge",
+      "tags": [
+        "event-bus",
+        "cross-account",
+        "routing"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An organization wants to route events from multiple AWS accounts to a **central event bus** for processing and auditing. Which service and feature should they use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "SNS with cross-account access policies"
+        },
+        {
+          "key": "B",
+          "text": "EventBridge with a custom event bus and cross-account permissions"
+        },
+        {
+          "key": "C",
+          "text": "SQS FIFO queues across accounts"
+        },
+        {
+          "key": "D",
+          "text": "CloudWatch Logs subscription filters"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Amazon EventBridge** supports custom event buses and cross-account event delivery using resource policies. This enables centralized routing and processing of events from multiple accounts.\n\nIt is the intended service for cross-account event routing.",
+      "incorrect": "- **SNS** can publish cross-account but lacks event-pattern routing and bus semantics.\n- **SQS FIFO** is a queue, not an event routing service.\n- **CloudWatch Logs** subscription filters are for log streaming, not general event routing.\n\nEventBridge custom event buses are the correct choice.",
+      "hint": "Use the managed event routing service with cross-account event buses."
+    },
+    {
+      "id": "STEP-001",
+      "domain": "Step Functions",
+      "tags": [
+        "workflow",
+        "orchestration",
+        "retry"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A serverless application needs to coordinate a **multi-step workflow** with retries, error handling, and long-running state management. Which service is BEST suited?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon SQS"
+        },
+        {
+          "key": "B",
+          "text": "AWS Step Functions"
+        },
+        {
+          "key": "C",
+          "text": "Amazon SNS"
+        },
+        {
+          "key": "D",
+          "text": "AWS Lambda only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**AWS Step Functions** orchestrates serverless workflows with built-in retries, branching, and state persistence. It is designed specifically for long-running, multi-step processes.\n\nThis matches the requirement for workflow orchestration.",
+      "incorrect": "- **SQS** and **SNS** are messaging services, not workflow orchestrators.\n- **Lambda only** would require custom state management and retry logic.\n\nStep Functions is the correct service.",
+      "hint": "Use the AWS service built for serverless workflow orchestration."
+    },
+    {
+      "id": "APIGW-001",
+      "domain": "API Gateway",
+      "tags": [
+        "api",
+        "throttling",
+        "auth"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company wants a **managed API frontend** with authentication, throttling, usage plans, and request validation for multiple back-end services. Which service should they use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Application Load Balancer"
+        },
+        {
+          "key": "B",
+          "text": "Amazon API Gateway"
+        },
+        {
+          "key": "C",
+          "text": "Amazon CloudFront"
+        },
+        {
+          "key": "D",
+          "text": "AWS Elastic Beanstalk"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Amazon API Gateway** provides a fully managed API front door with authentication (IAM, Cognito, Lambda authorizers), throttling, usage plans, and request validation.\n\nThis matches all stated requirements for an API management layer.",
+      "incorrect": "- **ALB** can route HTTP traffic but does not provide API management features.\n- **CloudFront** is a CDN and does not provide API-level auth and throttling.\n- **Elastic Beanstalk** is an application deployment service, not an API gateway.\n\nAPI Gateway is the correct choice.",
+      "hint": "Look for the AWS service that provides full API management features."
+    },
+    {
+      "id": "KINESIS-001",
+      "domain": "Kinesis",
+      "tags": [
+        "streaming",
+        "real-time",
+        "ordering"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A telemetry system needs to ingest **millions of events per second** and process them in near real time. It requires **ordered processing per device**. Which service is MOST appropriate?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon SQS Standard"
+        },
+        {
+          "key": "B",
+          "text": "Amazon Kinesis Data Streams"
+        },
+        {
+          "key": "C",
+          "text": "Amazon SNS"
+        },
+        {
+          "key": "D",
+          "text": "AWS Step Functions"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Kinesis Data Streams** is designed for high-throughput, real-time streaming with ordering guarantees **per shard**, making it suitable for device-based ordering by using the device ID as the partition key.\n\nThis meets both the throughput and ordering requirements.",
+      "incorrect": "- **SQS Standard** provides at-least-once delivery but no ordering guarantees.\n- **SNS** is pub/sub but not a streaming service with ordered shards.\n- **Step Functions** is for workflow orchestration.\n\nKinesis Data Streams is the correct streaming service.",
+      "hint": "Use a streaming service that supports ordering by partition key."
+    },
+    {
+      "id": "INT-1001",
+      "domain": "Integration",
+      "tags": [
+        "sns-topic-fanout",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: deliver one published message to multiple subscriber endpoints. Which application integration patterns capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Step Functions"
+        },
+        {
+          "key": "B",
+          "text": "SNS topic fanout"
+        },
+        {
+          "key": "C",
+          "text": "EventBridge event bus rules"
+        },
+        {
+          "key": "D",
+          "text": "SQS FIFO queues"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: deliver one published message to multiple subscriber endpoints.",
+      "explanation": "SNS topic fanout is correct because it provides pub-sub fanout to many downstream systems.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Step Functions is useful when you need to orchestrate multi-step workflows with retries and branching logic, but it is not the best fit for this requirement.",
+        "B": "Correct. SNS topic fanout is the best choice because it provides pub-sub fanout to many downstream systems.",
+        "C": "Incorrect. EventBridge event bus rules is useful when you need to route events from many sources to specific targets using patterns, but it is not the best fit for this requirement.",
+        "D": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1002",
+      "domain": "Integration",
+      "tags": [
+        "sqs-standard-queues",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: buffer very high-throughput asynchronous workloads with at-least-once delivery. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Step Functions"
+        },
+        {
+          "key": "B",
+          "text": "EventBridge event bus rules"
+        },
+        {
+          "key": "C",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "D",
+          "text": "API Gateway throttling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: buffer very high-throughput asynchronous workloads with at-least-once delivery.",
+      "explanation": "SQS Standard queues is correct because they scale nearly unlimited throughput with best-effort ordering.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Step Functions is useful when you need to orchestrate multi-step workflows with retries and branching logic, but it is not the best fit for this requirement.",
+        "B": "Incorrect. EventBridge event bus rules is useful when you need to route events from many sources to specific targets using patterns, but it is not the best fit for this requirement.",
+        "C": "Correct. SQS Standard queues is the best choice because they scale nearly unlimited throughput with best-effort ordering.",
+        "D": "Incorrect. API Gateway throttling is useful when you need to protect backend services from request bursts and abuse, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1003",
+      "domain": "Integration",
+      "tags": [
+        "sqs-fifo-queues",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: process messages exactly once and in strict order per message group. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Step Functions"
+        },
+        {
+          "key": "B",
+          "text": "API Gateway throttling"
+        },
+        {
+          "key": "C",
+          "text": "SNS topic fanout"
+        },
+        {
+          "key": "D",
+          "text": "SQS FIFO queues"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: process messages exactly once and in strict order per message group.",
+      "explanation": "SQS FIFO queues is correct because they provide ordering guarantees and deduplication support.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Step Functions is useful when you need to orchestrate multi-step workflows with retries and branching logic, but it is not the best fit for this requirement.",
+        "B": "Incorrect. API Gateway throttling is useful when you need to protect backend services from request bursts and abuse, but it is not the best fit for this requirement.",
+        "C": "Incorrect. SNS topic fanout is useful when you need to deliver one published message to multiple subscriber endpoints, but it is not the best fit for this requirement.",
+        "D": "Correct. SQS FIFO queues is the best choice because they provide ordering guarantees and deduplication support."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1004",
+      "domain": "Integration",
+      "tags": [
+        "eventbridge-event-bus-rules",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to route events from many sources to specific targets using patterns. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "B",
+          "text": "API Gateway throttling"
+        },
+        {
+          "key": "C",
+          "text": "SNS topic fanout"
+        },
+        {
+          "key": "D",
+          "text": "EventBridge event bus rules"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: route events from many sources to specific targets using patterns.",
+      "explanation": "EventBridge event bus rules is correct because it performs serverless event filtering and routing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS Standard queues is useful when you need to buffer very high-throughput asynchronous workloads with at-least-once delivery, but it is not the best fit for this requirement.",
+        "B": "Incorrect. API Gateway throttling is useful when you need to protect backend services from request bursts and abuse, but it is not the best fit for this requirement.",
+        "C": "Incorrect. SNS topic fanout is useful when you need to deliver one published message to multiple subscriber endpoints, but it is not the best fit for this requirement.",
+        "D": "Correct. EventBridge event bus rules is the best choice because it performs serverless event filtering and routing."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1005",
+      "domain": "Integration",
+      "tags": [
+        "step-functions",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: orchestrate multi-step workflows with retries and branching logic. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Step Functions"
+        },
+        {
+          "key": "B",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "C",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "D",
+          "text": "SNS topic fanout"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: orchestrate multi-step workflows with retries and branching logic.",
+      "explanation": "Step Functions is correct because it manages stateful workflow coordination between services.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Step Functions is the best choice because it manages stateful workflow coordination between services.",
+        "B": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement.",
+        "C": "Incorrect. SQS Standard queues is useful when you need to buffer very high-throughput asynchronous workloads with at-least-once delivery, but it is not the best fit for this requirement.",
+        "D": "Incorrect. SNS topic fanout is useful when you need to deliver one published message to multiple subscriber endpoints, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1006",
+      "domain": "Integration",
+      "tags": [
+        "api-gateway-throttling",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: protect backend services from request bursts and abuse. Which application integration patterns capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "API Gateway throttling"
+        },
+        {
+          "key": "B",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "C",
+          "text": "EventBridge event bus rules"
+        },
+        {
+          "key": "D",
+          "text": "SQS Standard queues"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: protect backend services from request bursts and abuse.",
+      "explanation": "API Gateway throttling is correct because it enforces request rate and burst limits at the API edge.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. API Gateway throttling is the best choice because it enforces request rate and burst limits at the API edge.",
+        "B": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement.",
+        "C": "Incorrect. EventBridge event bus rules is useful when you need to route events from many sources to specific targets using patterns, but it is not the best fit for this requirement.",
+        "D": "Incorrect. SQS Standard queues is useful when you need to buffer very high-throughput asynchronous workloads with at-least-once delivery, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1007",
+      "domain": "Integration",
+      "tags": [
+        "sns-topic-fanout",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: deliver one published message to multiple subscriber endpoints. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Step Functions"
+        },
+        {
+          "key": "B",
+          "text": "SNS topic fanout"
+        },
+        {
+          "key": "C",
+          "text": "API Gateway throttling"
+        },
+        {
+          "key": "D",
+          "text": "EventBridge event bus rules"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: deliver one published message to multiple subscriber endpoints.",
+      "explanation": "SNS topic fanout is correct because it provides pub-sub fanout to many downstream systems.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Step Functions is useful when you need to orchestrate multi-step workflows with retries and branching logic, but it is not the best fit for this requirement.",
+        "B": "Correct. SNS topic fanout is the best choice because it provides pub-sub fanout to many downstream systems.",
+        "C": "Incorrect. API Gateway throttling is useful when you need to protect backend services from request bursts and abuse, but it is not the best fit for this requirement.",
+        "D": "Incorrect. EventBridge event bus rules is useful when you need to route events from many sources to specific targets using patterns, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1008",
+      "domain": "Integration",
+      "tags": [
+        "sqs-standard-queues",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: buffer very high-throughput asynchronous workloads with at-least-once delivery. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "B",
+          "text": "API Gateway throttling"
+        },
+        {
+          "key": "C",
+          "text": "Step Functions"
+        },
+        {
+          "key": "D",
+          "text": "SNS topic fanout"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: buffer very high-throughput asynchronous workloads with at-least-once delivery.",
+      "explanation": "SQS Standard queues is correct because they scale nearly unlimited throughput with best-effort ordering.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. SQS Standard queues is the best choice because they scale nearly unlimited throughput with best-effort ordering.",
+        "B": "Incorrect. API Gateway throttling is useful when you need to protect backend services from request bursts and abuse, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Step Functions is useful when you need to orchestrate multi-step workflows with retries and branching logic, but it is not the best fit for this requirement.",
+        "D": "Incorrect. SNS topic fanout is useful when you need to deliver one published message to multiple subscriber endpoints, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1009",
+      "domain": "Integration",
+      "tags": [
+        "sqs-fifo-queues",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to process messages exactly once and in strict order per message group. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "API Gateway throttling"
+        },
+        {
+          "key": "B",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "C",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "D",
+          "text": "SNS topic fanout"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: process messages exactly once and in strict order per message group.",
+      "explanation": "SQS FIFO queues is correct because they provide ordering guarantees and deduplication support.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. API Gateway throttling is useful when you need to protect backend services from request bursts and abuse, but it is not the best fit for this requirement.",
+        "B": "Correct. SQS FIFO queues is the best choice because they provide ordering guarantees and deduplication support.",
+        "C": "Incorrect. SQS Standard queues is useful when you need to buffer very high-throughput asynchronous workloads with at-least-once delivery, but it is not the best fit for this requirement.",
+        "D": "Incorrect. SNS topic fanout is useful when you need to deliver one published message to multiple subscriber endpoints, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1010",
+      "domain": "Integration",
+      "tags": [
+        "eventbridge-event-bus-rules",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: route events from many sources to specific targets using patterns. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "B",
+          "text": "SNS topic fanout"
+        },
+        {
+          "key": "C",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "D",
+          "text": "EventBridge event bus rules"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: route events from many sources to specific targets using patterns.",
+      "explanation": "EventBridge event bus rules is correct because it performs serverless event filtering and routing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS Standard queues is useful when you need to buffer very high-throughput asynchronous workloads with at-least-once delivery, but it is not the best fit for this requirement.",
+        "B": "Incorrect. SNS topic fanout is useful when you need to deliver one published message to multiple subscriber endpoints, but it is not the best fit for this requirement.",
+        "C": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement.",
+        "D": "Correct. EventBridge event bus rules is the best choice because it performs serverless event filtering and routing."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1011",
+      "domain": "Integration",
+      "tags": [
+        "step-functions",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: orchestrate multi-step workflows with retries and branching logic. Which application integration patterns capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "B",
+          "text": "Step Functions"
+        },
+        {
+          "key": "C",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "D",
+          "text": "EventBridge event bus rules"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: orchestrate multi-step workflows with retries and branching logic.",
+      "explanation": "Step Functions is correct because it manages stateful workflow coordination between services.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS Standard queues is useful when you need to buffer very high-throughput asynchronous workloads with at-least-once delivery, but it is not the best fit for this requirement.",
+        "B": "Correct. Step Functions is the best choice because it manages stateful workflow coordination between services.",
+        "C": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement.",
+        "D": "Incorrect. EventBridge event bus rules is useful when you need to route events from many sources to specific targets using patterns, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1012",
+      "domain": "Integration",
+      "tags": [
+        "api-gateway-throttling",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: protect backend services from request bursts and abuse. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Step Functions"
+        },
+        {
+          "key": "B",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "C",
+          "text": "EventBridge event bus rules"
+        },
+        {
+          "key": "D",
+          "text": "API Gateway throttling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: protect backend services from request bursts and abuse.",
+      "explanation": "API Gateway throttling is correct because it enforces request rate and burst limits at the API edge.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Step Functions is useful when you need to orchestrate multi-step workflows with retries and branching logic, but it is not the best fit for this requirement.",
+        "B": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement.",
+        "C": "Incorrect. EventBridge event bus rules is useful when you need to route events from many sources to specific targets using patterns, but it is not the best fit for this requirement.",
+        "D": "Correct. API Gateway throttling is the best choice because it enforces request rate and burst limits at the API edge."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1013",
+      "domain": "Integration",
+      "tags": [
+        "sns-topic-fanout",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: deliver one published message to multiple subscriber endpoints. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SNS topic fanout"
+        },
+        {
+          "key": "B",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "C",
+          "text": "Step Functions"
+        },
+        {
+          "key": "D",
+          "text": "API Gateway throttling"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: deliver one published message to multiple subscriber endpoints.",
+      "explanation": "SNS topic fanout is correct because it provides pub-sub fanout to many downstream systems.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. SNS topic fanout is the best choice because it provides pub-sub fanout to many downstream systems.",
+        "B": "Incorrect. SQS Standard queues is useful when you need to buffer very high-throughput asynchronous workloads with at-least-once delivery, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Step Functions is useful when you need to orchestrate multi-step workflows with retries and branching logic, but it is not the best fit for this requirement.",
+        "D": "Incorrect. API Gateway throttling is useful when you need to protect backend services from request bursts and abuse, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1014",
+      "domain": "Integration",
+      "tags": [
+        "sqs-standard-queues",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to buffer very high-throughput asynchronous workloads with at-least-once delivery. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "B",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "C",
+          "text": "API Gateway throttling"
+        },
+        {
+          "key": "D",
+          "text": "SNS topic fanout"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: buffer very high-throughput asynchronous workloads with at-least-once delivery.",
+      "explanation": "SQS Standard queues is correct because they scale nearly unlimited throughput with best-effort ordering.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement.",
+        "B": "Correct. SQS Standard queues is the best choice because they scale nearly unlimited throughput with best-effort ordering.",
+        "C": "Incorrect. API Gateway throttling is useful when you need to protect backend services from request bursts and abuse, but it is not the best fit for this requirement.",
+        "D": "Incorrect. SNS topic fanout is useful when you need to deliver one published message to multiple subscriber endpoints, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1015",
+      "domain": "Integration",
+      "tags": [
+        "sqs-fifo-queues",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: process messages exactly once and in strict order per message group. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "B",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "C",
+          "text": "EventBridge event bus rules"
+        },
+        {
+          "key": "D",
+          "text": "SNS topic fanout"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: process messages exactly once and in strict order per message group.",
+      "explanation": "SQS FIFO queues is correct because they provide ordering guarantees and deduplication support.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. SQS FIFO queues is the best choice because they provide ordering guarantees and deduplication support.",
+        "B": "Incorrect. SQS Standard queues is useful when you need to buffer very high-throughput asynchronous workloads with at-least-once delivery, but it is not the best fit for this requirement.",
+        "C": "Incorrect. EventBridge event bus rules is useful when you need to route events from many sources to specific targets using patterns, but it is not the best fit for this requirement.",
+        "D": "Incorrect. SNS topic fanout is useful when you need to deliver one published message to multiple subscriber endpoints, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1016",
+      "domain": "Integration",
+      "tags": [
+        "eventbridge-event-bus-rules",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: route events from many sources to specific targets using patterns. Which application integration patterns capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "B",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "C",
+          "text": "EventBridge event bus rules"
+        },
+        {
+          "key": "D",
+          "text": "Step Functions"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: route events from many sources to specific targets using patterns.",
+      "explanation": "EventBridge event bus rules is correct because it performs serverless event filtering and routing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement.",
+        "B": "Incorrect. SQS Standard queues is useful when you need to buffer very high-throughput asynchronous workloads with at-least-once delivery, but it is not the best fit for this requirement.",
+        "C": "Correct. EventBridge event bus rules is the best choice because it performs serverless event filtering and routing.",
+        "D": "Incorrect. Step Functions is useful when you need to orchestrate multi-step workflows with retries and branching logic, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1017",
+      "domain": "Integration",
+      "tags": [
+        "step-functions",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: orchestrate multi-step workflows with retries and branching logic. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "EventBridge event bus rules"
+        },
+        {
+          "key": "B",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "C",
+          "text": "API Gateway throttling"
+        },
+        {
+          "key": "D",
+          "text": "Step Functions"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: orchestrate multi-step workflows with retries and branching logic.",
+      "explanation": "Step Functions is correct because it manages stateful workflow coordination between services.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. EventBridge event bus rules is useful when you need to route events from many sources to specific targets using patterns, but it is not the best fit for this requirement.",
+        "B": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement.",
+        "C": "Incorrect. API Gateway throttling is useful when you need to protect backend services from request bursts and abuse, but it is not the best fit for this requirement.",
+        "D": "Correct. Step Functions is the best choice because it manages stateful workflow coordination between services."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1018",
+      "domain": "Integration",
+      "tags": [
+        "api-gateway-throttling",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: protect backend services from request bursts and abuse. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Step Functions"
+        },
+        {
+          "key": "B",
+          "text": "EventBridge event bus rules"
+        },
+        {
+          "key": "C",
+          "text": "API Gateway throttling"
+        },
+        {
+          "key": "D",
+          "text": "SNS topic fanout"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: protect backend services from request bursts and abuse.",
+      "explanation": "API Gateway throttling is correct because it enforces request rate and burst limits at the API edge.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Step Functions is useful when you need to orchestrate multi-step workflows with retries and branching logic, but it is not the best fit for this requirement.",
+        "B": "Incorrect. EventBridge event bus rules is useful when you need to route events from many sources to specific targets using patterns, but it is not the best fit for this requirement.",
+        "C": "Correct. API Gateway throttling is the best choice because it enforces request rate and burst limits at the API edge.",
+        "D": "Incorrect. SNS topic fanout is useful when you need to deliver one published message to multiple subscriber endpoints, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1019",
+      "domain": "Integration",
+      "tags": [
+        "sns-topic-fanout",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to deliver one published message to multiple subscriber endpoints. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SQS Standard queues"
+        },
+        {
+          "key": "B",
+          "text": "API Gateway throttling"
+        },
+        {
+          "key": "C",
+          "text": "SNS topic fanout"
+        },
+        {
+          "key": "D",
+          "text": "SQS FIFO queues"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: deliver one published message to multiple subscriber endpoints.",
+      "explanation": "SNS topic fanout is correct because it provides pub-sub fanout to many downstream systems.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SQS Standard queues is useful when you need to buffer very high-throughput asynchronous workloads with at-least-once delivery, but it is not the best fit for this requirement.",
+        "B": "Incorrect. API Gateway throttling is useful when you need to protect backend services from request bursts and abuse, but it is not the best fit for this requirement.",
+        "C": "Correct. SNS topic fanout is the best choice because it provides pub-sub fanout to many downstream systems.",
+        "D": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    },
+    {
+      "id": "INT-1020",
+      "domain": "Integration",
+      "tags": [
+        "sqs-standard-queues",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: buffer very high-throughput asynchronous workloads with at-least-once delivery. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SNS topic fanout"
+        },
+        {
+          "key": "B",
+          "text": "SQS FIFO queues"
+        },
+        {
+          "key": "C",
+          "text": "EventBridge event bus rules"
+        },
+        {
+          "key": "D",
+          "text": "SQS Standard queues"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: buffer very high-throughput asynchronous workloads with at-least-once delivery.",
+      "explanation": "SQS Standard queues is correct because they scale nearly unlimited throughput with best-effort ordering.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SNS topic fanout is useful when you need to deliver one published message to multiple subscriber endpoints, but it is not the best fit for this requirement.",
+        "B": "Incorrect. SQS FIFO queues is useful when you need to process messages exactly once and in strict order per message group, but it is not the best fit for this requirement.",
+        "C": "Incorrect. EventBridge event bus rules is useful when you need to route events from many sources to specific targets using patterns, but it is not the best fit for this requirement.",
+        "D": "Correct. SQS Standard queues is the best choice because they scale nearly unlimited throughput with best-effort ordering."
+      },
+      "references": [
+        {
+          "label": "Application Integration Patterns documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/application-integration-services.html"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1380 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "R53-001",
+      "domain": "Route 53",
+      "tags": [
+        "latency",
+        "health-checks",
+        "routing"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A global application is deployed in **us-east-1**, **eu-west-1**, and **ap-southeast-1**. Users should be routed to the **lowest-latency region**, and if a region becomes unhealthy, traffic should automatically fail over to a healthy region. Which Route 53 routing policy should be used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Weighted routing with 33/33/33 weights"
+        },
+        {
+          "key": "B",
+          "text": "Latency-based routing with health checks"
+        },
+        {
+          "key": "C",
+          "text": "Geolocation routing"
+        },
+        {
+          "key": "D",
+          "text": "Multi-value answer routing without health checks"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Latency-based routing with health checks** routes users to the AWS region that provides the lowest latency, and it can automatically fail over if the endpoint is unhealthy. This matches both requirements: lowest-latency routing and health-based failover.\n\nLatency routing is designed for globally distributed applications where performance is the primary concern.",
+      "incorrect": "- **Weighted routing** distributes traffic based on weights, not latency.\n- **Geolocation routing** uses user location, which may not correlate with latency.\n- **Multi-value routing** can return multiple values but does not prioritize lowest latency and requires health checks to filter endpoints.\n\nOnly latency-based routing provides performance-based selection with health checks.",
+      "hint": "Pick the policy that chooses endpoints based on measured latency and supports health checks."
+    },
+    {
+      "id": "R53-002",
+      "domain": "Route 53",
+      "tags": [
+        "weighted",
+        "canary",
+        "deployment"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A team wants to perform a **canary release** of a new version of their application by sending **10%** of traffic to the new environment and 90% to the existing one. Which Route 53 routing policy is MOST appropriate?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Failover routing"
+        },
+        {
+          "key": "B",
+          "text": "Weighted routing"
+        },
+        {
+          "key": "C",
+          "text": "Latency-based routing"
+        },
+        {
+          "key": "D",
+          "text": "Geoproximity routing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Weighted routing** lets you split traffic by percentage, making it ideal for canary or blue/green deployments. You can set weights (10/90) and gradually shift traffic.\n\nThis provides a controlled rollout with easy rollback by adjusting weights.",
+      "incorrect": "- **Failover routing** is for active/passive architectures, not traffic splits.\n- **Latency-based routing** chooses the fastest region, not a percentage.\n- **Geoproximity routing** is based on geography and bias, not canary percentages.\n\nWeighted routing is the correct option for canary traffic distribution.",
+      "hint": "Canary releases require explicit percentage-based routing."
+    },
+    {
+      "id": "CF-001",
+      "domain": "CloudFront",
+      "tags": [
+        "oac",
+        "s3",
+        "private-origin"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company serves static content from an S3 bucket through Amazon CloudFront. The S3 bucket **must not be public** and should only be accessible through CloudFront. What is the BEST way to secure the origin?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable S3 public access and restrict by IP"
+        },
+        {
+          "key": "B",
+          "text": "Use CloudFront Origin Access Control (OAC) with a bucket policy"
+        },
+        {
+          "key": "C",
+          "text": "Use a signed URL on S3 without CloudFront"
+        },
+        {
+          "key": "D",
+          "text": "Place the S3 bucket in a public subnet"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Origin Access Control (OAC)** is the recommended way to keep an S3 origin private while allowing access through CloudFront. OAC uses AWS Signature Version 4 signing and a bucket policy to allow only CloudFront to read objects.\n\nThis ensures the bucket is not public and all access goes through CloudFront.",
+      "incorrect": "- **Public access** defeats the requirement to keep the bucket private.\n- **Signed URLs directly to S3** bypass CloudFront and caching.\n- **Subnet placement** does not control S3 public access (S3 is not in your VPC).\n\nOAC + bucket policy is the correct secure pattern.",
+      "hint": "Use the CloudFront feature that grants it private access to S3."
+    },
+    {
+      "id": "GA-001",
+      "domain": "Global Accelerator",
+      "tags": [
+        "global",
+        "static-ip",
+        "tcp-udp"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A SaaS platform serves **TCP and UDP** traffic globally and needs **static anycast IPs** with automatic failover to the closest healthy AWS Region. Which service should be used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon CloudFront"
+        },
+        {
+          "key": "B",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "C",
+          "text": "Route 53 weighted routing"
+        },
+        {
+          "key": "D",
+          "text": "Application Load Balancer"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**AWS Global Accelerator** provides static anycast IPs, optimized routing over the AWS global network, and automatic failover to the closest healthy endpoint for both TCP and UDP. It is built for non-HTTP and performance-sensitive workloads.\n\nThis matches the requirement for static IPs and TCP/UDP acceleration.",
+      "incorrect": "- **CloudFront** is optimized for HTTP/HTTPS content delivery, not generic TCP/UDP.\n- **Route 53 weighted routing** does not provide static anycast IPs or network acceleration.\n- **ALB** only supports HTTP/HTTPS and does not provide global static IPs.\n\nGlobal Accelerator is the correct fit.",
+      "hint": "Static anycast IPs for TCP/UDP point to a global network accelerator."
+    },
+    {
+      "id": "DX-001",
+      "domain": "Direct Connect",
+      "tags": [
+        "hybrid",
+        "bandwidth",
+        "private"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A financial company needs **consistent, low-latency, private connectivity** from its data center to AWS. The connection must provide high bandwidth and predictable performance. What is the BEST solution?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Site-to-Site VPN over the internet"
+        },
+        {
+          "key": "B",
+          "text": "AWS Direct Connect"
+        },
+        {
+          "key": "C",
+          "text": "VPC Peering"
+        },
+        {
+          "key": "D",
+          "text": "Transit Gateway without Direct Connect"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**AWS Direct Connect** provides dedicated, private network connectivity with consistent latency and higher bandwidth than internet-based VPNs. It is the standard solution for predictable, high-throughput hybrid connectivity.\n\nFor resilience, a VPN can be added as a backup, but Direct Connect is the primary best choice.",
+      "incorrect": "- **VPN** uses the public internet and has variable latency.\n- **VPC Peering** connects VPCs, not on-premises.\n- **Transit Gateway** is a hub for VPCs and on-prem, but still needs Direct Connect or VPN to reach on-prem.\n\nDirect Connect is required for consistent private connectivity.",
+      "hint": "Look for a dedicated private link with predictable latency."
+    },
+    {
+      "id": "TGW-001",
+      "domain": "Transit Gateway",
+      "tags": [
+        "networking",
+        "hub-and-spoke",
+        "multi-vpc"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company has **20 VPCs** and several on-premises networks that need full, scalable connectivity. The network team wants a **hub-and-spoke** model with simplified routing and centralized inspection. What is the BEST solution?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Create a full mesh of VPC peering connections"
+        },
+        {
+          "key": "B",
+          "text": "Use AWS Transit Gateway"
+        },
+        {
+          "key": "C",
+          "text": "Use NAT Gateways between all VPCs"
+        },
+        {
+          "key": "D",
+          "text": "Use individual VPNs between every VPC and on-premises"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**AWS Transit Gateway** is designed for large-scale hub-and-spoke connectivity between many VPCs and on-premises networks. It reduces complexity compared to full-mesh peering and supports centralized routing and inspection.\n\nThis is the most scalable and manageable approach for many networks.",
+      "incorrect": "- **Full mesh peering** scales poorly and becomes unmanageable with many VPCs.\n- **NAT Gateways** do not provide VPC-to-VPC routing.\n- **Individual VPNs** are complex and do not scale well.\n\nTransit Gateway is purpose-built for this use case.",
+      "hint": "Use the AWS service that acts as a central routing hub for many VPCs."
+    },
+    {
+      "id": "PL-001",
+      "domain": "PrivateLink",
+      "tags": [
+        "interface-endpoint",
+        "saas",
+        "private-access"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A SaaS provider wants to expose a service privately to hundreds of customer VPCs **without** VPC peering or public IPs. Customers should connect using private IPs in their own VPCs. Which architecture is BEST?",
+      "options": [
+        {
+          "key": "A",
+          "text": "VPC Peering with every customer VPC"
+        },
+        {
+          "key": "B",
+          "text": "AWS PrivateLink using a Network Load Balancer and interface endpoints"
+        },
+        {
+          "key": "C",
+          "text": "Public ALB with IP allow-listing"
+        },
+        {
+          "key": "D",
+          "text": "Site-to-Site VPN to each customer"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**AWS PrivateLink** allows a service provider to expose services via a **Network Load Balancer** and lets customers connect using **interface VPC endpoints**. This provides private connectivity without VPC peering, avoids IP overlap issues, and scales to many customers.\n\nIt is the standard SaaS private access pattern on AWS.",
+      "incorrect": "- **VPC peering** does not scale well to hundreds of customers and creates routing complexity.\n- **Public ALB** violates the requirement for private connectivity.\n- **VPNs** are operationally heavy and do not scale to many customers.\n\nPrivateLink is purpose-built for this use case.",
+      "hint": "Look for the managed private connectivity service for SaaS providers."
+    },
+    {
+      "id": "EDGE-1001",
+      "domain": "Networking",
+      "tags": [
+        "cloudfront-edge-caching",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: reduce global latency for frequently requested static and dynamic content. Which edge and connectivity architecture capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 failover routing"
+        },
+        {
+          "key": "C",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront edge caching"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce global latency for frequently requested static and dynamic content.",
+      "explanation": "CloudFront edge caching is correct because it serves content from edge locations close to end users.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Global Accelerator is useful when you need to improve TCP and UDP application performance with static anycast IPs, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement.",
+        "C": "Incorrect. AWS PrivateLink is useful when you need to privately expose a service to consumer VPCs without VPC peering, but it is not the best fit for this requirement.",
+        "D": "Correct. CloudFront edge caching is the best choice because it serves content from edge locations close to end users."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1002",
+      "domain": "Networking",
+      "tags": [
+        "cloudfront-origin-access-control",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: restrict direct public access to an S3 origin behind CloudFront. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudFront Origin Access Control"
+        },
+        {
+          "key": "B",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "C",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "D",
+          "text": "Direct Connect with VPN backup"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: restrict direct public access to an S3 origin behind CloudFront.",
+      "explanation": "CloudFront Origin Access Control is correct because it allows CloudFront-signed access so the bucket remains private.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. CloudFront Origin Access Control is the best choice because it allows CloudFront-signed access so the bucket remains private.",
+        "B": "Incorrect. AWS PrivateLink is useful when you need to privately expose a service to consumer VPCs without VPC peering, but it is not the best fit for this requirement.",
+        "C": "Incorrect. AWS Global Accelerator is useful when you need to improve TCP and UDP application performance with static anycast IPs, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Direct Connect with VPN backup is useful when you need to provide predictable private bandwidth with encrypted internet fallback, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1003",
+      "domain": "Networking",
+      "tags": [
+        "route-53-failover-routing",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: redirect clients to a healthy standby endpoint during primary failure. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 failover routing"
+        },
+        {
+          "key": "C",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront edge caching"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: redirect clients to a healthy standby endpoint during primary failure.",
+      "explanation": "Route 53 failover routing is correct because it uses health checks to automate DNS failover responses.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS PrivateLink is useful when you need to privately expose a service to consumer VPCs without VPC peering, but it is not the best fit for this requirement.",
+        "B": "Correct. Route 53 failover routing is the best choice because it uses health checks to automate DNS failover responses.",
+        "C": "Incorrect. Direct Connect with VPN backup is useful when you need to provide predictable private bandwidth with encrypted internet fallback, but it is not the best fit for this requirement.",
+        "D": "Incorrect. CloudFront edge caching is useful when you need to reduce global latency for frequently requested static and dynamic content, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1004",
+      "domain": "Networking",
+      "tags": [
+        "aws-global-accelerator",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to improve TCP and UDP application performance with static anycast IPs. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudFront Origin Access Control"
+        },
+        {
+          "key": "B",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "C",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront edge caching"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve TCP and UDP application performance with static anycast IPs.",
+      "explanation": "AWS Global Accelerator is correct because it routes traffic over the AWS global network to healthy endpoints.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. CloudFront Origin Access Control is useful when you need to restrict direct public access to an S3 origin behind CloudFront, but it is not the best fit for this requirement.",
+        "B": "Correct. AWS Global Accelerator is the best choice because it routes traffic over the AWS global network to healthy endpoints.",
+        "C": "Incorrect. Direct Connect with VPN backup is useful when you need to provide predictable private bandwidth with encrypted internet fallback, but it is not the best fit for this requirement.",
+        "D": "Incorrect. CloudFront edge caching is useful when you need to reduce global latency for frequently requested static and dynamic content, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1005",
+      "domain": "Networking",
+      "tags": [
+        "aws-privatelink",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: privately expose a service to consumer VPCs without VPC peering. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudFront Origin Access Control"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 failover routing"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront edge caching"
+        },
+        {
+          "key": "D",
+          "text": "AWS PrivateLink"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: privately expose a service to consumer VPCs without VPC peering.",
+      "explanation": "AWS PrivateLink is correct because it uses interface endpoints for private service connectivity.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. CloudFront Origin Access Control is useful when you need to restrict direct public access to an S3 origin behind CloudFront, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement.",
+        "C": "Incorrect. CloudFront edge caching is useful when you need to reduce global latency for frequently requested static and dynamic content, but it is not the best fit for this requirement.",
+        "D": "Correct. AWS PrivateLink is the best choice because it uses interface endpoints for private service connectivity."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1006",
+      "domain": "Networking",
+      "tags": [
+        "direct-connect-with-vpn-backup",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: provide predictable private bandwidth with encrypted internet fallback. Which edge and connectivity architecture capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "B",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront Origin Access Control"
+        },
+        {
+          "key": "D",
+          "text": "Route 53 failover routing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: provide predictable private bandwidth with encrypted internet fallback.",
+      "explanation": "Direct Connect with VPN backup is correct because it combines dedicated links with resilient backup connectivity.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Direct Connect with VPN backup is the best choice because it combines dedicated links with resilient backup connectivity.",
+        "B": "Incorrect. AWS Global Accelerator is useful when you need to improve TCP and UDP application performance with static anycast IPs, but it is not the best fit for this requirement.",
+        "C": "Incorrect. CloudFront Origin Access Control is useful when you need to restrict direct public access to an S3 origin behind CloudFront, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1007",
+      "domain": "Networking",
+      "tags": [
+        "cloudfront-edge-caching",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: reduce global latency for frequently requested static and dynamic content. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront edge caching"
+        },
+        {
+          "key": "C",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "D",
+          "text": "AWS Global Accelerator"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce global latency for frequently requested static and dynamic content.",
+      "explanation": "CloudFront edge caching is correct because it serves content from edge locations close to end users.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Direct Connect with VPN backup is useful when you need to provide predictable private bandwidth with encrypted internet fallback, but it is not the best fit for this requirement.",
+        "B": "Correct. CloudFront edge caching is the best choice because it serves content from edge locations close to end users.",
+        "C": "Incorrect. AWS PrivateLink is useful when you need to privately expose a service to consumer VPCs without VPC peering, but it is not the best fit for this requirement.",
+        "D": "Incorrect. AWS Global Accelerator is useful when you need to improve TCP and UDP application performance with static anycast IPs, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1008",
+      "domain": "Networking",
+      "tags": [
+        "cloudfront-origin-access-control",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: restrict direct public access to an S3 origin behind CloudFront. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront edge caching"
+        },
+        {
+          "key": "C",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront Origin Access Control"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: restrict direct public access to an S3 origin behind CloudFront.",
+      "explanation": "CloudFront Origin Access Control is correct because it allows CloudFront-signed access so the bucket remains private.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS PrivateLink is useful when you need to privately expose a service to consumer VPCs without VPC peering, but it is not the best fit for this requirement.",
+        "B": "Incorrect. CloudFront edge caching is useful when you need to reduce global latency for frequently requested static and dynamic content, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Direct Connect with VPN backup is useful when you need to provide predictable private bandwidth with encrypted internet fallback, but it is not the best fit for this requirement.",
+        "D": "Correct. CloudFront Origin Access Control is the best choice because it allows CloudFront-signed access so the bucket remains private."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1009",
+      "domain": "Networking",
+      "tags": [
+        "route-53-failover-routing",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to redirect clients to a healthy standby endpoint during primary failure. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 failover routing"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront edge caching"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront Origin Access Control"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: redirect clients to a healthy standby endpoint during primary failure.",
+      "explanation": "Route 53 failover routing is correct because it uses health checks to automate DNS failover responses.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Direct Connect with VPN backup is useful when you need to provide predictable private bandwidth with encrypted internet fallback, but it is not the best fit for this requirement.",
+        "B": "Correct. Route 53 failover routing is the best choice because it uses health checks to automate DNS failover responses.",
+        "C": "Incorrect. CloudFront edge caching is useful when you need to reduce global latency for frequently requested static and dynamic content, but it is not the best fit for this requirement.",
+        "D": "Incorrect. CloudFront Origin Access Control is useful when you need to restrict direct public access to an S3 origin behind CloudFront, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1010",
+      "domain": "Networking",
+      "tags": [
+        "aws-global-accelerator",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: improve TCP and UDP application performance with static anycast IPs. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudFront edge caching"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront Origin Access Control"
+        },
+        {
+          "key": "C",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "D",
+          "text": "Route 53 failover routing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve TCP and UDP application performance with static anycast IPs.",
+      "explanation": "AWS Global Accelerator is correct because it routes traffic over the AWS global network to healthy endpoints.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. CloudFront edge caching is useful when you need to reduce global latency for frequently requested static and dynamic content, but it is not the best fit for this requirement.",
+        "B": "Incorrect. CloudFront Origin Access Control is useful when you need to restrict direct public access to an S3 origin behind CloudFront, but it is not the best fit for this requirement.",
+        "C": "Correct. AWS Global Accelerator is the best choice because it routes traffic over the AWS global network to healthy endpoints.",
+        "D": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1011",
+      "domain": "Networking",
+      "tags": [
+        "aws-privatelink",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: privately expose a service to consumer VPCs without VPC peering. Which edge and connectivity architecture capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudFront Origin Access Control"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 failover routing"
+        },
+        {
+          "key": "C",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "D",
+          "text": "AWS Global Accelerator"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: privately expose a service to consumer VPCs without VPC peering.",
+      "explanation": "AWS PrivateLink is correct because it uses interface endpoints for private service connectivity.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. CloudFront Origin Access Control is useful when you need to restrict direct public access to an S3 origin behind CloudFront, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement.",
+        "C": "Correct. AWS PrivateLink is the best choice because it uses interface endpoints for private service connectivity.",
+        "D": "Incorrect. AWS Global Accelerator is useful when you need to improve TCP and UDP application performance with static anycast IPs, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1012",
+      "domain": "Networking",
+      "tags": [
+        "direct-connect-with-vpn-backup",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: provide predictable private bandwidth with encrypted internet fallback. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "B",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "C",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "D",
+          "text": "Route 53 failover routing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: provide predictable private bandwidth with encrypted internet fallback.",
+      "explanation": "Direct Connect with VPN backup is correct because it combines dedicated links with resilient backup connectivity.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Global Accelerator is useful when you need to improve TCP and UDP application performance with static anycast IPs, but it is not the best fit for this requirement.",
+        "B": "Correct. Direct Connect with VPN backup is the best choice because it combines dedicated links with resilient backup connectivity.",
+        "C": "Incorrect. AWS PrivateLink is useful when you need to privately expose a service to consumer VPCs without VPC peering, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1013",
+      "domain": "Networking",
+      "tags": [
+        "cloudfront-edge-caching",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: reduce global latency for frequently requested static and dynamic content. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "B",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront edge caching"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront Origin Access Control"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce global latency for frequently requested static and dynamic content.",
+      "explanation": "CloudFront edge caching is correct because it serves content from edge locations close to end users.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS PrivateLink is useful when you need to privately expose a service to consumer VPCs without VPC peering, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Direct Connect with VPN backup is useful when you need to provide predictable private bandwidth with encrypted internet fallback, but it is not the best fit for this requirement.",
+        "C": "Correct. CloudFront edge caching is the best choice because it serves content from edge locations close to end users.",
+        "D": "Incorrect. CloudFront Origin Access Control is useful when you need to restrict direct public access to an S3 origin behind CloudFront, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1014",
+      "domain": "Networking",
+      "tags": [
+        "cloudfront-origin-access-control",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to restrict direct public access to an S3 origin behind CloudFront. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Route 53 failover routing"
+        },
+        {
+          "key": "B",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront edge caching"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront Origin Access Control"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: restrict direct public access to an S3 origin behind CloudFront.",
+      "explanation": "CloudFront Origin Access Control is correct because it allows CloudFront-signed access so the bucket remains private.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Direct Connect with VPN backup is useful when you need to provide predictable private bandwidth with encrypted internet fallback, but it is not the best fit for this requirement.",
+        "C": "Incorrect. CloudFront edge caching is useful when you need to reduce global latency for frequently requested static and dynamic content, but it is not the best fit for this requirement.",
+        "D": "Correct. CloudFront Origin Access Control is the best choice because it allows CloudFront-signed access so the bucket remains private."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1015",
+      "domain": "Networking",
+      "tags": [
+        "route-53-failover-routing",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: redirect clients to a healthy standby endpoint during primary failure. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudFront Origin Access Control"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 failover routing"
+        },
+        {
+          "key": "C",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront edge caching"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: redirect clients to a healthy standby endpoint during primary failure.",
+      "explanation": "Route 53 failover routing is correct because it uses health checks to automate DNS failover responses.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. CloudFront Origin Access Control is useful when you need to restrict direct public access to an S3 origin behind CloudFront, but it is not the best fit for this requirement.",
+        "B": "Correct. Route 53 failover routing is the best choice because it uses health checks to automate DNS failover responses.",
+        "C": "Incorrect. AWS Global Accelerator is useful when you need to improve TCP and UDP application performance with static anycast IPs, but it is not the best fit for this requirement.",
+        "D": "Incorrect. CloudFront edge caching is useful when you need to reduce global latency for frequently requested static and dynamic content, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1016",
+      "domain": "Networking",
+      "tags": [
+        "aws-global-accelerator",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: improve TCP and UDP application performance with static anycast IPs. Which edge and connectivity architecture capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 failover routing"
+        },
+        {
+          "key": "C",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront Origin Access Control"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: improve TCP and UDP application performance with static anycast IPs.",
+      "explanation": "AWS Global Accelerator is correct because it routes traffic over the AWS global network to healthy endpoints.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS PrivateLink is useful when you need to privately expose a service to consumer VPCs without VPC peering, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement.",
+        "C": "Correct. AWS Global Accelerator is the best choice because it routes traffic over the AWS global network to healthy endpoints.",
+        "D": "Incorrect. CloudFront Origin Access Control is useful when you need to restrict direct public access to an S3 origin behind CloudFront, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1017",
+      "domain": "Networking",
+      "tags": [
+        "aws-privatelink",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: privately expose a service to consumer VPCs without VPC peering. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "B",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "C",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "D",
+          "text": "Route 53 failover routing"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: privately expose a service to consumer VPCs without VPC peering.",
+      "explanation": "AWS PrivateLink is correct because it uses interface endpoints for private service connectivity.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Global Accelerator is useful when you need to improve TCP and UDP application performance with static anycast IPs, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Direct Connect with VPN backup is useful when you need to provide predictable private bandwidth with encrypted internet fallback, but it is not the best fit for this requirement.",
+        "C": "Correct. AWS PrivateLink is the best choice because it uses interface endpoints for private service connectivity.",
+        "D": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1018",
+      "domain": "Networking",
+      "tags": [
+        "direct-connect-with-vpn-backup",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: provide predictable private bandwidth with encrypted internet fallback. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Direct Connect with VPN backup"
+        },
+        {
+          "key": "B",
+          "text": "AWS PrivateLink"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront edge caching"
+        },
+        {
+          "key": "D",
+          "text": "AWS Global Accelerator"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: provide predictable private bandwidth with encrypted internet fallback.",
+      "explanation": "Direct Connect with VPN backup is correct because it combines dedicated links with resilient backup connectivity.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Direct Connect with VPN backup is the best choice because it combines dedicated links with resilient backup connectivity.",
+        "B": "Incorrect. AWS PrivateLink is useful when you need to privately expose a service to consumer VPCs without VPC peering, but it is not the best fit for this requirement.",
+        "C": "Incorrect. CloudFront edge caching is useful when you need to reduce global latency for frequently requested static and dynamic content, but it is not the best fit for this requirement.",
+        "D": "Incorrect. AWS Global Accelerator is useful when you need to improve TCP and UDP application performance with static anycast IPs, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1019",
+      "domain": "Networking",
+      "tags": [
+        "cloudfront-edge-caching",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to reduce global latency for frequently requested static and dynamic content. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudFront Origin Access Control"
+        },
+        {
+          "key": "B",
+          "text": "Route 53 failover routing"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront edge caching"
+        },
+        {
+          "key": "D",
+          "text": "Direct Connect with VPN backup"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce global latency for frequently requested static and dynamic content.",
+      "explanation": "CloudFront edge caching is correct because it serves content from edge locations close to end users.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. CloudFront Origin Access Control is useful when you need to restrict direct public access to an S3 origin behind CloudFront, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement.",
+        "C": "Correct. CloudFront edge caching is the best choice because it serves content from edge locations close to end users.",
+        "D": "Incorrect. Direct Connect with VPN backup is useful when you need to provide predictable private bandwidth with encrypted internet fallback, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    },
+    {
+      "id": "EDGE-1020",
+      "domain": "Networking",
+      "tags": [
+        "cloudfront-origin-access-control",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: restrict direct public access to an S3 origin behind CloudFront. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudFront Origin Access Control"
+        },
+        {
+          "key": "B",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "C",
+          "text": "Route 53 failover routing"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront edge caching"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: restrict direct public access to an S3 origin behind CloudFront.",
+      "explanation": "CloudFront Origin Access Control is correct because it allows CloudFront-signed access so the bucket remains private.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. CloudFront Origin Access Control is the best choice because it allows CloudFront-signed access so the bucket remains private.",
+        "B": "Incorrect. AWS Global Accelerator is useful when you need to improve TCP and UDP application performance with static anycast IPs, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Route 53 failover routing is useful when you need to redirect clients to a healthy standby endpoint during primary failure, but it is not the best fit for this requirement.",
+        "D": "Incorrect. CloudFront edge caching is useful when you need to reduce global latency for frequently requested static and dynamic content, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Edge And Connectivity Architecture documentation",
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/networking-and-content-delivery-services.html"
+        }
+      ]
+    }
+  ]
+}

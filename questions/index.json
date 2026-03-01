@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "title": "AWS SAA-C03 - Full Exam Coverage Question Bank",
+  "version": "2026-02-28",
+  "files": [
+    "compute-scale.json",
+    "database-advanced.json",
+    "ec2.json",
+    "ecs.json",
+    "edge-networking.json",
+    "iam.json",
+    "integration.json",
+    "lambda.json",
+    "rds.json",
+    "s3.json",
+    "security-ops.json",
+    "storage-advanced.json",
+    "vpc.json",
+    "domain1-secure-architectures.json",
+    "domain2-resilient-architectures.json",
+    "domain3-high-performing-architectures.json",
+    "domain4-cost-optimized-architectures.json"
+  ],
+  "shuffleDefault": {
+    "questions": false,
+    "options": false
+  }
+}

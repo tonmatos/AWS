@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "SQS-001",
+      "domain": "SQS",
+      "tags": ["fifo", "ordering", "exactly-once"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "An order processing system requires messages to be processed **in order** and **exactly once**. Which SQS queue type should be used?",
+      "options": [
+        {"key": "A", "text": "Standard queue"},
+        {"key": "B", "text": "FIFO queue"},
+        {"key": "C", "text": "Delay queue"},
+        {"key": "D", "text": "Dead-letter queue"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**SQS FIFO** guarantees strict ordering and exactly-once processing (with deduplication). This is the correct queue type for ordered, non-duplicated processing.\n\nStandard queues provide at-least-once delivery and best-effort ordering, which does not meet the requirements.",
+      "incorrect": "- **Standard queues** do not guarantee ordering or exactly-once delivery.\n- **Delay queues** only postpone messages.\n- **Dead-letter queues** are for failed messages, not primary processing.\n\nFIFO is the only SQS option that meets both requirements.",
+      "hint": "Look for a queue type that guarantees order and deduplication."
+    },
+    {
+      "id": "SNS-001",
+      "domain": "SNS",
+      "tags": ["fanout", "pub-sub", "sqs"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A service publishes events that must be delivered to **multiple downstream systems** in parallel, each with its own queue. Which pattern is BEST?",
+      "options": [
+        {"key": "A", "text": "One SQS queue polled by all consumers"},
+        {"key": "B", "text": "SNS topic with multiple SQS subscriptions (fanout)"},
+        {"key": "C", "text": "EventBridge rule with no targets"},
+        {"key": "D", "text": "Direct HTTP calls from the publisher to all consumers"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "The **SNS fanout pattern** delivers a published message to multiple SQS queues in parallel. Each downstream system reads from its own queue, decoupling processing and improving reliability.\n\nThis is the standard AWS pattern for parallel event delivery.",
+      "incorrect": "- **One SQS queue** means consumers compete, not parallel fanout.\n- **EventBridge with no targets** does not deliver messages.\n- **Direct HTTP calls** tightly couple systems and reduce reliability.\n\nSNS + SQS fanout is the correct solution.",
+      "hint": "Use a pub/sub service with SQS subscriptions to fan out messages."
+    },
+    {
+      "id": "EVENTBRIDGE-001",
+      "domain": "EventBridge",
+      "tags": ["event-bus", "cross-account", "routing"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "An organization wants to route events from multiple AWS accounts to a **central event bus** for processing and auditing. Which service and feature should they use?",
+      "options": [
+        {"key": "A", "text": "SNS with cross-account access policies"},
+        {"key": "B", "text": "EventBridge with a custom event bus and cross-account permissions"},
+        {"key": "C", "text": "SQS FIFO queues across accounts"},
+        {"key": "D", "text": "CloudWatch Logs subscription filters"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Amazon EventBridge** supports custom event buses and cross-account event delivery using resource policies. This enables centralized routing and processing of events from multiple accounts.\n\nIt is the intended service for cross-account event routing.",
+      "incorrect": "- **SNS** can publish cross-account but lacks event-pattern routing and bus semantics.\n- **SQS FIFO** is a queue, not an event routing service.\n- **CloudWatch Logs** subscription filters are for log streaming, not general event routing.\n\nEventBridge custom event buses are the correct choice.",
+      "hint": "Use the managed event routing service with cross-account event buses."
+    },
+    {
+      "id": "STEP-001",
+      "domain": "Step Functions",
+      "tags": ["workflow", "orchestration", "retry"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A serverless application needs to coordinate a **multi-step workflow** with retries, error handling, and long-running state management. Which service is BEST suited?",
+      "options": [
+        {"key": "A", "text": "Amazon SQS"},
+        {"key": "B", "text": "AWS Step Functions"},
+        {"key": "C", "text": "Amazon SNS"},
+        {"key": "D", "text": "AWS Lambda only"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS Step Functions** orchestrates serverless workflows with built-in retries, branching, and state persistence. It is designed specifically for long-running, multi-step processes.\n\nThis matches the requirement for workflow orchestration.",
+      "incorrect": "- **SQS** and **SNS** are messaging services, not workflow orchestrators.\n- **Lambda only** would require custom state management and retry logic.\n\nStep Functions is the correct service.",
+      "hint": "Use the AWS service built for serverless workflow orchestration."
+    },
+    {
+      "id": "APIGW-001",
+      "domain": "API Gateway",
+      "tags": ["api", "throttling", "auth"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A company wants a **managed API frontend** with authentication, throttling, usage plans, and request validation for multiple back-end services. Which service should they use?",
+      "options": [
+        {"key": "A", "text": "Application Load Balancer"},
+        {"key": "B", "text": "Amazon API Gateway"},
+        {"key": "C", "text": "Amazon CloudFront"},
+        {"key": "D", "text": "AWS Elastic Beanstalk"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Amazon API Gateway** provides a fully managed API front door with authentication (IAM, Cognito, Lambda authorizers), throttling, usage plans, and request validation.\n\nThis matches all stated requirements for an API management layer.",
+      "incorrect": "- **ALB** can route HTTP traffic but does not provide API management features.\n- **CloudFront** is a CDN and does not provide API-level auth and throttling.\n- **Elastic Beanstalk** is an application deployment service, not an API gateway.\n\nAPI Gateway is the correct choice.",
+      "hint": "Look for the AWS service that provides full API management features."
+    },
+    {
+      "id": "KINESIS-001",
+      "domain": "Kinesis",
+      "tags": ["streaming", "real-time", "ordering"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A telemetry system needs to ingest **millions of events per second** and process them in near real time. It requires **ordered processing per device**. Which service is MOST appropriate?",
+      "options": [
+        {"key": "A", "text": "Amazon SQS Standard"},
+        {"key": "B", "text": "Amazon Kinesis Data Streams"},
+        {"key": "C", "text": "Amazon SNS"},
+        {"key": "D", "text": "AWS Step Functions"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Kinesis Data Streams** is designed for high-throughput, real-time streaming with ordering guarantees **per shard**, making it suitable for device-based ordering by using the device ID as the partition key.\n\nThis meets both the throughput and ordering requirements.",
+      "incorrect": "- **SQS Standard** provides at-least-once delivery but no ordering guarantees.\n- **SNS** is pub/sub but not a streaming service with ordered shards.\n- **Step Functions** is for workflow orchestration.\n\nKinesis Data Streams is the correct streaming service.",
+      "hint": "Use a streaming service that supports ordering by partition key."
+    }
+  ]
+}

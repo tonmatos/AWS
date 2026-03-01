@@ -1,0 +1,2453 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "S3-001",
+      "domain": "S3",
+      "tags": [
+        "lifecycle",
+        "storage-classes",
+        "cost-optimization"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A media company stores video files in Amazon S3 with the following access patterns:\n\n- **Days 0-30:** Videos are frequently accessed for editing and distribution (multiple accesses per day)\n- **Days 31-90:** Videos are accessed occasionally for reference (2-3 times per week)\n- **Days 91-365:** Videos are rarely accessed but must be available within minutes if needed (1-2 times per month)\n- **After 365 days:** Videos must be retained for 7 years for compliance but are almost never accessed (maybe once per year)\n- **After 7 years:** Videos can be permanently deleted\n\nCurrent storage: All videos in S3 Standard costing $0.023 per GB/month\nAverage video size: 5 GB\nTotal uploads: 10,000 videos per month\n\nThe company wants to minimize storage costs while ensuring videos are accessible within their required timeframes. Which S3 Lifecycle policy provides the MOST cost-effective solution?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Transition to S3 Standard-IA after 30 days, then to S3 Glacier Flexible Retrieval after 90 days, then to S3 Glacier Deep Archive after 365 days, with expiration after 7 years"
+        },
+        {
+          "key": "B",
+          "text": "Transition to S3 One Zone-IA after 30 days, then to S3 Intelligent-Tiering after 90 days, then to S3 Glacier Instant Retrieval after 365 days, with expiration after 7 years"
+        },
+        {
+          "key": "C",
+          "text": "Keep all videos in S3 Standard for 90 days, then transition to S3 Glacier Flexible Retrieval, then to S3 Glacier Deep Archive after 365 days, with expiration after 7 years"
+        },
+        {
+          "key": "D",
+          "text": "Transition to S3 Intelligent-Tiering immediately after upload to automatically optimize costs based on access patterns without lifecycle management"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "**Cost Analysis and Optimal Solution:**\n\nLet's calculate costs for 10,000 videos (50,000 GB total) over 7 years:\n\n**Option A (Correct Answer):**\n\n**Storage Cost Breakdown:**\n\n*Days 0-30 (S3 Standard):*\n- Cost: $0.023/GB/month\n- 50,000 GB \u00d7 $0.023 \u00d7 1 month = $1,150\n\n*Days 31-90 (S3 Standard-IA):*\n- Cost: $0.0125/GB/month  \n- 50,000 GB \u00d7 $0.0125 \u00d7 2 months = $1,250\n\n*Days 91-365 (S3 Glacier Flexible Retrieval):*\n- Cost: $0.0036/GB/month\n- 50,000 GB \u00d7 $0.0036 \u00d7 9 months = $1,620\n\n*Days 366-2,555 (6 years in S3 Glacier Deep Archive):*\n- Cost: $0.00099/GB/month\n- 50,000 GB \u00d7 $0.00099 \u00d7 72 months = $3,564\n\n**Total: $7,584 per batch**\n\n**Why each transition is optimal:**\n\n**1. Days 0-30: S3 Standard ($0.023/GB/month)**\n- Multiple daily accesses = frequent access tier appropriate\n- No retrieval fees\n- Millisecond latency\n- 99.99% availability\n\n**2. Days 31-90: S3 Standard-IA ($0.0125/GB/month)**\n- 2-3 accesses per week = infrequent access pattern\n- **Requirements met:**\n  - Millisecond latency (same as Standard)\n  - Minutes SLA: \u2713 (immediate access)\n  - 99.9% availability (acceptable for occasional use)\n- **Cost savings:** 46% cheaper than Standard\n- **Trade-offs:**\n  - Minimum 30-day storage duration (met)\n  - Minimum 128 KB object size (5 GB videos \u2713)\n  - Retrieval fee: $0.01/GB (acceptable for 2-3 accesses/week)\n\n**3. Days 91-365: S3 Glacier Flexible Retrieval ($0.0036/GB/month)**\n- 1-2 accesses per month = archive tier appropriate\n- **Requirements met:**\n  - \"Available within minutes\" requirement satisfied by Expedited retrievals\n  - Retrieval options:\n    - **Expedited:** 1-5 minutes ($0.03/GB + $0.01/request)\n    - **Standard:** 3-5 hours ($0.01/GB)\n    - **Bulk:** 5-12 hours ($0.0025/GB)\n- **Cost savings:** 84% cheaper than Standard\n- **Trade-offs:**\n  - Minimum 90-day storage (met)\n  - Retrieval required for access (acceptable for rare access)\n\n**4. Days 365+: S3 Glacier Deep Archive ($0.00099/GB/month)**\n- Compliance retention, rarely accessed = deep archive appropriate\n- **Requirements met:**\n  - Once-per-year access tolerable with 12-hour retrieval\n  - Retrieval options:\n    - **Standard:** 12 hours ($0.02/GB)\n    - **Bulk:** 48 hours ($0.0025/GB)\n- **Cost savings:** 96% cheaper than Standard\n- **Trade-offs:**\n  - Minimum 180-day storage duration\n  - Longer retrieval time (acceptable for compliance data)\n\n**5. Expiration after 7 years:**\n- Automated deletion reduces costs to zero\n- Meets compliance requirement\n\n**Lifecycle Policy Configuration:**\n\n```json\n{\n  \"Rules\": [{\n    \"Id\": \"MediaLifecycle\",\n    \"Status\": \"Enabled\",\n    \"Filter\": {\"Prefix\": \"videos/\"},\n    \"Transitions\": [\n      {\n        \"Days\": 30,\n        \"StorageClass\": \"STANDARD_IA\"\n      },\n      {\n        \"Days\": 90,\n        \"StorageClass\": \"GLACIER\"\n      },\n      {\n        \"Days\": 365,\n        \"StorageClass\": \"DEEP_ARCHIVE\"\n      }\n    ],\n    \"Expiration\": {\n      \"Days\": 2555\n    }\n  }]\n}\n```\n\n**Why other options are suboptimal:**\n\n**Option B:**\n- \u274c S3 One Zone-IA: Stores data in single AZ (less durable: 99.5% vs 99.999999999%)\n  - Risk of data loss if AZ fails\n  - Not suitable for long-term valuable content\n- \u274c S3 Intelligent-Tiering after 90 days: Unnecessary complexity and cost\n  - Adds monitoring cost: $0.0025 per 1,000 objects\n  - Access pattern already known (no need for intelligent tiering)\n- \u274c S3 Glacier Instant Retrieval: More expensive than Flexible Retrieval\n  - $0.004/GB/month vs $0.0036/GB/month\n  - Instant access not required (minutes is acceptable)\n\n**Option C:**\n- \u274c Keeps videos in expensive S3 Standard for full 90 days\n- Misses cost savings opportunity for days 31-90\n- Additional cost: 50,000 GB \u00d7 ($0.023 - $0.0125) \u00d7 2 months = $1,050 wasted\n\n**Option D:**\n- \u274c S3 Intelligent-Tiering for all videos:\n  - Monitoring cost: $0.0025 per 1,000 objects\n  - 10,000 videos \u00d7 $0.0025 = $25/month monitoring\n  - Doesn't move to Glacier classes automatically\n  - Tiers within Intelligent-Tiering:\n    - Frequent Access: $0.023/GB (same as Standard)\n    - Infrequent Access: $0.0125/GB (same as Standard-IA)\n    - Archive Instant Access: $0.004/GB (optional)\n  - Missing Deep Archive savings (96% cheaper)\n\n**Storage Class Comparison:**\n\n| Storage Class | Cost/GB/month | Retrieval Time | Minimum Duration | Use Case |\n|--------------|---------------|----------------|------------------|----------|\n| Standard | $0.023 | Immediate | None | Frequent access |\n| Standard-IA | $0.0125 | Immediate | 30 days | Infrequent access |\n| One Zone-IA | $0.01 | Immediate | 30 days | Non-critical infrequent |\n| Glacier Instant | $0.004 | Immediate | 90 days | Archive w/ instant access |\n| Glacier Flexible | $0.0036 | Minutes-hours | 90 days | Archive w/ flexible retrieval |\n| Glacier Deep | $0.00099 | Hours | 180 days | Long-term archive |\n\nReferences:\n- S3 Storage Classes: https://aws.amazon.com/s3/storage-classes/\n- S3 Lifecycle: https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html\n- S3 Pricing: https://aws.amazon.com/s3/pricing/",
+      "incorrect": "This lifecycle policy either misses cost optimization opportunities (staying in expensive tiers too long), uses less durable storage classes (One Zone-IA), or doesn't transition to the cheapest classes for long-term storage (Deep Archive). The optimal policy should align storage class transitions with actual access patterns, moving from Standard \u2192 Standard-IA (30 days) \u2192 Glacier Flexible (90 days) \u2192 Glacier Deep Archive (365 days) to maximize savings while meeting retrieval time requirements.",
+      "hint": "Match each access pattern with the appropriate storage class: frequent \u2192 Standard, occasional \u2192 Standard-IA, rare \u2192 Glacier, compliance \u2192 Deep Archive"
+    },
+    {
+      "id": "S3-002",
+      "domain": "S3",
+      "tags": [
+        "versioning",
+        "delete-marker"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An S3 bucket has versioning enabled. A user deletes an object without specifying a version ID. What happens?",
+      "options": [
+        {
+          "key": "A",
+          "text": "The object is permanently deleted"
+        },
+        {
+          "key": "B",
+          "text": "A delete marker is created and becomes the current version"
+        },
+        {
+          "key": "C",
+          "text": "All versions are deleted"
+        },
+        {
+          "key": "D",
+          "text": "The bucket versioning is suspended automatically"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "With versioning, a normal delete creates a delete marker.",
+      "explanation": "When versioning is enabled, deleting an object without a version ID adds a delete marker as the latest version. Previous versions remain and can be restored by removing the delete marker.",
+      "incorrect": "Permanent deletion requires deleting specific versions (including the delete marker).",
+      "references": [
+        {
+          "label": "S3 User Guide",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-003",
+      "domain": "S3",
+      "tags": [
+        "replication",
+        "versioning"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to enable cross-Region replication (CRR) for a bucket. What is a prerequisite?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable MFA Delete"
+        },
+        {
+          "key": "B",
+          "text": "Enable versioning on both source and destination buckets"
+        },
+        {
+          "key": "C",
+          "text": "Disable encryption"
+        },
+        {
+          "key": "D",
+          "text": "Enable transfer acceleration"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Replication requires versioning.",
+      "explanation": "S3 replication requires versioning to be enabled on both the source and destination buckets.",
+      "incorrect": "MFA Delete and transfer acceleration are optional features and not required for replication.",
+      "references": [
+        {
+          "label": "S3 replication requirements",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-004",
+      "domain": "S3",
+      "tags": [
+        "encryption",
+        "sse-kms"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A security policy requires customer-managed keys with audit trails and the ability to revoke access. Which S3 encryption option best fits?",
+      "options": [
+        {
+          "key": "A",
+          "text": "SSE-S3"
+        },
+        {
+          "key": "B",
+          "text": "SSE-KMS"
+        },
+        {
+          "key": "C",
+          "text": "SSE-C"
+        },
+        {
+          "key": "D",
+          "text": "Client-side encryption only, no KMS"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Customer-managed keys and audit events point to KMS.",
+      "explanation": "SSE-KMS uses AWS KMS keys (including customer-managed keys), provides CloudTrail audit events for key usage, and supports revocation by key policy changes.",
+      "incorrect": "SSE-S3 uses AWS-managed keys without the same KMS-level controls. SSE-C requires you to manage keys and provide them on each request.",
+      "references": [
+        {
+          "label": "S3 encryption options",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingEncryption.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-005",
+      "domain": "S3",
+      "tags": [
+        "lifecycle",
+        "storage-classes"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to automatically move objects to cheaper storage after 30 days and delete them after 365 days.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "B",
+          "text": "S3 Lifecycle configuration"
+        },
+        {
+          "key": "C",
+          "text": "S3 Access Points"
+        },
+        {
+          "key": "D",
+          "text": "S3 Transfer Acceleration"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Lifecycle rules are built for time-based transitions and expirations.",
+      "explanation": "S3 Lifecycle rules can transition objects to different storage classes after a defined number of days and expire (delete) them after another period.",
+      "incorrect": "Object Lock prevents deletion; Access Points and Transfer Acceleration are not lifecycle automation features.",
+      "references": [
+        {
+          "label": "S3 Lifecycle",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-006",
+      "domain": "S3",
+      "tags": [
+        "storage-class",
+        "frequent-access"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A dataset is accessed frequently for the first 30 days and then rarely. You want to minimize cost while keeping fast access when it is needed later.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Standard only"
+        },
+        {
+          "key": "B",
+          "text": "S3 Glacier Deep Archive only"
+        },
+        {
+          "key": "C",
+          "text": "S3 Standard then transition to S3 Standard-IA"
+        },
+        {
+          "key": "D",
+          "text": "S3 One Zone-IA only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Use lifecycle to transition from frequent to infrequent access.",
+      "explanation": "S3 Standard is good for frequent access. After the initial period, transitioning to Standard-IA reduces storage cost while keeping millisecond retrieval.",
+      "incorrect": "Glacier Deep Archive retrieval is slow and not suitable for occasional fast access needs.",
+      "references": [
+        {
+          "label": "S3 User Guide",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-007",
+      "domain": "S3",
+      "tags": [
+        "bucket-policy",
+        "access-control"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to grant a different AWS account read-only access to a specific S3 bucket. What is the standard way?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Put the other account root user in a security group"
+        },
+        {
+          "key": "B",
+          "text": "Use an S3 bucket policy granting s3:GetObject to that account"
+        },
+        {
+          "key": "C",
+          "text": "Use a VPC route table"
+        },
+        {
+          "key": "D",
+          "text": "Use an Internet Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Cross-account S3 access is typically done with bucket policies.",
+      "explanation": "A bucket policy can grant permissions to principals in another AWS account (for example, the account root or a specific role) to allow read-only access such as s3:GetObject.",
+      "incorrect": "Security groups and route tables do not grant S3 permissions.",
+      "references": [
+        {
+          "label": "S3 bucket policies",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-008",
+      "domain": "S3",
+      "tags": [
+        "presigned-url"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An application must allow a user to upload a file directly to S3 for the next 10 minutes without exposing AWS credentials. What should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Bucket ACLs"
+        },
+        {
+          "key": "B",
+          "text": "S3 pre-signed URL"
+        },
+        {
+          "key": "C",
+          "text": "S3 replication"
+        },
+        {
+          "key": "D",
+          "text": "S3 Inventory"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Temporary access without sharing credentials is pre-signed URL.",
+      "explanation": "A pre-signed URL grants time-limited permissions for a specific S3 operation (PUT/GET) without sharing AWS credentials.",
+      "incorrect": "ACLs are not time-bound and are not ideal for per-request temporary access.",
+      "references": [
+        {
+          "label": "Pre-signed URLs",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-009",
+      "domain": "S3",
+      "tags": [
+        "object-lock",
+        "worn"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A compliance requirement mandates write once, read many (WORM) protection so objects cannot be deleted or overwritten for 7 years.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Object Lock in compliance mode"
+        },
+        {
+          "key": "B",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "key": "C",
+          "text": "S3 Intelligent-Tiering"
+        },
+        {
+          "key": "D",
+          "text": "S3 Multi-Part Upload"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "WORM retention is exactly what Object Lock provides.",
+      "explanation": "S3 Object Lock in compliance mode enforces retention and prevents deletion or overwrite until the retention period ends, supporting WORM requirements.",
+      "incorrect": "Other features do not provide immutability guarantees.",
+      "references": [
+        {
+          "label": "S3 Object Lock",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-010",
+      "domain": "S3",
+      "tags": [
+        "glacier",
+        "retrieval"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You stored objects in S3 Glacier Flexible Retrieval. You need the objects available within minutes for an occasional restore. Which retrieval option is appropriate?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Expedited retrieval"
+        },
+        {
+          "key": "B",
+          "text": "Bulk retrieval"
+        },
+        {
+          "key": "C",
+          "text": "Standard retrieval (12 hours)"
+        },
+        {
+          "key": "D",
+          "text": "No retrieval is needed"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Minutes-level restore implies expedited retrieval.",
+      "explanation": "Glacier Flexible Retrieval supports expedited retrieval for faster restores (typically minutes). Bulk is cheaper but slower; standard is hours.",
+      "incorrect": "Retrieval is required to access archived objects.",
+      "references": [
+        {
+          "label": "Glacier Flexible Retrieval",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects-retrieval-options.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-011",
+      "domain": "S3",
+      "tags": [
+        "multipart-upload"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to upload a 20 GB file to S3 reliably over an unstable network connection. What should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Single PUT Object"
+        },
+        {
+          "key": "B",
+          "text": "Multipart upload"
+        },
+        {
+          "key": "C",
+          "text": "S3 Inventory"
+        },
+        {
+          "key": "D",
+          "text": "S3 Replication"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Large files and unreliable networks benefit from part retries.",
+      "explanation": "Multipart upload uploads an object in parts, allowing retries of individual parts and improving reliability and throughput for large objects.",
+      "incorrect": "Replication and inventory do not upload objects.",
+      "references": [
+        {
+          "label": "Multipart upload",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-012",
+      "domain": "S3",
+      "tags": [
+        "transfer-acceleration"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Users around the world upload objects to a single bucket in us-east-1 and experience slow uploads. You want to improve transfer performance with minimal changes.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable S3 Transfer Acceleration"
+        },
+        {
+          "key": "B",
+          "text": "Enable S3 Object Lock"
+        },
+        {
+          "key": "C",
+          "text": "Use Glacier Deep Archive"
+        },
+        {
+          "key": "D",
+          "text": "Disable versioning"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Global uploads to one region suggests using edge network acceleration.",
+      "explanation": "S3 Transfer Acceleration uses CloudFront edge locations to accelerate uploads and downloads over long distances.",
+      "incorrect": "Object Lock, Glacier, and versioning do not speed up uploads.",
+      "references": [
+        {
+          "label": "S3 Transfer Acceleration",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/transfer-acceleration.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-013",
+      "domain": "S3",
+      "tags": [
+        "access-points"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A shared S3 bucket stores data for multiple teams. Each team needs its own access policy and network access restrictions without creating many buckets.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Access Points"
+        },
+        {
+          "key": "B",
+          "text": "S3 Replication"
+        },
+        {
+          "key": "C",
+          "text": "S3 Lifecycle rules"
+        },
+        {
+          "key": "D",
+          "text": "S3 Glacier"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Access Points create distinct access paths with distinct policies.",
+      "explanation": "S3 Access Points provide unique access endpoints with dedicated access policies and can be combined with VPC restrictions, simplifying multi-tenant access to a shared bucket.",
+      "incorrect": "Replication and lifecycle do not provide per-team access endpoints.",
+      "references": [
+        {
+          "label": "S3 Access Points",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-014",
+      "domain": "S3",
+      "tags": [
+        "events",
+        "lambda"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to trigger an AWS Lambda function whenever a new object is created in a bucket.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Event Notifications"
+        },
+        {
+          "key": "B",
+          "text": "S3 Inventory"
+        },
+        {
+          "key": "C",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "D",
+          "text": "S3 Batch Operations"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "This is the standard object-created event flow.",
+      "explanation": "S3 Event Notifications can publish events to Lambda, SNS, or SQS when objects are created, removed, or restored.",
+      "incorrect": "Inventory is a scheduled report; Batch Operations is for large-scale operations, not real-time triggers.",
+      "references": [
+        {
+          "label": "S3 Event Notifications",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-015",
+      "domain": "S3",
+      "tags": [
+        "consistency"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An application writes a new object to S3 and immediately reads it back. What read consistency does S3 provide for new objects?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Eventual consistency"
+        },
+        {
+          "key": "B",
+          "text": "Strong read-after-write consistency"
+        },
+        {
+          "key": "C",
+          "text": "Consistency depends on region"
+        },
+        {
+          "key": "D",
+          "text": "Strong consistency only if versioning is enabled"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "S3 provides strong consistency for PUTs and DELETEs.",
+      "explanation": "Amazon S3 provides strong read-after-write consistency for PUTs of new objects and for DELETEs and overwrites, so immediate reads reflect the latest write.",
+      "incorrect": "Versioning does not change consistency guarantees.",
+      "references": [
+        {
+          "label": "S3 User Guide",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-016",
+      "domain": "S3",
+      "tags": [
+        "intelligent-tiering"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You have objects with unknown and changing access patterns. You want cost savings without operational overhead of manual lifecycle tuning.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Standard"
+        },
+        {
+          "key": "B",
+          "text": "S3 Intelligent-Tiering"
+        },
+        {
+          "key": "C",
+          "text": "S3 Glacier Deep Archive"
+        },
+        {
+          "key": "D",
+          "text": "S3 One Zone-IA"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Unknown access patterns point to Intelligent-Tiering.",
+      "explanation": "S3 Intelligent-Tiering automatically moves objects between access tiers based on usage patterns to optimize cost with minimal operational effort.",
+      "incorrect": "Glacier tiers trade cost for retrieval time and are not automatic without lifecycle configuration.",
+      "references": [
+        {
+          "label": "S3 Intelligent-Tiering",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-017",
+      "domain": "S3",
+      "tags": [
+        "mfa-delete"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You must protect against accidental deletion of objects and versions by requiring MFA for delete operations.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable S3 Object Lock"
+        },
+        {
+          "key": "B",
+          "text": "Enable MFA Delete on the bucket"
+        },
+        {
+          "key": "C",
+          "text": "Enable transfer acceleration"
+        },
+        {
+          "key": "D",
+          "text": "Disable versioning"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "MFA Delete adds MFA requirement for specific operations.",
+      "explanation": "MFA Delete requires MFA for deleting objects and changing versioning state, reducing risk of accidental or malicious deletions.",
+      "incorrect": "Object Lock provides retention but is a different control. Disabling versioning reduces recoverability.",
+      "references": [
+        {
+          "label": "MFA Delete",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/MultiFactorAuthenticationDelete.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-018",
+      "domain": "S3",
+      "tags": [
+        "crr",
+        "encryption"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You enable cross-Region replication to a destination bucket encrypted with SSE-KMS using a customer-managed key. Replication fails with access denied. What is the most likely missing piece?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable S3 static website hosting"
+        },
+        {
+          "key": "B",
+          "text": "Allow the replication IAM role to use the destination KMS key"
+        },
+        {
+          "key": "C",
+          "text": "Disable bucket versioning"
+        },
+        {
+          "key": "D",
+          "text": "Use One Zone-IA"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "KMS permissions often block replication to SSE-KMS buckets.",
+      "explanation": "For SSE-KMS replication, the replication role must have permissions to use the destination KMS key (key policy and IAM permissions). Without this, replication will fail.",
+      "incorrect": "Website hosting and storage class are unrelated.",
+      "references": [
+        {
+          "label": "S3 User Guide",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-019",
+      "domain": "S3",
+      "tags": [
+        "access-logs",
+        "audit"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to log S3 object-level access for security auditing and feed it into a SIEM. Which feature provides API-level data events?",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 server access logging only"
+        },
+        {
+          "key": "B",
+          "text": "CloudTrail data events for S3"
+        },
+        {
+          "key": "C",
+          "text": "CloudWatch metrics only"
+        },
+        {
+          "key": "D",
+          "text": "VPC Flow Logs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Object-level API auditing is CloudTrail data events.",
+      "explanation": "AWS CloudTrail data events can log S3 object-level API activity (such as GetObject and PutObject) and is suitable for detailed auditing.",
+      "incorrect": "Server access logs provide another log format but CloudTrail data events are the standard API auditing approach.",
+      "references": [
+        {
+          "label": "CloudTrail data events for S3",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-020",
+      "domain": "S3",
+      "tags": [
+        "policies",
+        "block-public-access"
+      ],
+      "difficulty": 3,
+      "type": "multi",
+      "select": {
+        "min": 2,
+        "max": 2
+      },
+      "prompt": "A company accidentally exposed an S3 bucket publicly in the past. They want a guardrail that prevents public access at the bucket level even if someone adds a public bucket policy later. Which TWO actions help most? (Choose TWO)",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable S3 Block Public Access for the bucket/account"
+        },
+        {
+          "key": "B",
+          "text": "Enable S3 Transfer Acceleration"
+        },
+        {
+          "key": "C",
+          "text": "Use AWS Config managed rules for S3 public read/write"
+        },
+        {
+          "key": "D",
+          "text": "Disable server-side encryption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A",
+          "C"
+        ]
+      },
+      "hint": "Think guardrails: Block Public Access plus continuous detection.",
+      "explanation": "S3 Block Public Access can override public ACL/policy settings to block public access. AWS Config managed rules can continuously detect and alert on noncompliant public buckets.",
+      "incorrect": "Transfer acceleration and encryption settings do not prevent public access misconfiguration.",
+      "references": [
+        {
+          "label": "Block Public Access",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-021",
+      "domain": "S3",
+      "tags": [
+        "static-website"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to host a simple static website directly from S3 with low cost. Which configuration is required?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable S3 static website hosting on the bucket"
+        },
+        {
+          "key": "B",
+          "text": "Attach the bucket to a VPC"
+        },
+        {
+          "key": "C",
+          "text": "Use Glacier storage class"
+        },
+        {
+          "key": "D",
+          "text": "Enable multipart upload"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "S3 has a built-in static website endpoint feature.",
+      "explanation": "Enable static website hosting on the bucket and configure index and error documents. Optionally use CloudFront in front for HTTPS and caching.",
+      "incorrect": "VPC attachment and storage class are not required for website hosting.",
+      "references": [
+        {
+          "label": "S3 static website hosting",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1001",
+      "domain": "S3",
+      "tags": [
+        "public-access"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to prevent any public access to an S3 bucket, even if someone accidentally adds a public bucket policy.\nWhat should you enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Block Public Access"
+        },
+        {
+          "key": "B",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "key": "C",
+          "text": "S3 Inventory"
+        },
+        {
+          "key": "D",
+          "text": "S3 Select"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Account/bucket-level public access guardrail.",
+      "explanation": "Block Public Access overrides public policies/ACLs to prevent accidental exposure."
+    },
+    {
+      "id": "S3-1002",
+      "domain": "S3",
+      "tags": [
+        "encryption"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need server-side encryption using customer-managed KMS keys.\nWhich option should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "SSE-S3"
+        },
+        {
+          "key": "B",
+          "text": "SSE-KMS"
+        },
+        {
+          "key": "C",
+          "text": "SSE-C"
+        },
+        {
+          "key": "D",
+          "text": "No encryption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Customer-managed keys implies KMS.",
+      "explanation": "SSE-KMS uses AWS KMS keys, including customer-managed keys with key policies and auditing."
+    },
+    {
+      "id": "S3-1003",
+      "domain": "S3",
+      "tags": [
+        "versioning"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to recover objects after accidental overwrite or delete.\nWhat should you enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "B",
+          "text": "S3 Select"
+        },
+        {
+          "key": "C",
+          "text": "Requester Pays"
+        },
+        {
+          "key": "D",
+          "text": "Transfer Acceleration"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Keep older object versions.",
+      "explanation": "Versioning preserves prior versions and delete markers, enabling recovery."
+    },
+    {
+      "id": "S3-1004",
+      "domain": "S3",
+      "tags": [
+        "lifecycle",
+        "glacier"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want to automatically transition objects to cheaper storage after 30 days and delete them after 365 days.\nWhat should you configure?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Lifecycle rules"
+        },
+        {
+          "key": "B",
+          "text": "Bucket policy"
+        },
+        {
+          "key": "C",
+          "text": "CORS"
+        },
+        {
+          "key": "D",
+          "text": "Object ACLs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Automate transitions and expiration.",
+      "explanation": "Lifecycle rules transition objects between storage classes and can expire them."
+    },
+    {
+      "id": "S3-1005",
+      "domain": "S3",
+      "tags": [
+        "crr"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need automatic replication of S3 objects to a bucket in another AWS Region for DR.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cross-Region Replication (CRR)"
+        },
+        {
+          "key": "B",
+          "text": "S3 Select"
+        },
+        {
+          "key": "C",
+          "text": "Transfer Acceleration"
+        },
+        {
+          "key": "D",
+          "text": "VPC peering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Managed replication across Regions.",
+      "explanation": "CRR automatically replicates objects to a destination bucket in another Region."
+    },
+    {
+      "id": "S3-1006",
+      "domain": "S3",
+      "tags": [
+        "presigned-url"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A backend must grant a user temporary permission to upload a single object to a private S3 bucket without making the bucket public.\nWhat should the backend generate?",
+      "options": [
+        {
+          "key": "A",
+          "text": "A pre-signed URL"
+        },
+        {
+          "key": "B",
+          "text": "A CloudFront distribution"
+        },
+        {
+          "key": "C",
+          "text": "A NAT Gateway"
+        },
+        {
+          "key": "D",
+          "text": "An S3 Access Point only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Temporary scoped access for one request.",
+      "explanation": "Pre-signed URLs grant time-limited permission to upload/download specific objects."
+    },
+    {
+      "id": "S3-1007",
+      "domain": "S3",
+      "tags": [
+        "multipart-upload"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to upload a very large file reliably to S3 and resume parts if the network fails.\nWhich feature should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Multipart upload"
+        },
+        {
+          "key": "B",
+          "text": "S3 Select"
+        },
+        {
+          "key": "C",
+          "text": "Requester Pays"
+        },
+        {
+          "key": "D",
+          "text": "S3 Inventory"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Split upload into parts.",
+      "explanation": "Multipart upload uploads parts independently and can retry failed parts without restarting the entire upload."
+    },
+    {
+      "id": "S3-1008",
+      "domain": "S3",
+      "tags": [
+        "event-notifications"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to trigger a Lambda function whenever an object is created in an S3 bucket.\nWhat should you configure?",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 event notifications"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront invalidations"
+        },
+        {
+          "key": "C",
+          "text": "Route 53 health checks"
+        },
+        {
+          "key": "D",
+          "text": "VPC endpoint policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "S3 can emit object events.",
+      "explanation": "S3 event notifications can invoke Lambda on object-created events."
+    },
+    {
+      "id": "S3-1009",
+      "domain": "S3",
+      "tags": [
+        "object-lock",
+        "worm"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A compliance requirement needs WORM protection so objects cannot be deleted or overwritten for a retention period.\nWhat should you enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Object Lock in Compliance mode"
+        },
+        {
+          "key": "B",
+          "text": "S3 Versioning only"
+        },
+        {
+          "key": "C",
+          "text": "SSE-S3"
+        },
+        {
+          "key": "D",
+          "text": "Transfer Acceleration"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "WORM retention is a named S3 feature.",
+      "explanation": "S3 Object Lock in Compliance mode enforces WORM retention preventing deletes/overwrites during retention."
+    },
+    {
+      "id": "S3-1010",
+      "domain": "S3",
+      "tags": [
+        "access-points"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want distinct access policies for different applications to the same S3 bucket without creating multiple buckets.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Access Points"
+        },
+        {
+          "key": "B",
+          "text": "S3 Transfer Acceleration"
+        },
+        {
+          "key": "C",
+          "text": "S3 Select"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Multiple controlled entry points to one bucket.",
+      "explanation": "S3 Access Points provide unique endpoints with their own policies for a shared bucket."
+    },
+    {
+      "id": "S3-1011",
+      "domain": "S3",
+      "tags": [
+        "s3-versioning",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: protect against accidental object overwrite and deletion. Which S3 storage architecture capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SSE-KMS encryption"
+        },
+        {
+          "key": "B",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "C",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "D",
+          "text": "S3 Object Lock"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: protect against accidental object overwrite and deletion.",
+      "explanation": "S3 Versioning is correct because it keeps multiple object versions for recovery.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SSE-KMS encryption is useful when you need to apply centrally managed encryption keys and audit key usage, but it is not the best fit for this requirement.",
+        "B": "Correct. S3 Versioning is the best choice because it keeps multiple object versions for recovery.",
+        "C": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement.",
+        "D": "Incorrect. S3 Object Lock is useful when you need to enforce immutable retention for compliance records, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1012",
+      "domain": "S3",
+      "tags": [
+        "s3-lifecycle-with-intelligent-tiering",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: reduce storage cost for objects with changing access patterns. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Pre-signed URLs"
+        },
+        {
+          "key": "B",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "C",
+          "text": "SSE-KMS encryption"
+        },
+        {
+          "key": "D",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce storage cost for objects with changing access patterns.",
+      "explanation": "S3 Lifecycle with Intelligent-Tiering is correct because it transitions or optimizes storage class based on access behavior.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Pre-signed URLs is useful when you need to grant temporary, scoped object access without making the bucket public, but it is not the best fit for this requirement.",
+        "B": "Incorrect. S3 Object Lock is useful when you need to enforce immutable retention for compliance records, but it is not the best fit for this requirement.",
+        "C": "Incorrect. SSE-KMS encryption is useful when you need to apply centrally managed encryption keys and audit key usage, but it is not the best fit for this requirement.",
+        "D": "Correct. S3 Lifecycle with Intelligent-Tiering is the best choice because it transitions or optimizes storage class based on access behavior."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1013",
+      "domain": "S3",
+      "tags": [
+        "s3-cross-region-replication",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: replicate critical objects to another Region for disaster recovery. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Pre-signed URLs"
+        },
+        {
+          "key": "B",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "C",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "D",
+          "text": "S3 Versioning"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: replicate critical objects to another Region for disaster recovery.",
+      "explanation": "S3 Cross-Region Replication is correct because it asynchronously copies objects to a destination bucket in another Region.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Pre-signed URLs is useful when you need to grant temporary, scoped object access without making the bucket public, but it is not the best fit for this requirement.",
+        "B": "Correct. S3 Cross-Region Replication is the best choice because it asynchronously copies objects to a destination bucket in another Region.",
+        "C": "Incorrect. S3 Object Lock is useful when you need to enforce immutable retention for compliance records, but it is not the best fit for this requirement.",
+        "D": "Incorrect. S3 Versioning is useful when you need to protect against accidental object overwrite and deletion, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1014",
+      "domain": "S3",
+      "tags": [
+        "sse-kms-encryption",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to apply centrally managed encryption keys and audit key usage. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "B",
+          "text": "Pre-signed URLs"
+        },
+        {
+          "key": "C",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        },
+        {
+          "key": "D",
+          "text": "SSE-KMS encryption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: apply centrally managed encryption keys and audit key usage.",
+      "explanation": "SSE-KMS encryption is correct because it encrypts objects with AWS KMS key governance and logging.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Versioning is useful when you need to protect against accidental object overwrite and deletion, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Pre-signed URLs is useful when you need to grant temporary, scoped object access without making the bucket public, but it is not the best fit for this requirement.",
+        "C": "Incorrect. S3 Lifecycle with Intelligent-Tiering is useful when you need to reduce storage cost for objects with changing access patterns, but it is not the best fit for this requirement.",
+        "D": "Correct. SSE-KMS encryption is the best choice because it encrypts objects with AWS KMS key governance and logging."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1015",
+      "domain": "S3",
+      "tags": [
+        "s3-object-lock",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: enforce immutable retention for compliance records. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "B",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        },
+        {
+          "key": "C",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "D",
+          "text": "S3 Object Lock"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: enforce immutable retention for compliance records.",
+      "explanation": "S3 Object Lock is correct because it provides WORM protections against modification or deletion.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Versioning is useful when you need to protect against accidental object overwrite and deletion, but it is not the best fit for this requirement.",
+        "B": "Incorrect. S3 Lifecycle with Intelligent-Tiering is useful when you need to reduce storage cost for objects with changing access patterns, but it is not the best fit for this requirement.",
+        "C": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement.",
+        "D": "Correct. S3 Object Lock is the best choice because it provides WORM protections against modification or deletion."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1016",
+      "domain": "S3",
+      "tags": [
+        "pre-signed-urls",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: grant temporary, scoped object access without making the bucket public. Which S3 storage architecture capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SSE-KMS encryption"
+        },
+        {
+          "key": "B",
+          "text": "Pre-signed URLs"
+        },
+        {
+          "key": "C",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        },
+        {
+          "key": "D",
+          "text": "S3 Cross-Region Replication"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: grant temporary, scoped object access without making the bucket public.",
+      "explanation": "Pre-signed URLs is correct because they provide time-limited secure access to specific objects.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SSE-KMS encryption is useful when you need to apply centrally managed encryption keys and audit key usage, but it is not the best fit for this requirement.",
+        "B": "Correct. Pre-signed URLs is the best choice because they provide time-limited secure access to specific objects.",
+        "C": "Incorrect. S3 Lifecycle with Intelligent-Tiering is useful when you need to reduce storage cost for objects with changing access patterns, but it is not the best fit for this requirement.",
+        "D": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1017",
+      "domain": "S3",
+      "tags": [
+        "s3-versioning",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: protect against accidental object overwrite and deletion. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "B",
+          "text": "Pre-signed URLs"
+        },
+        {
+          "key": "C",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "D",
+          "text": "SSE-KMS encryption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: protect against accidental object overwrite and deletion.",
+      "explanation": "S3 Versioning is correct because it keeps multiple object versions for recovery.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Object Lock is useful when you need to enforce immutable retention for compliance records, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Pre-signed URLs is useful when you need to grant temporary, scoped object access without making the bucket public, but it is not the best fit for this requirement.",
+        "C": "Correct. S3 Versioning is the best choice because it keeps multiple object versions for recovery.",
+        "D": "Incorrect. SSE-KMS encryption is useful when you need to apply centrally managed encryption keys and audit key usage, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1018",
+      "domain": "S3",
+      "tags": [
+        "s3-lifecycle-with-intelligent-tiering",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: reduce storage cost for objects with changing access patterns. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "B",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "C",
+          "text": "Pre-signed URLs"
+        },
+        {
+          "key": "D",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce storage cost for objects with changing access patterns.",
+      "explanation": "S3 Lifecycle with Intelligent-Tiering is correct because it transitions or optimizes storage class based on access behavior.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Versioning is useful when you need to protect against accidental object overwrite and deletion, but it is not the best fit for this requirement.",
+        "B": "Incorrect. S3 Object Lock is useful when you need to enforce immutable retention for compliance records, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Pre-signed URLs is useful when you need to grant temporary, scoped object access without making the bucket public, but it is not the best fit for this requirement.",
+        "D": "Correct. S3 Lifecycle with Intelligent-Tiering is the best choice because it transitions or optimizes storage class based on access behavior."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1019",
+      "domain": "S3",
+      "tags": [
+        "s3-cross-region-replication",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to replicate critical objects to another Region for disaster recovery. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "B",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "C",
+          "text": "Pre-signed URLs"
+        },
+        {
+          "key": "D",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: replicate critical objects to another Region for disaster recovery.",
+      "explanation": "S3 Cross-Region Replication is correct because it asynchronously copies objects to a destination bucket in another Region.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. S3 Cross-Region Replication is the best choice because it asynchronously copies objects to a destination bucket in another Region.",
+        "B": "Incorrect. S3 Versioning is useful when you need to protect against accidental object overwrite and deletion, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Pre-signed URLs is useful when you need to grant temporary, scoped object access without making the bucket public, but it is not the best fit for this requirement.",
+        "D": "Incorrect. S3 Lifecycle with Intelligent-Tiering is useful when you need to reduce storage cost for objects with changing access patterns, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1020",
+      "domain": "S3",
+      "tags": [
+        "sse-kms-encryption",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: apply centrally managed encryption keys and audit key usage. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SSE-KMS encryption"
+        },
+        {
+          "key": "B",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "C",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "D",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: apply centrally managed encryption keys and audit key usage.",
+      "explanation": "SSE-KMS encryption is correct because it encrypts objects with AWS KMS key governance and logging.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. SSE-KMS encryption is the best choice because it encrypts objects with AWS KMS key governance and logging.",
+        "B": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement.",
+        "C": "Incorrect. S3 Versioning is useful when you need to protect against accidental object overwrite and deletion, but it is not the best fit for this requirement.",
+        "D": "Incorrect. S3 Lifecycle with Intelligent-Tiering is useful when you need to reduce storage cost for objects with changing access patterns, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1021",
+      "domain": "S3",
+      "tags": [
+        "s3-object-lock",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: enforce immutable retention for compliance records. Which S3 storage architecture capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        },
+        {
+          "key": "B",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "C",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "D",
+          "text": "SSE-KMS encryption"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: enforce immutable retention for compliance records.",
+      "explanation": "S3 Object Lock is correct because it provides WORM protections against modification or deletion.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Lifecycle with Intelligent-Tiering is useful when you need to reduce storage cost for objects with changing access patterns, but it is not the best fit for this requirement.",
+        "B": "Correct. S3 Object Lock is the best choice because it provides WORM protections against modification or deletion.",
+        "C": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement.",
+        "D": "Incorrect. SSE-KMS encryption is useful when you need to apply centrally managed encryption keys and audit key usage, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1022",
+      "domain": "S3",
+      "tags": [
+        "pre-signed-urls",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: grant temporary, scoped object access without making the bucket public. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "B",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "C",
+          "text": "SSE-KMS encryption"
+        },
+        {
+          "key": "D",
+          "text": "Pre-signed URLs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: grant temporary, scoped object access without making the bucket public.",
+      "explanation": "Pre-signed URLs is correct because they provide time-limited secure access to specific objects.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement.",
+        "B": "Incorrect. S3 Object Lock is useful when you need to enforce immutable retention for compliance records, but it is not the best fit for this requirement.",
+        "C": "Incorrect. SSE-KMS encryption is useful when you need to apply centrally managed encryption keys and audit key usage, but it is not the best fit for this requirement.",
+        "D": "Correct. Pre-signed URLs is the best choice because they provide time-limited secure access to specific objects."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1023",
+      "domain": "S3",
+      "tags": [
+        "s3-versioning",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: protect against accidental object overwrite and deletion. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Pre-signed URLs"
+        },
+        {
+          "key": "B",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "C",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "D",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: protect against accidental object overwrite and deletion.",
+      "explanation": "S3 Versioning is correct because it keeps multiple object versions for recovery.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Pre-signed URLs is useful when you need to grant temporary, scoped object access without making the bucket public, but it is not the best fit for this requirement.",
+        "B": "Incorrect. S3 Object Lock is useful when you need to enforce immutable retention for compliance records, but it is not the best fit for this requirement.",
+        "C": "Correct. S3 Versioning is the best choice because it keeps multiple object versions for recovery.",
+        "D": "Incorrect. S3 Lifecycle with Intelligent-Tiering is useful when you need to reduce storage cost for objects with changing access patterns, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1024",
+      "domain": "S3",
+      "tags": [
+        "s3-lifecycle-with-intelligent-tiering",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to reduce storage cost for objects with changing access patterns. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "B",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "C",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        },
+        {
+          "key": "D",
+          "text": "Pre-signed URLs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce storage cost for objects with changing access patterns.",
+      "explanation": "S3 Lifecycle with Intelligent-Tiering is correct because it transitions or optimizes storage class based on access behavior.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Versioning is useful when you need to protect against accidental object overwrite and deletion, but it is not the best fit for this requirement.",
+        "B": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement.",
+        "C": "Correct. S3 Lifecycle with Intelligent-Tiering is the best choice because it transitions or optimizes storage class based on access behavior.",
+        "D": "Incorrect. Pre-signed URLs is useful when you need to grant temporary, scoped object access without making the bucket public, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1025",
+      "domain": "S3",
+      "tags": [
+        "s3-cross-region-replication",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: replicate critical objects to another Region for disaster recovery. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SSE-KMS encryption"
+        },
+        {
+          "key": "B",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "C",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "D",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: replicate critical objects to another Region for disaster recovery.",
+      "explanation": "S3 Cross-Region Replication is correct because it asynchronously copies objects to a destination bucket in another Region.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. SSE-KMS encryption is useful when you need to apply centrally managed encryption keys and audit key usage, but it is not the best fit for this requirement.",
+        "B": "Correct. S3 Cross-Region Replication is the best choice because it asynchronously copies objects to a destination bucket in another Region.",
+        "C": "Incorrect. S3 Versioning is useful when you need to protect against accidental object overwrite and deletion, but it is not the best fit for this requirement.",
+        "D": "Incorrect. S3 Lifecycle with Intelligent-Tiering is useful when you need to reduce storage cost for objects with changing access patterns, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1026",
+      "domain": "S3",
+      "tags": [
+        "sse-kms-encryption",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: apply centrally managed encryption keys and audit key usage. Which S3 storage architecture capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "SSE-KMS encryption"
+        },
+        {
+          "key": "B",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "C",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        },
+        {
+          "key": "D",
+          "text": "S3 Cross-Region Replication"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: apply centrally managed encryption keys and audit key usage.",
+      "explanation": "SSE-KMS encryption is correct because it encrypts objects with AWS KMS key governance and logging.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. SSE-KMS encryption is the best choice because it encrypts objects with AWS KMS key governance and logging.",
+        "B": "Incorrect. S3 Object Lock is useful when you need to enforce immutable retention for compliance records, but it is not the best fit for this requirement.",
+        "C": "Incorrect. S3 Lifecycle with Intelligent-Tiering is useful when you need to reduce storage cost for objects with changing access patterns, but it is not the best fit for this requirement.",
+        "D": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1027",
+      "domain": "S3",
+      "tags": [
+        "s3-object-lock",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: enforce immutable retention for compliance records. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "B",
+          "text": "Pre-signed URLs"
+        },
+        {
+          "key": "C",
+          "text": "SSE-KMS encryption"
+        },
+        {
+          "key": "D",
+          "text": "S3 Object Lock"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: enforce immutable retention for compliance records.",
+      "explanation": "S3 Object Lock is correct because it provides WORM protections against modification or deletion.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Pre-signed URLs is useful when you need to grant temporary, scoped object access without making the bucket public, but it is not the best fit for this requirement.",
+        "C": "Incorrect. SSE-KMS encryption is useful when you need to apply centrally managed encryption keys and audit key usage, but it is not the best fit for this requirement.",
+        "D": "Correct. S3 Object Lock is the best choice because it provides WORM protections against modification or deletion."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1028",
+      "domain": "S3",
+      "tags": [
+        "pre-signed-urls",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: grant temporary, scoped object access without making the bucket public. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Object Lock"
+        },
+        {
+          "key": "B",
+          "text": "S3 Versioning"
+        },
+        {
+          "key": "C",
+          "text": "SSE-KMS encryption"
+        },
+        {
+          "key": "D",
+          "text": "Pre-signed URLs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: grant temporary, scoped object access without making the bucket public.",
+      "explanation": "Pre-signed URLs is correct because they provide time-limited secure access to specific objects.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Object Lock is useful when you need to enforce immutable retention for compliance records, but it is not the best fit for this requirement.",
+        "B": "Incorrect. S3 Versioning is useful when you need to protect against accidental object overwrite and deletion, but it is not the best fit for this requirement.",
+        "C": "Incorrect. SSE-KMS encryption is useful when you need to apply centrally managed encryption keys and audit key usage, but it is not the best fit for this requirement.",
+        "D": "Correct. Pre-signed URLs is the best choice because they provide time-limited secure access to specific objects."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1029",
+      "domain": "S3",
+      "tags": [
+        "s3-versioning",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to protect against accidental object overwrite and deletion. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        },
+        {
+          "key": "B",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "C",
+          "text": "Pre-signed URLs"
+        },
+        {
+          "key": "D",
+          "text": "S3 Versioning"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: protect against accidental object overwrite and deletion.",
+      "explanation": "S3 Versioning is correct because it keeps multiple object versions for recovery.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Lifecycle with Intelligent-Tiering is useful when you need to reduce storage cost for objects with changing access patterns, but it is not the best fit for this requirement.",
+        "B": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Pre-signed URLs is useful when you need to grant temporary, scoped object access without making the bucket public, but it is not the best fit for this requirement.",
+        "D": "Correct. S3 Versioning is the best choice because it keeps multiple object versions for recovery."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    },
+    {
+      "id": "S3-1030",
+      "domain": "S3",
+      "tags": [
+        "s3-lifecycle-with-intelligent-tiering",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: reduce storage cost for objects with changing access patterns. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "S3 Cross-Region Replication"
+        },
+        {
+          "key": "B",
+          "text": "SSE-KMS encryption"
+        },
+        {
+          "key": "C",
+          "text": "S3 Lifecycle with Intelligent-Tiering"
+        },
+        {
+          "key": "D",
+          "text": "S3 Versioning"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce storage cost for objects with changing access patterns.",
+      "explanation": "S3 Lifecycle with Intelligent-Tiering is correct because it transitions or optimizes storage class based on access behavior.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. S3 Cross-Region Replication is useful when you need to replicate critical objects to another Region for disaster recovery, but it is not the best fit for this requirement.",
+        "B": "Incorrect. SSE-KMS encryption is useful when you need to apply centrally managed encryption keys and audit key usage, but it is not the best fit for this requirement.",
+        "C": "Correct. S3 Lifecycle with Intelligent-Tiering is the best choice because it transitions or optimizes storage class based on access behavior.",
+        "D": "Incorrect. S3 Versioning is useful when you need to protect against accidental object overwrite and deletion, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "S3 Storage Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+        }
+      ]
+    }
+  ]
+}

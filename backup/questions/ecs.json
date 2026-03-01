@@ -1,0 +1,1995 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "ECS-001",
+      "domain": "ECS",
+      "tags": [
+        "launch-type",
+        "fargate"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A team wants to run containers without managing EC2 instances. Which ECS launch type should they use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "EC2"
+        },
+        {
+          "key": "B",
+          "text": "Fargate"
+        },
+        {
+          "key": "C",
+          "text": "External"
+        },
+        {
+          "key": "D",
+          "text": "Lambda"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Fargate is the serverless launch type that removes host management.",
+      "incorrect": "This option still requires you to manage underlying infrastructure."
+    },
+    {
+      "id": "ECS-002",
+      "domain": "ECS",
+      "tags": [
+        "task-definition"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Where do you define container image, CPU, memory, and environment settings for ECS tasks?",
+      "options": [
+        {
+          "key": "A",
+          "text": "ECS cluster"
+        },
+        {
+          "key": "B",
+          "text": "Task definition"
+        },
+        {
+          "key": "C",
+          "text": "ECS service"
+        },
+        {
+          "key": "D",
+          "text": "Target group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Task definitions define container configuration and resource settings.",
+      "incorrect": "This option does not define container settings for tasks."
+    },
+    {
+      "id": "ECS-003",
+      "domain": "ECS",
+      "tags": [
+        "service"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What is the primary purpose of an ECS service?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Store container images"
+        },
+        {
+          "key": "B",
+          "text": "Maintain a desired number of tasks"
+        },
+        {
+          "key": "C",
+          "text": "Provide DNS for tasks"
+        },
+        {
+          "key": "D",
+          "text": "Encrypt task logs"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "An ECS service maintains desired count and manages deployments.",
+      "incorrect": "This option does not maintain task count or deployments."
+    },
+    {
+      "id": "ECS-004",
+      "domain": "ECS",
+      "tags": [
+        "cluster"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An ECS cluster is best described as:",
+      "options": [
+        {
+          "key": "A",
+          "text": "A single running container"
+        },
+        {
+          "key": "B",
+          "text": "A logical grouping of ECS tasks and services"
+        },
+        {
+          "key": "C",
+          "text": "A load balancer configuration"
+        },
+        {
+          "key": "D",
+          "text": "An IAM role"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "A cluster groups ECS tasks and services for scheduling and management.",
+      "incorrect": "This option is not a logical grouping of ECS tasks and services."
+    },
+    {
+      "id": "ECS-005",
+      "domain": "ECS",
+      "tags": [
+        "networking",
+        "fargate"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which network mode is required for ECS tasks running on Fargate?",
+      "options": [
+        {
+          "key": "A",
+          "text": "bridge"
+        },
+        {
+          "key": "B",
+          "text": "host"
+        },
+        {
+          "key": "C",
+          "text": "awsvpc"
+        },
+        {
+          "key": "D",
+          "text": "none"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "explanation": "Fargate requires awsvpc networking and assigns each task an ENI.",
+      "incorrect": "This network mode is not supported by Fargate."
+    },
+    {
+      "id": "ECS-006",
+      "domain": "ECS",
+      "tags": [
+        "iam",
+        "task-role",
+        "execution-role"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A development team is deploying a microservices application on Amazon ECS using Fargate. One of the services needs to:\n1. Pull a Docker image from a private Amazon ECR repository\n2. Write application logs to CloudWatch Logs\n3. Retrieve database credentials from AWS Secrets Manager during container startup\n4. Make API calls to Amazon S3 and DynamoDB as part of its business logic\n\nThe team has created two IAM roles: ExecutionRole and ApplicationRole. The team is unsure which permissions should be assigned to which role. Which of the following correctly describes how permissions should be distributed between these two roles?",
+      "options": [
+        {
+          "key": "A",
+          "text": "ExecutionRole should have all permissions (ECR, CloudWatch Logs, Secrets Manager, S3, DynamoDB) because it is the primary role for ECS tasks. ApplicationRole is not needed for Fargate tasks"
+        },
+        {
+          "key": "B",
+          "text": "ExecutionRole needs permissions for ECR image pull, CloudWatch Logs write, and Secrets Manager read. ApplicationRole needs permissions for S3 and DynamoDB access. The ExecutionRole is specified in taskRoleArn and ApplicationRole in executionRoleArn in the task definition"
+        },
+        {
+          "key": "C",
+          "text": "ExecutionRole needs permissions for ECR image pull, CloudWatch Logs write, and Secrets Manager read. ApplicationRole needs permissions for S3 and DynamoDB access. The ExecutionRole is specified in executionRoleArn and ApplicationRole in taskRoleArn in the task definition"
+        },
+        {
+          "key": "D",
+          "text": "ApplicationRole should have all permissions because application code runs under this role. ExecutionRole is only needed for EC2 launch type, not Fargate"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "explanation": "ECS uses two distinct IAM roles with different purposes:\n\n**1. Task Execution Role (executionRoleArn):**\nThis role is assumed by the ECS agent and the Fargate launch type infrastructure. It's used for ECS platform operations, NOT application code. It needs permissions for:\n- **ECR image pull:** `ecr:GetAuthorizationToken`, `ecr:BatchCheckLayerAvailability`, `ecr:GetDownloadUrlForLayer`, `ecr:BatchGetImage`\n- **CloudWatch Logs:** `logs:CreateLogStream`, `logs:PutLogEvents`\n- **Secrets Manager (for secrets injection):** `secretsmanager:GetSecretValue`, `kms:Decrypt` (if secrets are encrypted with custom KMS keys)\n- **SSM Parameter Store (if used):** `ssm:GetParameters`, `kms:Decrypt`\n\nExample execution role policy:\n```json\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Effect\": \"Allow\",\n    \"Action\": [\n      \"ecr:GetAuthorizationToken\",\n      \"ecr:BatchCheckLayerAvailability\",\n      \"ecr:GetDownloadUrlForLayer\",\n      \"ecr:BatchGetImage\",\n      \"logs:CreateLogStream\",\n      \"logs:PutLogEvents\",\n      \"secretsmanager:GetSecretValue\"\n    ],\n    \"Resource\": \"*\"\n  }]\n}\n```\n\n**2. Task Role (taskRoleArn):**\nThis role is assumed by the application containers running inside the task. Your application code uses this role to access AWS services. It needs permissions for:\n- **S3 access:** `s3:GetObject`, `s3:PutObject`, etc.\n- **DynamoDB access:** `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:Query`, etc.\n- Any other AWS services your application needs to call\n\nExample task role policy:\n```json\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Effect\": \"Allow\",\n    \"Action\": [\n      \"s3:GetObject\",\n      \"s3:PutObject\",\n      \"dynamodb:GetItem\",\n      \"dynamodb:PutItem\",\n      \"dynamodb:Query\"\n    ],\n    \"Resource\": [\n      \"arn:aws:s3:::my-bucket/*\",\n      \"arn:aws:dynamodb:us-east-1:123456789012:table/MyTable\"\n    ]\n  }]\n}\n```\n\n**Task Definition Configuration:**\n```json\n{\n  \"family\": \"my-app\",\n  \"executionRoleArn\": \"arn:aws:iam::123456789012:role/ExecutionRole\",\n  \"taskRoleArn\": \"arn:aws:iam::123456789012:role/ApplicationRole\",\n  \"containerDefinitions\": [...]\n}\n```\n\n**Key Principle:**\n- Execution Role = ECS infrastructure permissions (before and during container startup)\n- Task Role = Application permissions (what your code needs to do its job)\n\nThis separation follows the principle of least privilege and allows you to tightly control what the ECS platform can do versus what your application can do.\n\nReferences:\n- Amazon ECS task execution IAM role: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html\n- Amazon ECS task IAM role: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html",
+      "incorrect": "This option confuses the purpose of execution role and task role, or incorrectly assigns permissions to the wrong role. The execution role is for ECS platform operations (image pull, logging, secrets retrieval), while the task role is for your application's business logic (S3, DynamoDB, etc.). Mixing these up or assigning all permissions to one role violates the principle of least privilege and can create security risks. Also note that taskRoleArn is for application permissions (task role), and executionRoleArn is for platform permissions (execution role).",
+      "hint": "Think about who uses each role: the ECS service/agent (before your app runs) vs. your application code (while it's running)"
+    },
+    {
+      "id": "ECS-007",
+      "domain": "ECS",
+      "tags": [
+        "ecr",
+        "images"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which AWS service is commonly used to store container images for ECS?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon ECR"
+        },
+        {
+          "key": "B",
+          "text": "Amazon S3"
+        },
+        {
+          "key": "C",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "key": "D",
+          "text": "AWS Secrets Manager"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Amazon ECR is the managed container registry used by ECS.",
+      "incorrect": "This option is not a container image registry."
+    },
+    {
+      "id": "ECS-008",
+      "domain": "ECS",
+      "tags": [
+        "load-balancer"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which load balancer type is most commonly used with ECS services for HTTP/HTTPS traffic?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Network Load Balancer only"
+        },
+        {
+          "key": "B",
+          "text": "Classic Load Balancer only"
+        },
+        {
+          "key": "C",
+          "text": "Application Load Balancer"
+        },
+        {
+          "key": "D",
+          "text": "Gateway Load Balancer"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "explanation": "ALB is the standard Layer 7 load balancer for HTTP/HTTPS ECS services.",
+      "incorrect": "This option is not the typical Layer 7 load balancer for ECS web traffic."
+    },
+    {
+      "id": "ECS-009",
+      "domain": "ECS",
+      "tags": [
+        "autoscaling"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which AWS service manages automatic scaling of ECS service desired count?",
+      "options": [
+        {
+          "key": "A",
+          "text": "EC2 Auto Scaling group"
+        },
+        {
+          "key": "B",
+          "text": "Application Auto Scaling"
+        },
+        {
+          "key": "C",
+          "text": "AWS Systems Manager"
+        },
+        {
+          "key": "D",
+          "text": "Amazon CloudFront"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Application Auto Scaling manages ECS service desired-count scaling policies.",
+      "incorrect": "This option does not manage ECS service desired-count scaling."
+    },
+    {
+      "id": "ECS-010",
+      "domain": "ECS",
+      "tags": [
+        "agent",
+        "ec2"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "On ECS with EC2 launch type, what component runs on the instance to communicate with ECS?",
+      "options": [
+        {
+          "key": "A",
+          "text": "ECS agent"
+        },
+        {
+          "key": "B",
+          "text": "CloudWatch agent"
+        },
+        {
+          "key": "C",
+          "text": "SSM agent"
+        },
+        {
+          "key": "D",
+          "text": "ECR daemon"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "The ECS agent registers the instance and reports task status.",
+      "incorrect": "This option is not the component that registers with ECS and manages tasks."
+    },
+    {
+      "id": "ECS-011",
+      "domain": "ECS",
+      "tags": [
+        "capacity-provider"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want ECS to manage how tasks use Fargate and an Auto Scaling group with managed scaling. Which ECS feature defines the capacity sources and scaling behavior?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Task definition"
+        },
+        {
+          "key": "B",
+          "text": "Capacity provider"
+        },
+        {
+          "key": "C",
+          "text": "Service discovery"
+        },
+        {
+          "key": "D",
+          "text": "Cloud Map namespace"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Capacity providers define compute capacity sources and can enable managed scaling.",
+      "incorrect": "This option does not define compute capacity sources or managed scaling."
+    },
+    {
+      "id": "ECS-012",
+      "domain": "ECS",
+      "tags": [
+        "capacity-provider",
+        "spot"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need an ECS service to run on EC2 Spot Instances with managed scaling. What should you configure?",
+      "options": [
+        {
+          "key": "A",
+          "text": "A capacity provider backed by an Auto Scaling group using Spot"
+        },
+        {
+          "key": "B",
+          "text": "A Fargate Spot platform version"
+        },
+        {
+          "key": "C",
+          "text": "ECS Exec with Session Manager"
+        },
+        {
+          "key": "D",
+          "text": "A Classic Load Balancer"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Use a Spot-backed Auto Scaling group and associate it with a capacity provider.",
+      "incorrect": "This option does not configure Spot-backed EC2 capacity for the service."
+    },
+    {
+      "id": "ECS-013",
+      "domain": "ECS",
+      "tags": [
+        "logging",
+        "cloudwatch"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which log driver sends ECS container stdout and stderr to Amazon CloudWatch Logs?",
+      "options": [
+        {
+          "key": "A",
+          "text": "json-file"
+        },
+        {
+          "key": "B",
+          "text": "awslogs"
+        },
+        {
+          "key": "C",
+          "text": "fluentd"
+        },
+        {
+          "key": "D",
+          "text": "gelf"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The awslogs driver integrates ECS with CloudWatch Logs.",
+      "incorrect": "This driver does not send logs to CloudWatch Logs."
+    },
+    {
+      "id": "ECS-014",
+      "domain": "ECS",
+      "tags": [
+        "placement",
+        "strategy"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which ECS task placement strategy spreads tasks evenly across Availability Zones?",
+      "options": [
+        {
+          "key": "A",
+          "text": "spread"
+        },
+        {
+          "key": "B",
+          "text": "binpack"
+        },
+        {
+          "key": "C",
+          "text": "random"
+        },
+        {
+          "key": "D",
+          "text": "distinctInstance"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "The spread strategy distributes tasks across the specified attribute such as AZ.",
+      "incorrect": "This strategy does not balance tasks across Availability Zones."
+    },
+    {
+      "id": "ECS-015",
+      "domain": "ECS",
+      "tags": [
+        "deployment",
+        "circuit-breaker"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "When the ECS deployment circuit breaker with rollback is enabled, what happens if a deployment fails?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Tasks stop after a fixed time"
+        },
+        {
+          "key": "B",
+          "text": "The deployment is rolled back to the last stable task set"
+        },
+        {
+          "key": "C",
+          "text": "Service discovery is disabled"
+        },
+        {
+          "key": "D",
+          "text": "Traffic is routed to S3"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The circuit breaker detects failure and automatically rolls back to the last stable version.",
+      "incorrect": "This option does not automatically roll back failed deployments."
+    },
+    {
+      "id": "ECS-016",
+      "domain": "ECS",
+      "tags": [
+        "deployment",
+        "blue-green"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which AWS service orchestrates blue/green deployments for ECS services?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS CodeDeploy"
+        },
+        {
+          "key": "B",
+          "text": "AWS CodeCommit"
+        },
+        {
+          "key": "C",
+          "text": "AWS CodePipeline"
+        },
+        {
+          "key": "D",
+          "text": "AWS CloudFormation"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "CodeDeploy manages blue/green traffic shifting for ECS services.",
+      "incorrect": "This service does not manage blue/green deployments for ECS."
+    },
+    {
+      "id": "ECS-017",
+      "domain": "ECS",
+      "tags": [
+        "service-discovery"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which AWS service provides service discovery for ECS services and registers instances in DNS?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Cloud Map"
+        },
+        {
+          "key": "B",
+          "text": "Amazon Route 53 Resolver"
+        },
+        {
+          "key": "C",
+          "text": "AWS Global Accelerator"
+        },
+        {
+          "key": "D",
+          "text": "Amazon VPC Lattice"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Cloud Map integrates with ECS to register service instances for discovery.",
+      "incorrect": "This option is not used for ECS service discovery registration."
+    },
+    {
+      "id": "ECS-018",
+      "domain": "ECS",
+      "tags": [
+        "ecs-exec"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which ECS feature lets you open an interactive shell into a running task?",
+      "options": [
+        {
+          "key": "A",
+          "text": "ECS Exec"
+        },
+        {
+          "key": "B",
+          "text": "ECS Anywhere"
+        },
+        {
+          "key": "C",
+          "text": "AWS CloudShell"
+        },
+        {
+          "key": "D",
+          "text": "AWS Batch"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "ECS Exec provides interactive command sessions into running containers.",
+      "incorrect": "This option does not provide interactive shell access to ECS tasks."
+    },
+    {
+      "id": "ECS-019",
+      "domain": "ECS",
+      "tags": [
+        "task-definition",
+        "revision"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "When you register an updated task definition, ECS creates:",
+      "options": [
+        {
+          "key": "A",
+          "text": "A new cluster"
+        },
+        {
+          "key": "B",
+          "text": "A new task definition revision"
+        },
+        {
+          "key": "C",
+          "text": "A new service"
+        },
+        {
+          "key": "D",
+          "text": "A new target group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Task definition updates register a new revision.",
+      "incorrect": "This action does not create new infrastructure resources."
+    },
+    {
+      "id": "ECS-020",
+      "domain": "ECS",
+      "tags": [
+        "service",
+        "deployment"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "To deploy a new container version with ECS, you typically update the service to use:",
+      "options": [
+        {
+          "key": "A",
+          "text": "A new task definition revision"
+        },
+        {
+          "key": "B",
+          "text": "A new cluster"
+        },
+        {
+          "key": "C",
+          "text": "A new VPC"
+        },
+        {
+          "key": "D",
+          "text": "A new security group only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Updating the service to a new task definition revision triggers a deployment.",
+      "incorrect": "This change does not roll out a new container version."
+    },
+    {
+      "id": "ECS-021",
+      "domain": "ECS",
+      "tags": [
+        "health-check"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For an ECS service behind an Application Load Balancer, which component performs health checks on tasks?",
+      "options": [
+        {
+          "key": "A",
+          "text": "ECS agent"
+        },
+        {
+          "key": "B",
+          "text": "ALB target group"
+        },
+        {
+          "key": "C",
+          "text": "CloudWatch Logs"
+        },
+        {
+          "key": "D",
+          "text": "Amazon ECR"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The ALB target group performs health checks against tasks.",
+      "incorrect": "This component does not perform ALB health checks on tasks."
+    },
+    {
+      "id": "ECS-022",
+      "domain": "ECS",
+      "tags": [
+        "storage",
+        "efs",
+        "fargate"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A media processing company is migrating their video transcoding application to AWS ECS using Fargate. The application architecture includes:\n\n- Multiple ECS tasks running in parallel across different Availability Zones for high availability\n- Each task processes video files that are 500MB to 2GB in size\n- Tasks need to read input files from a shared location and write output files to the same shared location\n- Other tasks must be able to immediately see files written by any task (consistent file system view)\n- The solution must support both Fargate and EC2 launch types\n- Storage must persist even if all tasks are stopped\n- The company wants to minimize operational overhead and avoid managing storage infrastructure\n\nWhich storage solution meets ALL of these requirements?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Attach EBS volumes to the ECS tasks and configure EBS Multi-Attach to allow multiple tasks to access the same volume simultaneously. Use EBS snapshots for backup and recovery"
+        },
+        {
+          "key": "B",
+          "text": "Create an Amazon EFS file system in the same VPC, create an EFS access point, and configure the task definition with an EFS volume configuration that mounts the file system to all containers using the awsvpc network mode"
+        },
+        {
+          "key": "C",
+          "text": "Configure the EC2 host instance store as a Docker volume and share it across all tasks running on the same instance. Use AWS DataSync to replicate data across instances in different Availability Zones"
+        },
+        {
+          "key": "D",
+          "text": "Use Amazon S3 for storage and mount the S3 bucket as a file system using s3fs-fuse or similar FUSE-based filesystem driver in each container. Configure S3 Transfer Acceleration for better performance"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Amazon EFS (Elastic File System) is the correct solution for this scenario because it meets all requirements:\n\n**Why EFS is the right choice:**\n\n1. **Shared Access Across Multiple Tasks:**\n   - EFS provides a true shared file system that can be mounted by multiple ECS tasks simultaneously\n   - All tasks get a consistent view of the filesystem with immediate visibility of changes\n   - Supports concurrent reads and writes from multiple tasks\n\n2. **Works with Fargate:**\n   - EFS is fully supported by both Fargate and EC2 launch types\n   - No host management required for Fargate\n\n3. **Persistent Storage:**\n   - Data persists independently of task lifecycle\n   - Files remain available even when all tasks are stopped\n   - Automatically replicated across multiple Availability Zones\n\n4. **High Availability:**\n   - EFS is a regional service that spans multiple AZs\n   - Tasks in different AZs can access the same file system\n   - No single point of failure\n\n5. **Managed Service:**\n   - No infrastructure to manage\n   - Automatically scales capacity\n   - AWS handles replication, backups, and maintenance\n\n**Implementation in Task Definition:**\n\n```json\n{\n  \"family\": \"video-transcoder\",\n  \"networkMode\": \"awsvpc\",\n  \"requiresCompatibilities\": [\"FARGATE\"],\n  \"cpu\": \"1024\",\n  \"memory\": \"2048\",\n  \"volumes\": [{\n    \"name\": \"shared-storage\",\n    \"efsVolumeConfiguration\": {\n      \"fileSystemId\": \"fs-1234567\",\n      \"transitEncryption\": \"ENABLED\",\n      \"authorizationConfig\": {\n        \"accessPointId\": \"fsap-1234567\",\n        \"iam\": \"ENABLED\"\n      }\n    }\n  }],\n  \"containerDefinitions\": [{\n    \"name\": \"transcoder\",\n    \"image\": \"transcoder:latest\",\n    \"mountPoints\": [{\n      \"sourceVolume\": \"shared-storage\",\n      \"containerPath\": \"/mnt/shared\",\n      \"readOnly\": false\n    }]\n  }]\n}\n```\n\n**Performance Considerations:**\n- EFS Performance Modes: General Purpose (default) or Max I/O for highly parallel workloads\n- EFS Throughput Modes: Bursting (default) or Provisioned for consistent throughput\n- For video processing, consider Provisioned Throughput mode\n\n**Security:**\n- Encryption in transit using TLS\n- Encryption at rest using AWS KMS\n- VPC isolation with security groups\n- IAM-based access control with EFS access points\n\n**Why other options don't work:**\n\n- **A (EBS):** EBS volumes are block storage attached to EC2 instances, not to Fargate tasks. EBS Multi-Attach only works with specific instance types and is limited to 16 instances in the same AZ. Not suitable for Fargate or cross-AZ access.\n\n- **C (Instance Store):** Instance store is ephemeral storage that is lost when the instance stops. Not available for Fargate. Not persistent. Requires complex replication logic. Not managed.\n\n- **D (S3 with FUSE):** While S3 can work for some use cases, s3fs-fuse provides a POSIX-like interface but with limitations:\n  - Not truly POSIX-compliant (eventual consistency issues in older regions)\n  - Poor performance for small files and metadata operations\n  - Limited concurrent write support\n  - Requires custom container images with FUSE drivers\n  - No support for file locking or certain filesystem operations\n  - S3 is object storage, not a file system\n\nReferences:\n- Using Amazon EFS file systems with Amazon ECS: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html\n- Amazon EFS: How it works: https://docs.aws.amazon.com/efs/latest/ug/how-it-works.html\n- Tutorial: Using Amazon EFS file systems with Amazon ECS: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/tutorial-efs-volumes.html",
+      "incorrect": "This option either doesn't support Fargate (EBS, instance store), lacks true shared filesystem semantics (S3), or doesn't provide persistent storage (instance store). EBS volumes are attached to EC2 instances, not containers, and cannot be shared across Fargate tasks. Instance store is ephemeral and lost on instance termination. S3 with FUSE drivers has limitations around POSIX compliance, performance, and concurrent writes. Only EFS provides true shared, persistent, POSIX-compliant file system storage for ECS tasks.",
+      "hint": "Think about what provides a managed, POSIX-compliant, shared file system that works with serverless containers"
+    },
+    {
+      "id": "ECS-023",
+      "domain": "ECS",
+      "tags": [
+        "secrets"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Where should you store database credentials so ECS can inject them securely at runtime?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Plaintext environment variables in the task definition"
+        },
+        {
+          "key": "B",
+          "text": "AWS Secrets Manager or SSM Parameter Store referenced by the task definition"
+        },
+        {
+          "key": "C",
+          "text": "Hardcode them in the container image"
+        },
+        {
+          "key": "D",
+          "text": "Store them in ECR repository tags"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "ECS supports secure secret injection from Secrets Manager or SSM Parameter Store.",
+      "incorrect": "This option stores secrets insecurely or cannot be injected at runtime."
+    },
+    {
+      "id": "ECS-024",
+      "domain": "ECS",
+      "tags": [
+        "networking",
+        "awsvpc"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "In ECS awsvpc network mode, each task gets:",
+      "options": [
+        {
+          "key": "A",
+          "text": "The host IP and a shared network namespace"
+        },
+        {
+          "key": "B",
+          "text": "Its own ENI and private IP address"
+        },
+        {
+          "key": "C",
+          "text": "A public IP by default"
+        },
+        {
+          "key": "D",
+          "text": "No network interface"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "awsvpc assigns a dedicated ENI and private IP to each task.",
+      "incorrect": "This option does not describe task-level ENI/IP allocation."
+    },
+    {
+      "id": "ECS-025",
+      "domain": "ECS",
+      "tags": [
+        "ec2",
+        "ami"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For the EC2 launch type, which AMI is recommended to run the ECS agent and optimized settings?",
+      "options": [
+        {
+          "key": "A",
+          "text": "ECS-optimized Amazon Linux AMI"
+        },
+        {
+          "key": "B",
+          "text": "Generic Windows Server AMI without ECS agent"
+        },
+        {
+          "key": "C",
+          "text": "Ubuntu AMI without ECS agent"
+        },
+        {
+          "key": "D",
+          "text": "AWS Lambda runtime"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "ECS-optimized AMIs include the ECS agent, Docker, and recommended settings.",
+      "incorrect": "This AMI does not include the ECS agent and optimized configuration."
+    },
+    {
+      "id": "ECS-026",
+      "domain": "ECS",
+      "tags": [
+        "placement",
+        "constraints"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which ECS placement constraint ensures tasks are placed on distinct EC2 instances?",
+      "options": [
+        {
+          "key": "A",
+          "text": "distinctInstance"
+        },
+        {
+          "key": "B",
+          "text": "memberOf"
+        },
+        {
+          "key": "C",
+          "text": "binpack"
+        },
+        {
+          "key": "D",
+          "text": "spread"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "distinctInstance prevents multiple tasks from running on the same instance.",
+      "incorrect": "This constraint does not guarantee one task per instance."
+    },
+    {
+      "id": "ECS-027",
+      "domain": "ECS",
+      "tags": [
+        "scheduling"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which scheduling strategy is the default for ECS services?",
+      "options": [
+        {
+          "key": "A",
+          "text": "REPLICA"
+        },
+        {
+          "key": "B",
+          "text": "DAEMON"
+        },
+        {
+          "key": "C",
+          "text": "ONE_PER_AZ"
+        },
+        {
+          "key": "D",
+          "text": "SPOT"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "REPLICA is the default and maintains the desired count of tasks.",
+      "incorrect": "This strategy does not maintain a desired count for services."
+    },
+    {
+      "id": "ECS-028",
+      "domain": "ECS",
+      "tags": [
+        "monitoring",
+        "cloudwatch"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which AWS service provides ECS service and task metrics and supports alarms?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon CloudWatch"
+        },
+        {
+          "key": "B",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "key": "C",
+          "text": "AWS Config"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "CloudWatch provides ECS metrics and supports alarms and dashboards.",
+      "incorrect": "This service does not provide ECS performance metrics and alarms."
+    },
+    {
+      "id": "ECS-029",
+      "domain": "ECS",
+      "tags": [
+        "tasks",
+        "run-task"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to run a one-off ECS task without creating a service. Which API should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "RunTask"
+        },
+        {
+          "key": "B",
+          "text": "CreateService"
+        },
+        {
+          "key": "C",
+          "text": "RegisterTaskDefinition"
+        },
+        {
+          "key": "D",
+          "text": "UpdateService"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "RunTask starts tasks directly without creating a long-running service.",
+      "incorrect": "This action is for services or definitions, not launching one-off tasks."
+    },
+    {
+      "id": "ECS-030",
+      "domain": "ECS",
+      "tags": [
+        "logging"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Where do ECS container logs go when using the awslogs driver?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon S3"
+        },
+        {
+          "key": "B",
+          "text": "Amazon CloudWatch Logs"
+        },
+        {
+          "key": "C",
+          "text": "AWS Config"
+        },
+        {
+          "key": "D",
+          "text": "Amazon DynamoDB"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The awslogs driver sends container output to CloudWatch Logs.",
+      "incorrect": "This destination is not where awslogs sends container output."
+    },
+    {
+      "id": "ECS-031",
+      "domain": "ECS",
+      "tags": [
+        "networking",
+        "bridge"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which ECS network mode is supported only on EC2 launch type (not Fargate)?",
+      "options": [
+        {
+          "key": "A",
+          "text": "awsvpc"
+        },
+        {
+          "key": "B",
+          "text": "bridge"
+        },
+        {
+          "key": "C",
+          "text": "none"
+        },
+        {
+          "key": "D",
+          "text": "public"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "bridge networking is supported on EC2 launch type but not on Fargate.",
+      "incorrect": "This mode is not limited to EC2-only networking."
+    },
+    {
+      "id": "ECS-032",
+      "domain": "ECS",
+      "tags": [
+        "iam",
+        "execution-role"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which IAM role is used by ECS to pull images and write logs on behalf of a task?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Task role"
+        },
+        {
+          "key": "B",
+          "text": "Execution role"
+        },
+        {
+          "key": "C",
+          "text": "Service-linked role"
+        },
+        {
+          "key": "D",
+          "text": "Instance profile role"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The execution role is assumed by ECS for image pulls and log publishing.",
+      "incorrect": "This role is not used by ECS for image pulls and logging."
+    },
+    {
+      "id": "ECS-033",
+      "domain": "ECS",
+      "tags": [
+        "scheduling",
+        "daemon"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which ECS scheduling strategy runs exactly one task on each EC2 instance?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Replica"
+        },
+        {
+          "key": "B",
+          "text": "Daemon"
+        },
+        {
+          "key": "C",
+          "text": "OnePerAZ"
+        },
+        {
+          "key": "D",
+          "text": "Spot"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Daemon scheduling runs one task on every eligible EC2 instance.",
+      "incorrect": "This strategy does not run one task per instance."
+    },
+    {
+      "id": "ECS-034",
+      "domain": "ECS",
+      "tags": [
+        "placement",
+        "binpack"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which placement strategy attempts to use as few instances as possible based on CPU or memory?",
+      "options": [
+        {
+          "key": "A",
+          "text": "spread"
+        },
+        {
+          "key": "B",
+          "text": "binpack"
+        },
+        {
+          "key": "C",
+          "text": "random"
+        },
+        {
+          "key": "D",
+          "text": "distinctInstance"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Binpack places tasks on the fewest instances by packing CPU or memory.",
+      "incorrect": "This strategy does not minimize the number of instances used."
+    },
+    {
+      "id": "ECS-035",
+      "domain": "ECS",
+      "tags": [
+        "deployment",
+        "rolling"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What is the default deployment type for ECS services?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Blue/green"
+        },
+        {
+          "key": "B",
+          "text": "Rolling update"
+        },
+        {
+          "key": "C",
+          "text": "Canary"
+        },
+        {
+          "key": "D",
+          "text": "All-at-once"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "ECS services use rolling updates by default.",
+      "incorrect": "This deployment type is not the default for ECS services."
+    },
+    {
+      "id": "ECS-036",
+      "domain": "ECS",
+      "tags": [
+        "cpu",
+        "memory"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For Fargate tasks, where do you specify CPU and memory settings?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cluster level"
+        },
+        {
+          "key": "B",
+          "text": "Service level"
+        },
+        {
+          "key": "C",
+          "text": "Task definition level"
+        },
+        {
+          "key": "D",
+          "text": "Target group level"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "explanation": "Fargate CPU/memory are configured in the task definition.",
+      "incorrect": "For Fargate, CPU and memory are not configured at this level."
+    },
+    {
+      "id": "ECS-037",
+      "domain": "ECS",
+      "tags": [
+        "iam",
+        "logs"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which permission is required for the execution role to write logs to CloudWatch Logs?",
+      "options": [
+        {
+          "key": "A",
+          "text": "logs:PutLogEvents"
+        },
+        {
+          "key": "B",
+          "text": "logs:DeleteLogGroup"
+        },
+        {
+          "key": "C",
+          "text": "logs:DescribeLogGroups"
+        },
+        {
+          "key": "D",
+          "text": "logs:StartQuery"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Publishing logs requires logs:PutLogEvents (and typically logs:CreateLogStream).",
+      "incorrect": "This permission does not allow writing log events to CloudWatch Logs."
+    },
+    {
+      "id": "ECS-038",
+      "domain": "ECS",
+      "tags": [
+        "service",
+        "desired-count"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which ECS service setting specifies how many tasks should be running?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Desired count"
+        },
+        {
+          "key": "B",
+          "text": "Task definition"
+        },
+        {
+          "key": "C",
+          "text": "Cluster"
+        },
+        {
+          "key": "D",
+          "text": "Capacity provider"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Desired count defines the number of tasks the service keeps running.",
+      "incorrect": "This setting does not specify how many tasks should run."
+    },
+    {
+      "id": "ECS-039",
+      "domain": "ECS",
+      "tags": [
+        "service",
+        "deployment"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which ECS service setting defines the lower bound of healthy tasks during a deployment?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Minimum healthy percent"
+        },
+        {
+          "key": "B",
+          "text": "Platform version"
+        },
+        {
+          "key": "C",
+          "text": "Task role"
+        },
+        {
+          "key": "D",
+          "text": "Cluster capacity"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Minimum healthy percent sets the minimum healthy tasks during deployment.",
+      "incorrect": "This setting does not define the minimum healthy task count."
+    },
+    {
+      "id": "ECS-040",
+      "domain": "ECS",
+      "tags": [
+        "service",
+        "deployment"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which ECS service setting limits the maximum number of running tasks during a deployment?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Maximum percent"
+        },
+        {
+          "key": "B",
+          "text": "Minimum healthy percent"
+        },
+        {
+          "key": "C",
+          "text": "Placement constraints"
+        },
+        {
+          "key": "D",
+          "text": "Task size"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Maximum percent caps the upper bound of tasks during deployments.",
+      "incorrect": "This setting does not cap the maximum number of tasks."
+    },
+    {
+      "id": "ECS-041",
+      "domain": "ECS",
+      "tags": [
+        "ecs-anywhere"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "What does ECS Anywhere enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Running ECS tasks on on-premises or external servers"
+        },
+        {
+          "key": "B",
+          "text": "Running ECS tasks only on AWS Outposts"
+        },
+        {
+          "key": "C",
+          "text": "Running ECS tasks without a task definition"
+        },
+        {
+          "key": "D",
+          "text": "Running ECS tasks in CloudFront"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "ECS Anywhere extends ECS to external or on-premises compute.",
+      "incorrect": "This option does not allow running ECS tasks on external servers."
+    },
+    {
+      "id": "ECS-042",
+      "domain": "ECS",
+      "tags": [
+        "placement",
+        "constraints"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which ECS placement constraint lets you use an expression to target instances with specific attributes?",
+      "options": [
+        {
+          "key": "A",
+          "text": "distinctInstance"
+        },
+        {
+          "key": "B",
+          "text": "memberOf"
+        },
+        {
+          "key": "C",
+          "text": "binpack"
+        },
+        {
+          "key": "D",
+          "text": "spread"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "memberOf uses expressions to match instance attributes for placement.",
+      "incorrect": "This constraint does not use an attribute expression for placement."
+    },
+    {
+      "id": "ECS-043",
+      "domain": "ECS",
+      "tags": [
+        "health-check",
+        "containers"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Where do you define a container health check command for ECS?",
+      "options": [
+        {
+          "key": "A",
+          "text": "ECS cluster settings"
+        },
+        {
+          "key": "B",
+          "text": "Container definition in the task definition"
+        },
+        {
+          "key": "C",
+          "text": "Load balancer listener rule"
+        },
+        {
+          "key": "D",
+          "text": "CloudWatch alarm"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Container health checks are configured in the task definition container definition.",
+      "incorrect": "This option does not define container-level health check commands."
+    },
+    {
+      "id": "ECS-044",
+      "domain": "ECS",
+      "tags": [
+        "networking",
+        "public-ip"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "How do you assign a public IP to a Fargate task?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable Assign public IP in the service or RunTask network configuration"
+        },
+        {
+          "key": "B",
+          "text": "Attach an Internet Gateway to the task"
+        },
+        {
+          "key": "C",
+          "text": "Attach an Elastic IP in the task definition"
+        },
+        {
+          "key": "D",
+          "text": "Use bridge networking"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Public IP assignment is configured in the awsvpc network configuration.",
+      "incorrect": "This option does not control public IP assignment for tasks."
+    },
+    {
+      "id": "ECS-045",
+      "domain": "ECS",
+      "tags": [
+        "load-balancer",
+        "fargate"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which target type must be used in an ALB target group for Fargate tasks?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Instance"
+        },
+        {
+          "key": "B",
+          "text": "IP"
+        },
+        {
+          "key": "C",
+          "text": "Lambda"
+        },
+        {
+          "key": "D",
+          "text": "Network"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Fargate tasks register using IP target type because tasks have their own ENIs.",
+      "incorrect": "This target type cannot register Fargate task ENIs."
+    },
+    {
+      "id": "ECS-046",
+      "domain": "ECS",
+      "tags": [
+        "secrets",
+        "env"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which task definition field maps Secrets Manager or SSM values to environment variables?",
+      "options": [
+        {
+          "key": "A",
+          "text": "environment"
+        },
+        {
+          "key": "B",
+          "text": "secrets"
+        },
+        {
+          "key": "C",
+          "text": "volumes"
+        },
+        {
+          "key": "D",
+          "text": "portMappings"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The secrets field injects values from Secrets Manager or SSM.",
+      "incorrect": "This field does not inject secrets into environment variables."
+    },
+    {
+      "id": "ECS-047",
+      "domain": "ECS",
+      "tags": [
+        "service",
+        "autoscaling"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which metric is commonly used to scale ECS services with target tracking?",
+      "options": [
+        {
+          "key": "A",
+          "text": "CPU utilization"
+        },
+        {
+          "key": "B",
+          "text": "Number of IAM users"
+        },
+        {
+          "key": "C",
+          "text": "S3 bucket size"
+        },
+        {
+          "key": "D",
+          "text": "VPC route count"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "Target tracking typically uses CPU or memory utilization for scaling.",
+      "incorrect": "This metric is not used for ECS target tracking scaling."
+    },
+    {
+      "id": "ECS-048",
+      "domain": "ECS",
+      "tags": [
+        "ecs-exec"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which setting must be enabled to use ECS Exec?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable execute command"
+        },
+        {
+          "key": "B",
+          "text": "Enable container insights"
+        },
+        {
+          "key": "C",
+          "text": "Enable spot instance draining"
+        },
+        {
+          "key": "D",
+          "text": "Enable service discovery"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "ECS Exec requires enableExecuteCommand on the service or task.",
+      "incorrect": "This setting does not enable ECS Exec sessions."
+    },
+    {
+      "id": "ECS-049",
+      "domain": "ECS",
+      "tags": [
+        "metadata"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Where can an ECS task retrieve its IAM role credentials at runtime?",
+      "options": [
+        {
+          "key": "A",
+          "text": "A shared S3 bucket"
+        },
+        {
+          "key": "B",
+          "text": "The task metadata endpoint"
+        },
+        {
+          "key": "C",
+          "text": "The CloudWatch Logs API"
+        },
+        {
+          "key": "D",
+          "text": "The ECS console"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "The task metadata endpoint exposes task credentials and metadata.",
+      "incorrect": "This source is not used for retrieving task credentials."
+    },
+    {
+      "id": "ECS-050",
+      "domain": "ECS",
+      "tags": [
+        "security",
+        "sg"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "In awsvpc mode, which resource controls inbound traffic to a task?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Network ACL only"
+        },
+        {
+          "key": "B",
+          "text": "Security group attached to the task ENI"
+        },
+        {
+          "key": "C",
+          "text": "IAM role policy"
+        },
+        {
+          "key": "D",
+          "text": "Route table only"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "Security groups attached to the task ENI control inbound and outbound traffic.",
+      "incorrect": "This option does not control inbound access to tasks in awsvpc mode."
+    }
+  ]
+}

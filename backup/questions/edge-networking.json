@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "R53-001",
+      "domain": "Route 53",
+      "tags": ["latency", "health-checks", "routing"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A global application is deployed in **us-east-1**, **eu-west-1**, and **ap-southeast-1**. Users should be routed to the **lowest-latency region**, and if a region becomes unhealthy, traffic should automatically fail over to a healthy region. Which Route 53 routing policy should be used?",
+      "options": [
+        {"key": "A", "text": "Weighted routing with 33/33/33 weights"},
+        {"key": "B", "text": "Latency-based routing with health checks"},
+        {"key": "C", "text": "Geolocation routing"},
+        {"key": "D", "text": "Multi-value answer routing without health checks"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Latency-based routing with health checks** routes users to the AWS region that provides the lowest latency, and it can automatically fail over if the endpoint is unhealthy. This matches both requirements: lowest-latency routing and health-based failover.\n\nLatency routing is designed for globally distributed applications where performance is the primary concern.",
+      "incorrect": "- **Weighted routing** distributes traffic based on weights, not latency.\n- **Geolocation routing** uses user location, which may not correlate with latency.\n- **Multi-value routing** can return multiple values but does not prioritize lowest latency and requires health checks to filter endpoints.\n\nOnly latency-based routing provides performance-based selection with health checks.",
+      "hint": "Pick the policy that chooses endpoints based on measured latency and supports health checks."
+    },
+    {
+      "id": "R53-002",
+      "domain": "Route 53",
+      "tags": ["weighted", "canary", "deployment"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A team wants to perform a **canary release** of a new version of their application by sending **10%** of traffic to the new environment and 90% to the existing one. Which Route 53 routing policy is MOST appropriate?",
+      "options": [
+        {"key": "A", "text": "Failover routing"},
+        {"key": "B", "text": "Weighted routing"},
+        {"key": "C", "text": "Latency-based routing"},
+        {"key": "D", "text": "Geoproximity routing"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Weighted routing** lets you split traffic by percentage, making it ideal for canary or blue/green deployments. You can set weights (10/90) and gradually shift traffic.\n\nThis provides a controlled rollout with easy rollback by adjusting weights.",
+      "incorrect": "- **Failover routing** is for active/passive architectures, not traffic splits.\n- **Latency-based routing** chooses the fastest region, not a percentage.\n- **Geoproximity routing** is based on geography and bias, not canary percentages.\n\nWeighted routing is the correct option for canary traffic distribution.",
+      "hint": "Canary releases require explicit percentage-based routing."
+    },
+    {
+      "id": "CF-001",
+      "domain": "CloudFront",
+      "tags": ["oac", "s3", "private-origin"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A company serves static content from an S3 bucket through Amazon CloudFront. The S3 bucket **must not be public** and should only be accessible through CloudFront. What is the BEST way to secure the origin?",
+      "options": [
+        {"key": "A", "text": "Enable S3 public access and restrict by IP"},
+        {"key": "B", "text": "Use CloudFront Origin Access Control (OAC) with a bucket policy"},
+        {"key": "C", "text": "Use a signed URL on S3 without CloudFront"},
+        {"key": "D", "text": "Place the S3 bucket in a public subnet"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Origin Access Control (OAC)** is the recommended way to keep an S3 origin private while allowing access through CloudFront. OAC uses AWS Signature Version 4 signing and a bucket policy to allow only CloudFront to read objects.\n\nThis ensures the bucket is not public and all access goes through CloudFront.",
+      "incorrect": "- **Public access** defeats the requirement to keep the bucket private.\n- **Signed URLs directly to S3** bypass CloudFront and caching.\n- **Subnet placement** does not control S3 public access (S3 is not in your VPC).\n\nOAC + bucket policy is the correct secure pattern.",
+      "hint": "Use the CloudFront feature that grants it private access to S3."
+    },
+    {
+      "id": "GA-001",
+      "domain": "Global Accelerator",
+      "tags": ["global", "static-ip", "tcp-udp"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A SaaS platform serves **TCP and UDP** traffic globally and needs **static anycast IPs** with automatic failover to the closest healthy AWS Region. Which service should be used?",
+      "options": [
+        {"key": "A", "text": "Amazon CloudFront"},
+        {"key": "B", "text": "AWS Global Accelerator"},
+        {"key": "C", "text": "Route 53 weighted routing"},
+        {"key": "D", "text": "Application Load Balancer"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS Global Accelerator** provides static anycast IPs, optimized routing over the AWS global network, and automatic failover to the closest healthy endpoint for both TCP and UDP. It is built for non-HTTP and performance-sensitive workloads.\n\nThis matches the requirement for static IPs and TCP/UDP acceleration.",
+      "incorrect": "- **CloudFront** is optimized for HTTP/HTTPS content delivery, not generic TCP/UDP.\n- **Route 53 weighted routing** does not provide static anycast IPs or network acceleration.\n- **ALB** only supports HTTP/HTTPS and does not provide global static IPs.\n\nGlobal Accelerator is the correct fit.",
+      "hint": "Static anycast IPs for TCP/UDP point to a global network accelerator."
+    },
+    {
+      "id": "DX-001",
+      "domain": "Direct Connect",
+      "tags": ["hybrid", "bandwidth", "private"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A financial company needs **consistent, low-latency, private connectivity** from its data center to AWS. The connection must provide high bandwidth and predictable performance. What is the BEST solution?",
+      "options": [
+        {"key": "A", "text": "Site-to-Site VPN over the internet"},
+        {"key": "B", "text": "AWS Direct Connect"},
+        {"key": "C", "text": "VPC Peering"},
+        {"key": "D", "text": "Transit Gateway without Direct Connect"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS Direct Connect** provides dedicated, private network connectivity with consistent latency and higher bandwidth than internet-based VPNs. It is the standard solution for predictable, high-throughput hybrid connectivity.\n\nFor resilience, a VPN can be added as a backup, but Direct Connect is the primary best choice.",
+      "incorrect": "- **VPN** uses the public internet and has variable latency.\n- **VPC Peering** connects VPCs, not on-premises.\n- **Transit Gateway** is a hub for VPCs and on-prem, but still needs Direct Connect or VPN to reach on-prem.\n\nDirect Connect is required for consistent private connectivity.",
+      "hint": "Look for a dedicated private link with predictable latency."
+    },
+    {
+      "id": "TGW-001",
+      "domain": "Transit Gateway",
+      "tags": ["networking", "hub-and-spoke", "multi-vpc"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A company has **20 VPCs** and several on-premises networks that need full, scalable connectivity. The network team wants a **hub-and-spoke** model with simplified routing and centralized inspection. What is the BEST solution?",
+      "options": [
+        {"key": "A", "text": "Create a full mesh of VPC peering connections"},
+        {"key": "B", "text": "Use AWS Transit Gateway"},
+        {"key": "C", "text": "Use NAT Gateways between all VPCs"},
+        {"key": "D", "text": "Use individual VPNs between every VPC and on-premises"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS Transit Gateway** is designed for large-scale hub-and-spoke connectivity between many VPCs and on-premises networks. It reduces complexity compared to full-mesh peering and supports centralized routing and inspection.\n\nThis is the most scalable and manageable approach for many networks.",
+      "incorrect": "- **Full mesh peering** scales poorly and becomes unmanageable with many VPCs.\n- **NAT Gateways** do not provide VPC-to-VPC routing.\n- **Individual VPNs** are complex and do not scale well.\n\nTransit Gateway is purpose-built for this use case.",
+      "hint": "Use the AWS service that acts as a central routing hub for many VPCs."
+    },
+    {
+      "id": "PL-001",
+      "domain": "PrivateLink",
+      "tags": ["interface-endpoint", "saas", "private-access"],
+      "difficulty": 4,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A SaaS provider wants to expose a service privately to hundreds of customer VPCs **without** VPC peering or public IPs. Customers should connect using private IPs in their own VPCs. Which architecture is BEST?",
+      "options": [
+        {"key": "A", "text": "VPC Peering with every customer VPC"},
+        {"key": "B", "text": "AWS PrivateLink using a Network Load Balancer and interface endpoints"},
+        {"key": "C", "text": "Public ALB with IP allow-listing"},
+        {"key": "D", "text": "Site-to-Site VPN to each customer"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS PrivateLink** allows a service provider to expose services via a **Network Load Balancer** and lets customers connect using **interface VPC endpoints**. This provides private connectivity without VPC peering, avoids IP overlap issues, and scales to many customers.\n\nIt is the standard SaaS private access pattern on AWS.",
+      "incorrect": "- **VPC peering** does not scale well to hundreds of customers and creates routing complexity.\n- **Public ALB** violates the requirement for private connectivity.\n- **VPNs** are operationally heavy and do not scale to many customers.\n\nPrivateLink is purpose-built for this use case.",
+      "hint": "Look for the managed private connectivity service for SaaS providers."
+    }
+  ]
+}

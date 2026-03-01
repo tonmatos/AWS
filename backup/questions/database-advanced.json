@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "AURORA-001",
+      "domain": "Aurora",
+      "tags": ["mysql", "high-availability", "read-scaling"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "An e-commerce company needs a **MySQL-compatible** database with **fast failover** and **read scaling** across multiple read replicas. Which database option is BEST?",
+      "options": [
+        {"key": "A", "text": "Amazon RDS for MySQL with Multi-AZ"},
+        {"key": "B", "text": "Amazon Aurora MySQL with reader endpoint"},
+        {"key": "C", "text": "Amazon DynamoDB"},
+        {"key": "D", "text": "Amazon Redshift"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Amazon Aurora MySQL** provides fast failover, distributed storage across multiple AZs, and built-in read scaling with multiple Aurora replicas. The **reader endpoint** automatically load-balances read traffic.\n\nThis provides both high availability and read scalability for MySQL workloads.",
+      "incorrect": "- **RDS Multi-AZ** provides HA but does not automatically load-balance read replicas.\n- **DynamoDB** is NoSQL and not MySQL compatible.\n- **Redshift** is a data warehouse, not OLTP.\n\nAurora MySQL best meets the requirements.",
+      "hint": "Look for a MySQL-compatible service with reader endpoints and faster failover."
+    },
+    {
+      "id": "RDS-REPLICA-001",
+      "domain": "RDS",
+      "tags": ["read-replica", "scaling", "read-heavy"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A reporting workload is causing **read bottlenecks** on a primary RDS PostgreSQL instance. The team wants to scale reads without impacting write performance. What is the BEST solution?",
+      "options": [
+        {"key": "A", "text": "Increase the instance size only"},
+        {"key": "B", "text": "Create one or more RDS Read Replicas"},
+        {"key": "C", "text": "Enable RDS Multi-AZ"},
+        {"key": "D", "text": "Move the database to DynamoDB"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**RDS Read Replicas** offload read traffic from the primary database and are the standard approach for scaling read-heavy workloads. They can be used for analytics or reporting without affecting writes.\n\nThis directly addresses read bottlenecks.",
+      "incorrect": "- **Scaling up** helps but does not separate read workloads.\n- **Multi-AZ** is for high availability, not read scaling.\n- **DynamoDB** is not a drop-in replacement for relational workloads.\n\nRead Replicas are the right solution.",
+      "hint": "Use the feature that creates read-only copies of the database."
+    },
+    {
+      "id": "DDB-001",
+      "domain": "DynamoDB",
+      "tags": ["partition-key", "hot-partition", "design"],
+      "difficulty": 4,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A DynamoDB table uses a **sequential order ID** as the partition key and is experiencing **hot partitions**. What is the BEST way to improve write distribution?",
+      "options": [
+        {"key": "A", "text": "Switch to strongly consistent reads"},
+        {"key": "B", "text": "Add a random or hash-based suffix to the partition key"},
+        {"key": "C", "text": "Decrease the table's provisioned throughput"},
+        {"key": "D", "text": "Use a single large partition for all items"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "Hot partitions occur when many writes target the same partition key range. Adding a **random or hash-based suffix** to the partition key distributes writes across multiple partitions while still allowing query patterns with a composite key.\n\nThis is a common DynamoDB design pattern for high write throughput.",
+      "incorrect": "- **Strongly consistent reads** affect read consistency, not write distribution.\n- **Reducing throughput** worsens the issue.\n- **Single partition** concentrates traffic and increases hot partitioning.\n\nSpreading the key space is the correct solution.",
+      "hint": "You need to spread writes across more partition keys."
+    },
+    {
+      "id": "DAX-001",
+      "domain": "DynamoDB",
+      "tags": ["dax", "cache", "latency"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "An application using DynamoDB requires **microsecond read latency** for frequently accessed items. What should the team implement?",
+      "options": [
+        {"key": "A", "text": "Enable DynamoDB Streams"},
+        {"key": "B", "text": "Use DynamoDB Accelerator (DAX)"},
+        {"key": "C", "text": "Use Global Secondary Indexes"},
+        {"key": "D", "text": "Switch to on-demand capacity"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**DynamoDB Accelerator (DAX)** is an in-memory cache that sits in front of DynamoDB and provides **microsecond read latency** for read-heavy workloads. It is API-compatible and ideal for hot keys.\n\nThis directly satisfies the latency requirement.",
+      "incorrect": "- **Streams** capture changes, not reduce read latency.\n- **GSIs** add query flexibility but do not provide caching.\n- **On-demand capacity** changes billing mode, not latency.\n\nDAX is purpose-built for this use case.",
+      "hint": "Use the in-memory cache service specifically designed for DynamoDB."
+    },
+    {
+      "id": "DDB-GLOBAL-001",
+      "domain": "DynamoDB",
+      "tags": ["global-tables", "multi-region", "active-active"],
+      "difficulty": 4,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A globally distributed application needs **active-active** writes in multiple regions with low latency and automatic replication. Which DynamoDB feature should be used?",
+      "options": [
+        {"key": "A", "text": "DynamoDB Streams"},
+        {"key": "B", "text": "DynamoDB Global Tables"},
+        {"key": "C", "text": "DynamoDB TTL"},
+        {"key": "D", "text": "DynamoDB Local Secondary Indexes"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**DynamoDB Global Tables** provide multi-region, multi-active replication with automatic conflict resolution. This enables low-latency reads and writes in each region.\n\nIt is the standard DynamoDB solution for active-active global applications.",
+      "incorrect": "- **Streams** capture changes but do not provide multi-region active-active.\n- **TTL** is for automatic item expiration.\n- **LSIs** are for alternative sort keys within a region.\n\nGlobal Tables are the correct feature.",
+      "hint": "You need built-in multi-region, active-active replication."
+    },
+    {
+      "id": "CACHE-001",
+      "domain": "ElastiCache",
+      "tags": ["redis", "session", "persistence"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "An application needs a cache for **user session data**, requires **data persistence**, and relies on **advanced data structures** (sorted sets, hashes). Which cache engine is BEST?",
+      "options": [
+        {"key": "A", "text": "ElastiCache for Memcached"},
+        {"key": "B", "text": "ElastiCache for Redis"},
+        {"key": "C", "text": "Amazon DynamoDB"},
+        {"key": "D", "text": "Amazon Aurora"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Redis** supports persistence, replication, and advanced data structures like sorted sets and hashes, making it ideal for session storage and complex caching patterns.\n\nMemcached is simpler and does not support persistence or advanced structures.",
+      "incorrect": "- **Memcached** lacks persistence and advanced data structures.\n- **DynamoDB** is a database, not an in-memory cache.\n- **Aurora** is a relational database and not optimized for caching.\n\nRedis is the correct cache engine.",
+      "hint": "Choose the cache engine with persistence and rich data structures."
+    },
+    {
+      "id": "ATHENA-001",
+      "domain": "Athena",
+      "tags": ["s3", "sql", "serverless"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A data team wants to run **ad-hoc SQL queries** directly on log files stored in Amazon S3 without managing servers. Which service is MOST appropriate?",
+      "options": [
+        {"key": "A", "text": "Amazon Redshift"},
+        {"key": "B", "text": "Amazon Athena"},
+        {"key": "C", "text": "Amazon EMR"},
+        {"key": "D", "text": "AWS Glue DataBrew"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Amazon Athena** is a serverless, pay-per-query service that runs SQL directly against data stored in S3. It requires no infrastructure management and is ideal for ad-hoc analysis.\n\nThis exactly matches the requirement.",
+      "incorrect": "- **Redshift** requires a managed cluster.\n- **EMR** requires cluster management.\n- **DataBrew** is for data preparation, not ad-hoc SQL queries.\n\nAthena is the correct serverless query service.",
+      "hint": "Look for serverless SQL directly on S3."
+    }
+  ]
+}

@@ -1,0 +1,1086 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "D3PERF-1001",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "right-sized-compute-family-selection",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: match CPU, memory, and network characteristics to workload profiles. Which high-performing architecture design capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "B",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "C",
+          "text": "Right-sized compute family selection"
+        },
+        {
+          "key": "D",
+          "text": "Read scaling with replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: match CPU, memory, and network characteristics to workload profiles.",
+      "explanation": "Right-sized compute family selection is correct because it improves performance efficiency and avoids resource bottlenecks.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. DynamoDB partition key design is useful when you need to avoid hot partitions and support predictable high throughput, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement.",
+        "C": "Correct. Right-sized compute family selection is the best choice because it improves performance efficiency and avoids resource bottlenecks.",
+        "D": "Incorrect. Read scaling with replicas is useful when you need to increase database read throughput without overloading the writer, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1002",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "cloudfront-edge-delivery",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: accelerate content delivery for globally distributed users. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "C",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "D",
+          "text": "Read scaling with replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: accelerate content delivery for globally distributed users.",
+      "explanation": "CloudFront edge delivery is correct because it lowers latency by serving content from nearby edge locations.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. DynamoDB partition key design is useful when you need to avoid hot partitions and support predictable high throughput, but it is not the best fit for this requirement.",
+        "B": "Correct. CloudFront edge delivery is the best choice because it lowers latency by serving content from nearby edge locations.",
+        "C": "Incorrect. Placement and networking optimization is useful when you need to minimize latency for tightly coupled high-performance workloads, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Read scaling with replicas is useful when you need to increase database read throughput without overloading the writer, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1003",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "caching-with-elasticache",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: reduce repeated database queries for frequently requested data. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "B",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "C",
+          "text": "Read scaling with replicas"
+        },
+        {
+          "key": "D",
+          "text": "Right-sized compute family selection"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce repeated database queries for frequently requested data.",
+      "explanation": "Caching with ElastiCache is correct because it improves response times by serving hot data from memory.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Placement and networking optimization is useful when you need to minimize latency for tightly coupled high-performance workloads, but it is not the best fit for this requirement.",
+        "B": "Correct. Caching with ElastiCache is the best choice because it improves response times by serving hot data from memory.",
+        "C": "Incorrect. Read scaling with replicas is useful when you need to increase database read throughput without overloading the writer, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Right-sized compute family selection is useful when you need to match CPU, memory, and network characteristics to workload profiles, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1004",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "dynamodb-partition-key-design",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to avoid hot partitions and support predictable high throughput. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Right-sized compute family selection"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "C",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "D",
+          "text": "Placement and networking optimization"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: avoid hot partitions and support predictable high throughput.",
+      "explanation": "DynamoDB partition key design is correct because it distributes load evenly across storage partitions.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Right-sized compute family selection is useful when you need to match CPU, memory, and network characteristics to workload profiles, but it is not the best fit for this requirement.",
+        "B": "Incorrect. CloudFront edge delivery is useful when you need to accelerate content delivery for globally distributed users, but it is not the best fit for this requirement.",
+        "C": "Correct. DynamoDB partition key design is the best choice because it distributes load evenly across storage partitions.",
+        "D": "Incorrect. Placement and networking optimization is useful when you need to minimize latency for tightly coupled high-performance workloads, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1005",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "read-scaling-with-replicas",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: increase database read throughput without overloading the writer. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Read scaling with replicas"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "C",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "D",
+          "text": "Right-sized compute family selection"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: increase database read throughput without overloading the writer.",
+      "explanation": "Read scaling with replicas is correct because replicas offload read traffic from the primary instance.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Read scaling with replicas is the best choice because replicas offload read traffic from the primary instance.",
+        "B": "Incorrect. CloudFront edge delivery is useful when you need to accelerate content delivery for globally distributed users, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Right-sized compute family selection is useful when you need to match CPU, memory, and network characteristics to workload profiles, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1006",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "placement-and-networking-optimization",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: minimize latency for tightly coupled high-performance workloads. Which high-performing architecture design capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "B",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "D",
+          "text": "DynamoDB partition key design"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: minimize latency for tightly coupled high-performance workloads.",
+      "explanation": "Placement and networking optimization is correct because optimized placement and networking increase throughput and reduce latency.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Placement and networking optimization is the best choice because optimized placement and networking increase throughput and reduce latency.",
+        "B": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement.",
+        "C": "Incorrect. CloudFront edge delivery is useful when you need to accelerate content delivery for globally distributed users, but it is not the best fit for this requirement.",
+        "D": "Incorrect. DynamoDB partition key design is useful when you need to avoid hot partitions and support predictable high throughput, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1007",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "right-sized-compute-family-selection",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: match CPU, memory, and network characteristics to workload profiles. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "B",
+          "text": "Read scaling with replicas"
+        },
+        {
+          "key": "C",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "D",
+          "text": "Right-sized compute family selection"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: match CPU, memory, and network characteristics to workload profiles.",
+      "explanation": "Right-sized compute family selection is correct because it improves performance efficiency and avoids resource bottlenecks.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Placement and networking optimization is useful when you need to minimize latency for tightly coupled high-performance workloads, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Read scaling with replicas is useful when you need to increase database read throughput without overloading the writer, but it is not the best fit for this requirement.",
+        "C": "Incorrect. DynamoDB partition key design is useful when you need to avoid hot partitions and support predictable high throughput, but it is not the best fit for this requirement.",
+        "D": "Correct. Right-sized compute family selection is the best choice because it improves performance efficiency and avoids resource bottlenecks."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1008",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "cloudfront-edge-delivery",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: accelerate content delivery for globally distributed users. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "C",
+          "text": "Right-sized compute family selection"
+        },
+        {
+          "key": "D",
+          "text": "Read scaling with replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: accelerate content delivery for globally distributed users.",
+      "explanation": "CloudFront edge delivery is correct because it lowers latency by serving content from nearby edge locations.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Placement and networking optimization is useful when you need to minimize latency for tightly coupled high-performance workloads, but it is not the best fit for this requirement.",
+        "B": "Correct. CloudFront edge delivery is the best choice because it lowers latency by serving content from nearby edge locations.",
+        "C": "Incorrect. Right-sized compute family selection is useful when you need to match CPU, memory, and network characteristics to workload profiles, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Read scaling with replicas is useful when you need to increase database read throughput without overloading the writer, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1009",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "caching-with-elasticache",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to reduce repeated database queries for frequently requested data. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "B",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "D",
+          "text": "Right-sized compute family selection"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce repeated database queries for frequently requested data.",
+      "explanation": "Caching with ElastiCache is correct because it improves response times by serving hot data from memory.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Placement and networking optimization is useful when you need to minimize latency for tightly coupled high-performance workloads, but it is not the best fit for this requirement.",
+        "B": "Correct. Caching with ElastiCache is the best choice because it improves response times by serving hot data from memory.",
+        "C": "Incorrect. CloudFront edge delivery is useful when you need to accelerate content delivery for globally distributed users, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Right-sized compute family selection is useful when you need to match CPU, memory, and network characteristics to workload profiles, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1010",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "dynamodb-partition-key-design",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: avoid hot partitions and support predictable high throughput. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Right-sized compute family selection"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "C",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "D",
+          "text": "Caching with ElastiCache"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: avoid hot partitions and support predictable high throughput.",
+      "explanation": "DynamoDB partition key design is correct because it distributes load evenly across storage partitions.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Right-sized compute family selection is useful when you need to match CPU, memory, and network characteristics to workload profiles, but it is not the best fit for this requirement.",
+        "B": "Incorrect. CloudFront edge delivery is useful when you need to accelerate content delivery for globally distributed users, but it is not the best fit for this requirement.",
+        "C": "Correct. DynamoDB partition key design is the best choice because it distributes load evenly across storage partitions.",
+        "D": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1011",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "read-scaling-with-replicas",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: increase database read throughput without overloading the writer. Which high-performing architecture design capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "B",
+          "text": "Read scaling with replicas"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "D",
+          "text": "Caching with ElastiCache"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: increase database read throughput without overloading the writer.",
+      "explanation": "Read scaling with replicas is correct because replicas offload read traffic from the primary instance.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. DynamoDB partition key design is useful when you need to avoid hot partitions and support predictable high throughput, but it is not the best fit for this requirement.",
+        "B": "Correct. Read scaling with replicas is the best choice because replicas offload read traffic from the primary instance.",
+        "C": "Incorrect. CloudFront edge delivery is useful when you need to accelerate content delivery for globally distributed users, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1012",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "placement-and-networking-optimization",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: minimize latency for tightly coupled high-performance workloads. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "B",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "C",
+          "text": "Read scaling with replicas"
+        },
+        {
+          "key": "D",
+          "text": "Placement and networking optimization"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: minimize latency for tightly coupled high-performance workloads.",
+      "explanation": "Placement and networking optimization is correct because optimized placement and networking increase throughput and reduce latency.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. DynamoDB partition key design is useful when you need to avoid hot partitions and support predictable high throughput, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Read scaling with replicas is useful when you need to increase database read throughput without overloading the writer, but it is not the best fit for this requirement.",
+        "D": "Correct. Placement and networking optimization is the best choice because optimized placement and networking increase throughput and reduce latency."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1013",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "right-sized-compute-family-selection",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: match CPU, memory, and network characteristics to workload profiles. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Read scaling with replicas"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "C",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "D",
+          "text": "Right-sized compute family selection"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: match CPU, memory, and network characteristics to workload profiles.",
+      "explanation": "Right-sized compute family selection is correct because it improves performance efficiency and avoids resource bottlenecks.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Read scaling with replicas is useful when you need to increase database read throughput without overloading the writer, but it is not the best fit for this requirement.",
+        "B": "Incorrect. CloudFront edge delivery is useful when you need to accelerate content delivery for globally distributed users, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Placement and networking optimization is useful when you need to minimize latency for tightly coupled high-performance workloads, but it is not the best fit for this requirement.",
+        "D": "Correct. Right-sized compute family selection is the best choice because it improves performance efficiency and avoids resource bottlenecks."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1014",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "cloudfront-edge-delivery",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to accelerate content delivery for globally distributed users. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "C",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "D",
+          "text": "Right-sized compute family selection"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: accelerate content delivery for globally distributed users.",
+      "explanation": "CloudFront edge delivery is correct because it lowers latency by serving content from nearby edge locations.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement.",
+        "B": "Correct. CloudFront edge delivery is the best choice because it lowers latency by serving content from nearby edge locations.",
+        "C": "Incorrect. Placement and networking optimization is useful when you need to minimize latency for tightly coupled high-performance workloads, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Right-sized compute family selection is useful when you need to match CPU, memory, and network characteristics to workload profiles, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1015",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "caching-with-elasticache",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: reduce repeated database queries for frequently requested data. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Right-sized compute family selection"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "C",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront edge delivery"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: reduce repeated database queries for frequently requested data.",
+      "explanation": "Caching with ElastiCache is correct because it improves response times by serving hot data from memory.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Right-sized compute family selection is useful when you need to match CPU, memory, and network characteristics to workload profiles, but it is not the best fit for this requirement.",
+        "B": "Incorrect. DynamoDB partition key design is useful when you need to avoid hot partitions and support predictable high throughput, but it is not the best fit for this requirement.",
+        "C": "Correct. Caching with ElastiCache is the best choice because it improves response times by serving hot data from memory.",
+        "D": "Incorrect. CloudFront edge delivery is useful when you need to accelerate content delivery for globally distributed users, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1016",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "dynamodb-partition-key-design",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: avoid hot partitions and support predictable high throughput. Which high-performing architecture design capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "B",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "C",
+          "text": "Read scaling with replicas"
+        },
+        {
+          "key": "D",
+          "text": "CloudFront edge delivery"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: avoid hot partitions and support predictable high throughput.",
+      "explanation": "DynamoDB partition key design is correct because it distributes load evenly across storage partitions.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement.",
+        "B": "Correct. DynamoDB partition key design is the best choice because it distributes load evenly across storage partitions.",
+        "C": "Incorrect. Read scaling with replicas is useful when you need to increase database read throughput without overloading the writer, but it is not the best fit for this requirement.",
+        "D": "Incorrect. CloudFront edge delivery is useful when you need to accelerate content delivery for globally distributed users, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1017",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "read-scaling-with-replicas",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: increase database read throughput without overloading the writer. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "B",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "C",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "D",
+          "text": "Read scaling with replicas"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: increase database read throughput without overloading the writer.",
+      "explanation": "Read scaling with replicas is correct because replicas offload read traffic from the primary instance.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. DynamoDB partition key design is useful when you need to avoid hot partitions and support predictable high throughput, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Placement and networking optimization is useful when you need to minimize latency for tightly coupled high-performance workloads, but it is not the best fit for this requirement.",
+        "D": "Correct. Read scaling with replicas is the best choice because replicas offload read traffic from the primary instance."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1018",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "placement-and-networking-optimization",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: minimize latency for tightly coupled high-performance workloads. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "B",
+          "text": "Read scaling with replicas"
+        },
+        {
+          "key": "C",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "D",
+          "text": "Right-sized compute family selection"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: minimize latency for tightly coupled high-performance workloads.",
+      "explanation": "Placement and networking optimization is correct because optimized placement and networking increase throughput and reduce latency.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Placement and networking optimization is the best choice because optimized placement and networking increase throughput and reduce latency.",
+        "B": "Incorrect. Read scaling with replicas is useful when you need to increase database read throughput without overloading the writer, but it is not the best fit for this requirement.",
+        "C": "Incorrect. DynamoDB partition key design is useful when you need to avoid hot partitions and support predictable high throughput, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Right-sized compute family selection is useful when you need to match CPU, memory, and network characteristics to workload profiles, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1019",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "right-sized-compute-family-selection",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to match CPU, memory, and network characteristics to workload profiles. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "B",
+          "text": "Placement and networking optimization"
+        },
+        {
+          "key": "C",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "D",
+          "text": "Right-sized compute family selection"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: match CPU, memory, and network characteristics to workload profiles.",
+      "explanation": "Right-sized compute family selection is correct because it improves performance efficiency and avoids resource bottlenecks.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Placement and networking optimization is useful when you need to minimize latency for tightly coupled high-performance workloads, but it is not the best fit for this requirement.",
+        "C": "Incorrect. CloudFront edge delivery is useful when you need to accelerate content delivery for globally distributed users, but it is not the best fit for this requirement.",
+        "D": "Correct. Right-sized compute family selection is the best choice because it improves performance efficiency and avoids resource bottlenecks."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    },
+    {
+      "id": "D3PERF-1020",
+      "domain": "Domain 3 - High-Performing Architectures",
+      "tags": [
+        "cloudfront-edge-delivery",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: accelerate content delivery for globally distributed users. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudFront edge delivery"
+        },
+        {
+          "key": "B",
+          "text": "Caching with ElastiCache"
+        },
+        {
+          "key": "C",
+          "text": "DynamoDB partition key design"
+        },
+        {
+          "key": "D",
+          "text": "Right-sized compute family selection"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: accelerate content delivery for globally distributed users.",
+      "explanation": "CloudFront edge delivery is correct because it lowers latency by serving content from nearby edge locations.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. CloudFront edge delivery is the best choice because it lowers latency by serving content from nearby edge locations.",
+        "B": "Incorrect. Caching with ElastiCache is useful when you need to reduce repeated database queries for frequently requested data, but it is not the best fit for this requirement.",
+        "C": "Incorrect. DynamoDB partition key design is useful when you need to avoid hot partitions and support predictable high throughput, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Right-sized compute family selection is useful when you need to match CPU, memory, and network characteristics to workload profiles, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "High-Performing Architecture Design documentation",
+          "url": "https://d1.awsstatic.com/training-and-certification/docs-sa-assoc/AWS-Certified-Solutions-Architect-Associate_Exam-Guide.pdf"
+        }
+      ]
+    }
+  ]
+}

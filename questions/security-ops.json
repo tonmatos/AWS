@@ -1,0 +1,1543 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "KMS-001",
+      "domain": "KMS",
+      "tags": [
+        "encryption",
+        "s3",
+        "cmk"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must encrypt sensitive files in S3 using **customer-managed keys** with auditability of key usage. Which option BEST meets this requirement?",
+      "options": [
+        {
+          "key": "A",
+          "text": "SSE-S3 (S3-managed keys)"
+        },
+        {
+          "key": "B",
+          "text": "SSE-KMS with a customer-managed KMS key"
+        },
+        {
+          "key": "C",
+          "text": "SSE-C (customer-provided keys)"
+        },
+        {
+          "key": "D",
+          "text": "Client-side encryption without KMS"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**SSE-KMS with a customer-managed KMS key** provides encryption at rest with full auditability via AWS CloudTrail for key usage and the ability to control key policies and rotation.\n\nThis satisfies both encryption and auditing requirements.",
+      "incorrect": "- **SSE-S3** uses AWS-managed keys with less control.\n- **SSE-C** requires the client to provide keys and does not integrate with KMS auditing.\n- **Client-side encryption** lacks centralized key usage auditing in KMS.\n\nSSE-KMS with CMKs is the best fit.",
+      "hint": "You need customer-managed keys and audit logs of key usage."
+    },
+    {
+      "id": "SECRETS-001",
+      "domain": "Secrets Manager",
+      "tags": [
+        "rotation",
+        "rds",
+        "credentials"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An application stores database credentials and needs **automatic rotation** without downtime. Which service should be used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Systems Manager Parameter Store (Standard)"
+        },
+        {
+          "key": "B",
+          "text": "AWS Secrets Manager"
+        },
+        {
+          "key": "C",
+          "text": "AWS Key Management Service"
+        },
+        {
+          "key": "D",
+          "text": "Amazon S3"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**AWS Secrets Manager** provides built-in secret rotation for services like RDS with automated Lambda-based rotation workflows. It is designed specifically for managed credential rotation.\n\nThis matches the requirement for automatic rotation.",
+      "incorrect": "- **Parameter Store Standard** does not provide automatic rotation.\n- **KMS** manages keys, not secrets.\n- **S3** is not a secrets management service.\n\nSecrets Manager is the correct solution.",
+      "hint": "Use the AWS service that supports managed secret rotation."
+    },
+    {
+      "id": "WAF-001",
+      "domain": "WAF",
+      "tags": [
+        "sql-injection",
+        "xss",
+        "alb"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company wants to protect its public web application from **SQL injection** and **cross-site scripting (XSS)** attacks. Which service should they use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Shield Standard"
+        },
+        {
+          "key": "B",
+          "text": "AWS WAF"
+        },
+        {
+          "key": "C",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "key": "D",
+          "text": "AWS Config"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**AWS WAF** provides Layer 7 web application firewall rules to block SQL injection, XSS, and other application-layer attacks. It integrates with ALB, API Gateway, and CloudFront.\n\nThis is the correct service for web application protection.",
+      "incorrect": "- **Shield Standard** is for DDoS protection at the network/transport layers.\n- **GuardDuty** detects threats but does not block traffic.\n- **Config** evaluates configuration compliance.\n\nAWS WAF is the right choice.",
+      "hint": "Use the service that filters malicious HTTP requests."
+    },
+    {
+      "id": "SHIELD-001",
+      "domain": "Shield",
+      "tags": [
+        "ddos",
+        "protection"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A high-profile ecommerce site needs **enhanced DDoS protection**, cost protection against scaling spikes, and access to the DDoS Response Team (DRT). Which service is BEST?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Shield Advanced"
+        },
+        {
+          "key": "B",
+          "text": "AWS Shield Standard"
+        },
+        {
+          "key": "C",
+          "text": "AWS WAF"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "**AWS Shield Advanced** provides enhanced DDoS protection, cost protection against scaling charges, and access to the AWS DDoS Response Team.\n\nThis is the service designed for high-profile, mission-critical applications.",
+      "incorrect": "- **Shield Standard** provides basic protection but no DRT access or cost protection.\n- **WAF** protects against application-layer attacks but does not replace DDoS protection.\n- **GuardDuty** detects threats, not DDoS mitigation.\n\nShield Advanced is required for these features.",
+      "hint": "Look for the DDoS service that includes DRT access and cost protection."
+    },
+    {
+      "id": "GUARD-001",
+      "domain": "GuardDuty",
+      "tags": [
+        "threat-detection",
+        "anomaly"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A security team wants **continuous threat detection** using VPC Flow Logs, CloudTrail, and DNS logs to identify suspicious activity. Which service should they enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon Inspector"
+        },
+        {
+          "key": "B",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "key": "C",
+          "text": "AWS Config"
+        },
+        {
+          "key": "D",
+          "text": "AWS Trusted Advisor"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Amazon GuardDuty** is a managed threat detection service that analyzes VPC Flow Logs, CloudTrail events, and DNS logs to identify malicious or anomalous activity.\n\nThis is exactly what the team requested.",
+      "incorrect": "- **Inspector** scans for vulnerabilities, not continuous threat detection.\n- **Config** evaluates configuration compliance.\n- **Trusted Advisor** provides best practice checks but not threat detection.\n\nGuardDuty is the correct service.",
+      "hint": "Use the managed service that analyzes CloudTrail, VPC Flow Logs, and DNS logs."
+    },
+    {
+      "id": "ORG-001",
+      "domain": "Organizations",
+      "tags": [
+        "scp",
+        "governance",
+        "guardrails"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An organization wants to **prevent member accounts** from disabling CloudTrail or deleting log archives. What is the BEST way to enforce this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Create IAM policies in each account"
+        },
+        {
+          "key": "B",
+          "text": "Use an AWS Organizations Service Control Policy (SCP)"
+        },
+        {
+          "key": "C",
+          "text": "Use AWS Config rules only"
+        },
+        {
+          "key": "D",
+          "text": "Store logs in S3 without policies"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Service Control Policies (SCPs)** in AWS Organizations provide centralized permission guardrails that member accounts cannot override. An SCP can explicitly deny actions such as stopping CloudTrail or deleting log archives.\n\nThis is the strongest and most centralized enforcement mechanism.",
+      "incorrect": "- **IAM policies** can be altered within accounts and are not centralized guardrails.\n- **Config rules** monitor compliance but do not prevent actions.\n- **S3 without policies** provides no protection.\n\nSCPs are required for enforceable organization-wide restrictions.",
+      "hint": "Use the organization-level control that overrides account permissions."
+    },
+    {
+      "id": "TRAIL-001",
+      "domain": "CloudTrail",
+      "tags": [
+        "audit",
+        "api-logging"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A compliance team needs a complete history of **AWS API calls** across an account for auditing and investigations. Which service should they use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon CloudWatch Metrics"
+        },
+        {
+          "key": "B",
+          "text": "AWS CloudTrail"
+        },
+        {
+          "key": "C",
+          "text": "AWS Config"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**AWS CloudTrail** records API activity across AWS services and provides an audit log of actions taken in the account. It is the primary service for API call auditing.\n\nThis directly satisfies the requirement.",
+      "incorrect": "- **CloudWatch Metrics** provide operational metrics, not API audit logs.\n- **Config** records configuration changes, not all API calls.\n- **GuardDuty** detects threats but is not a complete audit log.\n\nCloudTrail is the correct auditing service.",
+      "hint": "Use the service that logs API calls for governance and audit."
+    },
+    {
+      "id": "CONFIG-001",
+      "domain": "Config",
+      "tags": [
+        "compliance",
+        "resource-change"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A security team wants to **continuously evaluate** whether S3 buckets are publicly accessible and receive notifications when they become noncompliant. Which service should they use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Config with managed rules"
+        },
+        {
+          "key": "B",
+          "text": "AWS CloudTrail only"
+        },
+        {
+          "key": "C",
+          "text": "AWS IAM Access Analyzer only"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "**AWS Config** provides continuous configuration monitoring and managed rules (such as checking for public S3 buckets). It can notify and record compliance status changes.\n\nThis is the correct service for continuous compliance monitoring.",
+      "incorrect": "- **CloudTrail** logs API activity but does not evaluate compliance rules.\n- **Access Analyzer** identifies potential access but does not continuously track compliance states.\n- **GuardDuty** is for threat detection.\n\nConfig is purpose-built for compliance monitoring.",
+      "hint": "Choose the service that continuously evaluates resource configuration against rules."
+    },
+    {
+      "id": "SSM-001",
+      "domain": "Systems Manager",
+      "tags": [
+        "session-manager",
+        "no-ssh"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An operations team wants to access EC2 instances **without opening SSH/RDP ports** and without managing bastion hosts. Which solution is BEST?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Use a public bastion host with SSH"
+        },
+        {
+          "key": "B",
+          "text": "Use AWS Systems Manager Session Manager"
+        },
+        {
+          "key": "C",
+          "text": "Open SSH to 0.0.0.0/0"
+        },
+        {
+          "key": "D",
+          "text": "Use AWS Direct Connect"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**AWS Systems Manager Session Manager** provides secure shell access without opening inbound ports. It uses IAM for authentication and can log session activity.\n\nThis meets the requirement for access without SSH/RDP exposure.",
+      "incorrect": "- **Bastion hosts** still require SSH ports and maintenance.\n- **Opening SSH to the internet** is insecure.\n- **Direct Connect** is networking and does not provide instance access controls.\n\nSession Manager is the best choice.",
+      "hint": "Look for the managed service that allows shell access without inbound ports."
+    },
+    {
+      "id": "CW-001",
+      "domain": "CloudWatch",
+      "tags": [
+        "alarms",
+        "logs",
+        "metrics"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A team needs to **alert** when application logs contain the phrase \"ERROR\" more than 10 times in 5 minutes. Which AWS feature should they use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "CloudWatch Logs metric filter + CloudWatch Alarm"
+        },
+        {
+          "key": "B",
+          "text": "CloudTrail data events"
+        },
+        {
+          "key": "C",
+          "text": "AWS Config rule"
+        },
+        {
+          "key": "D",
+          "text": "AWS WAF rule"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "**CloudWatch Logs metric filters** can turn log patterns into metrics. A **CloudWatch Alarm** can then trigger when the metric exceeds a threshold.\n\nThis is the standard solution for log-based alerting.",
+      "incorrect": "- **CloudTrail** tracks API calls, not application log patterns.\n- **Config** monitors resource configurations.\n- **WAF** filters HTTP requests, not application logs.\n\nCloudWatch metric filters and alarms are correct.",
+      "hint": "Use CloudWatch to convert log patterns into metrics and alarm on them."
+    },
+    {
+      "id": "COG-001",
+      "domain": "Cognito",
+      "tags": [
+        "user-auth",
+        "federation",
+        "mobile"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A mobile application needs **user sign-up/sign-in**, social identity federation, and token-based authentication for APIs. Which AWS service is BEST suited?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS IAM roles only"
+        },
+        {
+          "key": "B",
+          "text": "Amazon Cognito User Pools and Identity Pools"
+        },
+        {
+          "key": "C",
+          "text": "AWS Secrets Manager"
+        },
+        {
+          "key": "D",
+          "text": "AWS KMS"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Amazon Cognito User Pools** provide user sign-up/sign-in and federation, while **Identity Pools** provide temporary AWS credentials for authenticated users. Together they enable token-based auth and social identity login for mobile apps.\n\nThis directly matches the requirements.",
+      "incorrect": "- **IAM roles only** are not designed for end-user sign-up/sign-in.\n- **Secrets Manager** and **KMS** manage secrets and keys, not user authentication.\n\nCognito is the correct service for mobile user auth and federation.",
+      "hint": "Use the AWS service built for end-user authentication and federation."
+    },
+    {
+      "id": "SEC-1001",
+      "domain": "Security",
+      "tags": [
+        "organization-wide-cloudtrail-trails",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: collect API audit logs from all AWS accounts centrally. Which security operations capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "B",
+          "text": "Secrets Manager rotation"
+        },
+        {
+          "key": "C",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "key": "D",
+          "text": "Organization-wide CloudTrail trails"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: collect API audit logs from all AWS accounts centrally.",
+      "explanation": "Organization-wide CloudTrail trails is correct because they capture and centralize account activity for auditing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Security Hub is useful when you need to aggregate and prioritize security findings across AWS security services, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Secrets Manager rotation is useful when you need to automatically rotate database and service credentials on a schedule, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement.",
+        "D": "Correct. Organization-wide CloudTrail trails is the best choice because they capture and centralize account activity for auditing."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1002",
+      "domain": "Security",
+      "tags": [
+        "aws-config-managed-rules",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: continuously evaluate resource configurations against compliance policies. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "B",
+          "text": "AWS WAF managed rule groups"
+        },
+        {
+          "key": "C",
+          "text": "Secrets Manager rotation"
+        },
+        {
+          "key": "D",
+          "text": "AWS Config managed rules"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: continuously evaluate resource configurations against compliance policies.",
+      "explanation": "AWS Config managed rules is correct because they detect non-compliant configuration drift over time.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Security Hub is useful when you need to aggregate and prioritize security findings across AWS security services, but it is not the best fit for this requirement.",
+        "B": "Incorrect. AWS WAF managed rule groups is useful when you need to block common web attacks on internet-facing applications, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Secrets Manager rotation is useful when you need to automatically rotate database and service credentials on a schedule, but it is not the best fit for this requirement.",
+        "D": "Correct. AWS Config managed rules is the best choice because they detect non-compliant configuration drift over time."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1003",
+      "domain": "Security",
+      "tags": [
+        "amazon-guardduty",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: detect suspicious behavior using threat intelligence and anomaly detection. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "B",
+          "text": "Secrets Manager rotation"
+        },
+        {
+          "key": "C",
+          "text": "AWS WAF managed rule groups"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: detect suspicious behavior using threat intelligence and anomaly detection.",
+      "explanation": "Amazon GuardDuty is correct because it analyzes logs and events to surface potential threats.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Organization-wide CloudTrail trails is useful when you need to collect API audit logs from all AWS accounts centrally, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Secrets Manager rotation is useful when you need to automatically rotate database and service credentials on a schedule, but it is not the best fit for this requirement.",
+        "C": "Incorrect. AWS WAF managed rule groups is useful when you need to block common web attacks on internet-facing applications, but it is not the best fit for this requirement.",
+        "D": "Correct. Amazon GuardDuty is the best choice because it analyzes logs and events to surface potential threats."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1004",
+      "domain": "Security",
+      "tags": [
+        "aws-security-hub",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to aggregate and prioritize security findings across AWS security services. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "B",
+          "text": "AWS WAF managed rule groups"
+        },
+        {
+          "key": "C",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "D",
+          "text": "AWS Config managed rules"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: aggregate and prioritize security findings across AWS security services.",
+      "explanation": "AWS Security Hub is correct because it provides centralized visibility and compliance posture dashboards.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. AWS Security Hub is the best choice because it provides centralized visibility and compliance posture dashboards.",
+        "B": "Incorrect. AWS WAF managed rule groups is useful when you need to block common web attacks on internet-facing applications, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Organization-wide CloudTrail trails is useful when you need to collect API audit logs from all AWS accounts centrally, but it is not the best fit for this requirement.",
+        "D": "Incorrect. AWS Config managed rules is useful when you need to continuously evaluate resource configurations against compliance policies, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1005",
+      "domain": "Security",
+      "tags": [
+        "secrets-manager-rotation",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: automatically rotate database and service credentials on a schedule. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Config managed rules"
+        },
+        {
+          "key": "B",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "key": "C",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "D",
+          "text": "Secrets Manager rotation"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: automatically rotate database and service credentials on a schedule.",
+      "explanation": "Secrets Manager rotation is correct because it reduces risk from long-lived credentials and supports rotation workflows.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Config managed rules is useful when you need to continuously evaluate resource configurations against compliance policies, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Organization-wide CloudTrail trails is useful when you need to collect API audit logs from all AWS accounts centrally, but it is not the best fit for this requirement.",
+        "D": "Correct. Secrets Manager rotation is the best choice because it reduces risk from long-lived credentials and supports rotation workflows."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1006",
+      "domain": "Security",
+      "tags": [
+        "aws-waf-managed-rule-groups",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: block common web attacks on internet-facing applications. Which security operations capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "key": "B",
+          "text": "AWS WAF managed rule groups"
+        },
+        {
+          "key": "C",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "D",
+          "text": "AWS Config managed rules"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: block common web attacks on internet-facing applications.",
+      "explanation": "AWS WAF managed rule groups is correct because they provide curated protections for known web exploit patterns.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement.",
+        "B": "Correct. AWS WAF managed rule groups is the best choice because they provide curated protections for known web exploit patterns.",
+        "C": "Incorrect. AWS Security Hub is useful when you need to aggregate and prioritize security findings across AWS security services, but it is not the best fit for this requirement.",
+        "D": "Incorrect. AWS Config managed rules is useful when you need to continuously evaluate resource configurations against compliance policies, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1007",
+      "domain": "Security",
+      "tags": [
+        "organization-wide-cloudtrail-trails",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: collect API audit logs from all AWS accounts centrally. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "B",
+          "text": "Secrets Manager rotation"
+        },
+        {
+          "key": "C",
+          "text": "AWS WAF managed rule groups"
+        },
+        {
+          "key": "D",
+          "text": "AWS Security Hub"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: collect API audit logs from all AWS accounts centrally.",
+      "explanation": "Organization-wide CloudTrail trails is correct because they capture and centralize account activity for auditing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Organization-wide CloudTrail trails is the best choice because they capture and centralize account activity for auditing.",
+        "B": "Incorrect. Secrets Manager rotation is useful when you need to automatically rotate database and service credentials on a schedule, but it is not the best fit for this requirement.",
+        "C": "Incorrect. AWS WAF managed rule groups is useful when you need to block common web attacks on internet-facing applications, but it is not the best fit for this requirement.",
+        "D": "Incorrect. AWS Security Hub is useful when you need to aggregate and prioritize security findings across AWS security services, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1008",
+      "domain": "Security",
+      "tags": [
+        "aws-config-managed-rules",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: continuously evaluate resource configurations against compliance policies. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS WAF managed rule groups"
+        },
+        {
+          "key": "B",
+          "text": "AWS Config managed rules"
+        },
+        {
+          "key": "C",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "D",
+          "text": "Secrets Manager rotation"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: continuously evaluate resource configurations against compliance policies.",
+      "explanation": "AWS Config managed rules is correct because they detect non-compliant configuration drift over time.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS WAF managed rule groups is useful when you need to block common web attacks on internet-facing applications, but it is not the best fit for this requirement.",
+        "B": "Correct. AWS Config managed rules is the best choice because they detect non-compliant configuration drift over time.",
+        "C": "Incorrect. Organization-wide CloudTrail trails is useful when you need to collect API audit logs from all AWS accounts centrally, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Secrets Manager rotation is useful when you need to automatically rotate database and service credentials on a schedule, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1009",
+      "domain": "Security",
+      "tags": [
+        "amazon-guardduty",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to detect suspicious behavior using threat intelligence and anomaly detection. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "key": "B",
+          "text": "AWS Config managed rules"
+        },
+        {
+          "key": "C",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "D",
+          "text": "AWS WAF managed rule groups"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: detect suspicious behavior using threat intelligence and anomaly detection.",
+      "explanation": "Amazon GuardDuty is correct because it analyzes logs and events to surface potential threats.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Amazon GuardDuty is the best choice because it analyzes logs and events to surface potential threats.",
+        "B": "Incorrect. AWS Config managed rules is useful when you need to continuously evaluate resource configurations against compliance policies, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Organization-wide CloudTrail trails is useful when you need to collect API audit logs from all AWS accounts centrally, but it is not the best fit for this requirement.",
+        "D": "Incorrect. AWS WAF managed rule groups is useful when you need to block common web attacks on internet-facing applications, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1010",
+      "domain": "Security",
+      "tags": [
+        "aws-security-hub",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: aggregate and prioritize security findings across AWS security services. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "B",
+          "text": "AWS Config managed rules"
+        },
+        {
+          "key": "C",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: aggregate and prioritize security findings across AWS security services.",
+      "explanation": "AWS Security Hub is correct because it provides centralized visibility and compliance posture dashboards.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Organization-wide CloudTrail trails is useful when you need to collect API audit logs from all AWS accounts centrally, but it is not the best fit for this requirement.",
+        "B": "Incorrect. AWS Config managed rules is useful when you need to continuously evaluate resource configurations against compliance policies, but it is not the best fit for this requirement.",
+        "C": "Correct. AWS Security Hub is the best choice because it provides centralized visibility and compliance posture dashboards.",
+        "D": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1011",
+      "domain": "Security",
+      "tags": [
+        "secrets-manager-rotation",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: automatically rotate database and service credentials on a schedule. Which security operations capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Config managed rules"
+        },
+        {
+          "key": "B",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "key": "C",
+          "text": "Secrets Manager rotation"
+        },
+        {
+          "key": "D",
+          "text": "AWS Security Hub"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: automatically rotate database and service credentials on a schedule.",
+      "explanation": "Secrets Manager rotation is correct because it reduces risk from long-lived credentials and supports rotation workflows.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Config managed rules is useful when you need to continuously evaluate resource configurations against compliance policies, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement.",
+        "C": "Correct. Secrets Manager rotation is the best choice because it reduces risk from long-lived credentials and supports rotation workflows.",
+        "D": "Incorrect. AWS Security Hub is useful when you need to aggregate and prioritize security findings across AWS security services, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1012",
+      "domain": "Security",
+      "tags": [
+        "aws-waf-managed-rule-groups",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: block common web attacks on internet-facing applications. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Secrets Manager rotation"
+        },
+        {
+          "key": "B",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "key": "C",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "D",
+          "text": "AWS WAF managed rule groups"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: block common web attacks on internet-facing applications.",
+      "explanation": "AWS WAF managed rule groups is correct because they provide curated protections for known web exploit patterns.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Secrets Manager rotation is useful when you need to automatically rotate database and service credentials on a schedule, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement.",
+        "C": "Incorrect. AWS Security Hub is useful when you need to aggregate and prioritize security findings across AWS security services, but it is not the best fit for this requirement.",
+        "D": "Correct. AWS WAF managed rule groups is the best choice because they provide curated protections for known web exploit patterns."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1013",
+      "domain": "Security",
+      "tags": [
+        "organization-wide-cloudtrail-trails",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: collect API audit logs from all AWS accounts centrally. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Secrets Manager rotation"
+        },
+        {
+          "key": "B",
+          "text": "AWS Config managed rules"
+        },
+        {
+          "key": "C",
+          "text": "AWS WAF managed rule groups"
+        },
+        {
+          "key": "D",
+          "text": "Organization-wide CloudTrail trails"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: collect API audit logs from all AWS accounts centrally.",
+      "explanation": "Organization-wide CloudTrail trails is correct because they capture and centralize account activity for auditing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Secrets Manager rotation is useful when you need to automatically rotate database and service credentials on a schedule, but it is not the best fit for this requirement.",
+        "B": "Incorrect. AWS Config managed rules is useful when you need to continuously evaluate resource configurations against compliance policies, but it is not the best fit for this requirement.",
+        "C": "Incorrect. AWS WAF managed rule groups is useful when you need to block common web attacks on internet-facing applications, but it is not the best fit for this requirement.",
+        "D": "Correct. Organization-wide CloudTrail trails is the best choice because they capture and centralize account activity for auditing."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1014",
+      "domain": "Security",
+      "tags": [
+        "aws-config-managed-rules",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to continuously evaluate resource configurations against compliance policies. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "B",
+          "text": "AWS Config managed rules"
+        },
+        {
+          "key": "C",
+          "text": "AWS WAF managed rule groups"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: continuously evaluate resource configurations against compliance policies.",
+      "explanation": "AWS Config managed rules is correct because they detect non-compliant configuration drift over time.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Organization-wide CloudTrail trails is useful when you need to collect API audit logs from all AWS accounts centrally, but it is not the best fit for this requirement.",
+        "B": "Correct. AWS Config managed rules is the best choice because they detect non-compliant configuration drift over time.",
+        "C": "Incorrect. AWS WAF managed rule groups is useful when you need to block common web attacks on internet-facing applications, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1015",
+      "domain": "Security",
+      "tags": [
+        "amazon-guardduty",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: detect suspicious behavior using threat intelligence and anomaly detection. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Config managed rules"
+        },
+        {
+          "key": "B",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "C",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: detect suspicious behavior using threat intelligence and anomaly detection.",
+      "explanation": "Amazon GuardDuty is correct because it analyzes logs and events to surface potential threats.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Config managed rules is useful when you need to continuously evaluate resource configurations against compliance policies, but it is not the best fit for this requirement.",
+        "B": "Incorrect. AWS Security Hub is useful when you need to aggregate and prioritize security findings across AWS security services, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Organization-wide CloudTrail trails is useful when you need to collect API audit logs from all AWS accounts centrally, but it is not the best fit for this requirement.",
+        "D": "Correct. Amazon GuardDuty is the best choice because it analyzes logs and events to surface potential threats."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1016",
+      "domain": "Security",
+      "tags": [
+        "aws-security-hub",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: aggregate and prioritize security findings across AWS security services. Which security operations capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "B",
+          "text": "Secrets Manager rotation"
+        },
+        {
+          "key": "C",
+          "text": "AWS Config managed rules"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: aggregate and prioritize security findings across AWS security services.",
+      "explanation": "AWS Security Hub is correct because it provides centralized visibility and compliance posture dashboards.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. AWS Security Hub is the best choice because it provides centralized visibility and compliance posture dashboards.",
+        "B": "Incorrect. Secrets Manager rotation is useful when you need to automatically rotate database and service credentials on a schedule, but it is not the best fit for this requirement.",
+        "C": "Incorrect. AWS Config managed rules is useful when you need to continuously evaluate resource configurations against compliance policies, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1017",
+      "domain": "Security",
+      "tags": [
+        "secrets-manager-rotation",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: automatically rotate database and service credentials on a schedule. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "B",
+          "text": "AWS WAF managed rule groups"
+        },
+        {
+          "key": "C",
+          "text": "Secrets Manager rotation"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: automatically rotate database and service credentials on a schedule.",
+      "explanation": "Secrets Manager rotation is correct because it reduces risk from long-lived credentials and supports rotation workflows.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Security Hub is useful when you need to aggregate and prioritize security findings across AWS security services, but it is not the best fit for this requirement.",
+        "B": "Incorrect. AWS WAF managed rule groups is useful when you need to block common web attacks on internet-facing applications, but it is not the best fit for this requirement.",
+        "C": "Correct. Secrets Manager rotation is the best choice because it reduces risk from long-lived credentials and supports rotation workflows.",
+        "D": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1018",
+      "domain": "Security",
+      "tags": [
+        "aws-waf-managed-rule-groups",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: block common web attacks on internet-facing applications. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "B",
+          "text": "Secrets Manager rotation"
+        },
+        {
+          "key": "C",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "D",
+          "text": "AWS WAF managed rule groups"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: block common web attacks on internet-facing applications.",
+      "explanation": "AWS WAF managed rule groups is correct because they provide curated protections for known web exploit patterns.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS Security Hub is useful when you need to aggregate and prioritize security findings across AWS security services, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Secrets Manager rotation is useful when you need to automatically rotate database and service credentials on a schedule, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Organization-wide CloudTrail trails is useful when you need to collect API audit logs from all AWS accounts centrally, but it is not the best fit for this requirement.",
+        "D": "Correct. AWS WAF managed rule groups is the best choice because they provide curated protections for known web exploit patterns."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1019",
+      "domain": "Security",
+      "tags": [
+        "organization-wide-cloudtrail-trails",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to collect API audit logs from all AWS accounts centrally. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS WAF managed rule groups"
+        },
+        {
+          "key": "B",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "C",
+          "text": "AWS Config managed rules"
+        },
+        {
+          "key": "D",
+          "text": "Amazon GuardDuty"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: collect API audit logs from all AWS accounts centrally.",
+      "explanation": "Organization-wide CloudTrail trails is correct because they capture and centralize account activity for auditing.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. AWS WAF managed rule groups is useful when you need to block common web attacks on internet-facing applications, but it is not the best fit for this requirement.",
+        "B": "Correct. Organization-wide CloudTrail trails is the best choice because they capture and centralize account activity for auditing.",
+        "C": "Incorrect. AWS Config managed rules is useful when you need to continuously evaluate resource configurations against compliance policies, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "SEC-1020",
+      "domain": "Security",
+      "tags": [
+        "aws-config-managed-rules",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: continuously evaluate resource configurations against compliance policies. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Organization-wide CloudTrail trails"
+        },
+        {
+          "key": "B",
+          "text": "Amazon GuardDuty"
+        },
+        {
+          "key": "C",
+          "text": "AWS Security Hub"
+        },
+        {
+          "key": "D",
+          "text": "AWS Config managed rules"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: continuously evaluate resource configurations against compliance policies.",
+      "explanation": "AWS Config managed rules is correct because they detect non-compliant configuration drift over time.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Organization-wide CloudTrail trails is useful when you need to collect API audit logs from all AWS accounts centrally, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Amazon GuardDuty is useful when you need to detect suspicious behavior using threat intelligence and anomaly detection, but it is not the best fit for this requirement.",
+        "C": "Incorrect. AWS Security Hub is useful when you need to aggregate and prioritize security findings across AWS security services, but it is not the best fit for this requirement.",
+        "D": "Correct. AWS Config managed rules is the best choice because they detect non-compliant configuration drift over time."
+      },
+      "references": [
+        {
+          "label": "Security Operations documentation",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    }
+  ]
+}

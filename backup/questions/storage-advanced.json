@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "EFS-001",
+      "domain": "EFS",
+      "tags": ["shared-storage", "multi-az", "nfs"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A web application runs on multiple EC2 instances across two Availability Zones. The instances must share a **common file system** with **concurrent read/write access**. Which storage service should be used?",
+      "options": [
+        {"key": "A", "text": "Amazon EBS"},
+        {"key": "B", "text": "Amazon EFS"},
+        {"key": "C", "text": "Amazon S3"},
+        {"key": "D", "text": "Instance Store"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Amazon EFS** provides a managed NFS file system that can be mounted concurrently by multiple EC2 instances across multiple AZs. It is designed for shared, POSIX-compliant storage.\n\nThis matches the requirement for a shared file system with concurrent access.",
+      "incorrect": "- **EBS** is block storage attached to a single instance (Multi-Attach is limited and same-AZ).\n- **S3** is object storage and not a POSIX file system.\n- **Instance Store** is ephemeral and not shared.\n\nEFS is the correct shared file system solution.",
+      "hint": "Look for a managed NFS file system that supports multiple instances across AZs."
+    },
+    {
+      "id": "EBS-001",
+      "domain": "EBS",
+      "tags": ["io2", "iops", "database"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A mission-critical database requires **high, sustained IOPS** and **low latency** on a single EC2 instance in one Availability Zone. Which EBS volume type is BEST?",
+      "options": [
+        {"key": "A", "text": "General Purpose SSD (gp3)"},
+        {"key": "B", "text": "Provisioned IOPS SSD (io2)"},
+        {"key": "C", "text": "Throughput Optimized HDD (st1)"},
+        {"key": "D", "text": "Cold HDD (sc1)"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**io2 (Provisioned IOPS SSD)** is built for high-performance transactional workloads that require sustained IOPS and low latency. It provides the best consistency and durability for mission-critical databases.\n\nWhile gp3 can be provisioned, io2 is the premium option for strict IOPS and latency requirements.",
+      "incorrect": "- **gp3** is good for general workloads but not the top tier for mission-critical IOPS.\n- **st1** and **sc1** are HDD-based and optimized for throughput, not low latency.\n\nio2 is the most suitable for high, consistent IOPS.",
+      "hint": "Choose the SSD volume type designed for the highest and most consistent IOPS."
+    },
+    {
+      "id": "FSX-001",
+      "domain": "FSx",
+      "tags": ["windows", "smb", "active-directory"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A company needs a managed file system that supports **SMB**, integrates with **Microsoft Active Directory**, and is optimized for Windows workloads. Which service should they use?",
+      "options": [
+        {"key": "A", "text": "Amazon EFS"},
+        {"key": "B", "text": "Amazon FSx for Windows File Server"},
+        {"key": "C", "text": "Amazon FSx for Lustre"},
+        {"key": "D", "text": "Amazon S3"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**FSx for Windows File Server** provides fully managed Windows file shares with SMB support and native Active Directory integration. It is purpose-built for Windows-based file storage and enterprise applications.\n\nThis is the correct choice for SMB + AD integration.",
+      "incorrect": "- **EFS** provides NFS for Linux, not SMB.\n- **FSx for Lustre** is for high-performance HPC and not Windows SMB.\n- **S3** is object storage, not a file system.\n\nFSx for Windows File Server is the right option.",
+      "hint": "You need SMB and Active Directory integration."
+    },
+    {
+      "id": "FSX-002",
+      "domain": "FSx",
+      "tags": ["lustre", "hpc", "s3"],
+      "difficulty": 4,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A research team runs HPC workloads that require a **high-performance parallel file system** and seamless integration with data stored in S3. Which service is BEST?",
+      "options": [
+        {"key": "A", "text": "Amazon EFS with Bursting throughput"},
+        {"key": "B", "text": "Amazon FSx for Lustre"},
+        {"key": "C", "text": "Amazon FSx for Windows File Server"},
+        {"key": "D", "text": "Amazon S3 with Transfer Acceleration"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**FSx for Lustre** provides a managed high-performance parallel file system and integrates directly with S3 for fast data loading and export. It is designed for HPC, ML, and analytics workloads.\n\nThis is the best fit for high-performance file access with S3 integration.",
+      "incorrect": "- **EFS** is shared NFS but does not provide the same HPC performance.\n- **FSx for Windows** is for SMB/Windows workloads.\n- **S3 Transfer Acceleration** improves object transfers but does not provide a parallel file system.\n\nFSx for Lustre is purpose-built for this use case.",
+      "hint": "Look for a managed parallel file system used by HPC workloads."
+    },
+    {
+      "id": "SGW-001",
+      "domain": "Storage Gateway",
+      "tags": ["hybrid", "file-gateway", "nfs"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "An on-premises application writes files using **NFS** and the data must be stored durably in Amazon S3. The company wants a **local cache** for low-latency access to recently used files. Which Storage Gateway type should they use?",
+      "options": [
+        {"key": "A", "text": "Tape Gateway"},
+        {"key": "B", "text": "File Gateway"},
+        {"key": "C", "text": "Volume Gateway (cached volumes)"},
+        {"key": "D", "text": "Volume Gateway (stored volumes)"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**File Gateway** provides an NFS/SMB interface backed by Amazon S3 and maintains a local cache for frequently accessed data. It is designed specifically for file-based workloads that must store data in S3.\n\nThis matches the requirement for NFS access with S3 backing and local cache.",
+      "incorrect": "- **Tape Gateway** is for virtual tape libraries, not file access.\n- **Volume Gateway** exposes block storage (iSCSI), not NFS file shares.\n\nFile Gateway is the correct choice for NFS-to-S3 access.",
+      "hint": "You need NFS/SMB file access with S3 as the backing store."
+    },
+    {
+      "id": "SNOW-001",
+      "domain": "Snowball",
+      "tags": ["data-transfer", "offline", "migration"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A company must migrate **150 TB** of archival data from a data center to AWS. Their internet connection is limited and would take months to transfer the data. What is the MOST efficient solution?",
+      "options": [
+        {"key": "A", "text": "AWS Storage Gateway"},
+        {"key": "B", "text": "AWS Snowball Edge"},
+        {"key": "C", "text": "S3 Transfer Acceleration"},
+        {"key": "D", "text": "AWS DataSync over the internet"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS Snowball Edge** is designed for large-scale offline data transfers when network bandwidth is insufficient. It allows physical shipment of data to AWS, drastically reducing migration time.\n\nThis is the most efficient method for very large datasets with limited connectivity.",
+      "incorrect": "- **Storage Gateway** is for hybrid ongoing access, not bulk migration.\n- **Transfer Acceleration** and **DataSync** still rely on network bandwidth and may take too long.\n\nSnowball Edge is the correct offline migration service.",
+      "hint": "Use the service that ships physical devices to move large datasets."
+    },
+    {
+      "id": "BACKUP-001",
+      "domain": "AWS Backup",
+      "tags": ["backup", "centralized", "compliance"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A company wants a **centralized backup service** to manage backups for EBS, RDS, and DynamoDB across multiple AWS accounts with lifecycle policies and retention enforcement. Which service should they use?",
+      "options": [
+        {"key": "A", "text": "AWS Backup"},
+        {"key": "B", "text": "Amazon S3 Lifecycle Policies"},
+        {"key": "C", "text": "AWS CloudTrail"},
+        {"key": "D", "text": "Amazon EventBridge"}
+      ],
+      "answer": {"keys": ["A"]},
+      "explanation": "**AWS Backup** provides centralized backup management across AWS services and accounts, including EBS, RDS, and DynamoDB. It supports backup plans, lifecycle policies, and retention enforcement.\n\nThis meets the requirement for centralized, policy-driven backups.",
+      "incorrect": "- **S3 Lifecycle** manages objects in S3 only.\n- **CloudTrail** is for audit logging.\n- **EventBridge** routes events and does not manage backups.\n\nAWS Backup is the correct service for centralized backups.",
+      "hint": "Look for a service that manages backups across multiple AWS services and accounts."
+    }
+  ]
+}

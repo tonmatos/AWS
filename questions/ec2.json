@@ -1,0 +1,2940 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "EC2-001",
+      "domain": "EC2",
+      "tags": [
+        "instance-types",
+        "cost-optimization"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A financial services company runs a batch processing application that analyzes trading data every night from 2 AM to 6 AM. The workload is compute-intensive but can tolerate interruptions and be resumed from the last checkpoint. The application currently runs on On-Demand t3.2xlarge instances (8 vCPUs, 32 GB RAM) costing $0.3328 per hour. The company wants to reduce costs by at least 60% while maintaining the ability to complete the nightly processing. Processing must complete within the 4-hour window, and the application uses checkpointing every 15 minutes.\n\nWhich EC2 purchasing option provides the MOST cost-effective solution?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Purchase a 1-year Reserved Instance with All Upfront payment for guaranteed capacity and maximum discount of approximately 40% compared to On-Demand"
+        },
+        {
+          "key": "B",
+          "text": "Use Spot Instances with a maximum price equal to On-Demand pricing, implementing instance interruption handling with the 2-minute warning to save checkpoint state"
+        },
+        {
+          "key": "C",
+          "text": "Use a Savings Plan with 1-year commitment providing approximately 30-40% savings across instance families and regions"
+        },
+        {
+          "key": "D",
+          "text": "Use Dedicated Hosts with license optimization to reduce costs through Bring-Your-Own-License (BYOL) arrangements"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "explanation": "**Why Spot Instances are the best choice:**\n\n**Cost Analysis:**\n- **On-Demand:** $0.3328/hour \u00d7 4 hours \u00d7 30 days = ~$39.94/month\n- **Spot Instances:** Typically 60-90% cheaper than On-Demand = ~$4-16/month\n- **Reserved Instances:** ~40% discount = ~$23.96/month\n- **Savings Plans:** ~30-40% discount = ~$24-28/month\n\nSpot Instances provide 60-90% savings, easily exceeding the 60% requirement.\n\n**Why Spot works for this workload:**\n\n1. **Interruption Tolerance:**\n   - Application checkpoints every 15 minutes\n   - Can resume from last checkpoint if interrupted\n   - 4-hour window with 15-min checkpoints = max 15 minutes of lost work\n\n2. **Spot Instance Interruption Handling:**\n   - AWS provides 2-minute warning via EC2 instance metadata\n   - Application can save current checkpoint and gracefully shut down\n   - CloudWatch Events can trigger Lambda to save state\n\n3. **Implementation Pattern:**\n```python\nimport requests\nimport time\n\ndef check_spot_termination():\n    try:\n        r = requests.get(\n            'http://169.254.169.254/latest/meta-data/spot/instance-action',\n            timeout=1\n        )\n        if r.status_code == 200:\n            # Spot termination notice received\n            return True\n    except:\n        pass\n    return False\n\nwhile processing:\n    if check_spot_termination():\n        save_checkpoint()\n        break\n    # Process batch\n    time.sleep(60)\n```\n\n4. **Availability Consideration:**\n   - t3 instances have high Spot availability (low interruption rate)\n   - Nightly batch window (2-6 AM) typically has lower demand\n   - Can configure multiple instance types in Spot Fleet for higher availability\n\n**Why other options are less suitable:**\n\n- **A (Reserved Instances):** Only 40% savings, doesn't meet 60% requirement. Also requires 1-year commitment for predictable, consistent workloads. Overkill for 4 hours/night usage.\n\n- **C (Savings Plans):** Only 30-40% savings, doesn't meet 60% requirement. Better for diverse workloads across instance types/regions.\n\n- **D (Dedicated Hosts):** More expensive than On-Demand. Used for licensing requirements (Oracle, Windows Server) or compliance needs. Increases cost rather than reducing it.\n\n**Best Practice Configuration:**\n```bash\n# Launch Spot Instance with user data for termination handling\naws ec2 run-instances \\\n  --instance-type t3.2xlarge \\\n  --instance-market-options '{\n    \"MarketType\": \"spot\",\n    \"SpotOptions\": {\n      \"MaxPrice\": \"0.3328\",\n      \"SpotInstanceType\": \"one-time\",\n      \"InstanceInterruptionBehavior\": \"terminate\"\n    }\n  }' \\\n  --user-data file://check-termination.sh\n```\n\nReferences:\n- Spot Instance interruption notices: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html\n- EC2 Spot Best Practices: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-best-practices.html",
+      "incorrect": "This option either doesn't provide enough cost savings (60%+ required) or isn't suitable for the workload characteristics. Reserved Instances and Savings Plans provide 30-40% savings, falling short of the requirement. Dedicated Hosts actually increase costs. Spot Instances are perfect for interruptible, checkpoint-capable batch workloads that don't require guaranteed capacity, providing 60-90% savings.",
+      "hint": "The workload can tolerate interruptions and has checkpointing. Which purchasing option provides the highest discount for interruptible workloads?"
+    },
+    {
+      "id": "EC2-002",
+      "domain": "EC2",
+      "tags": [
+        "security-groups",
+        "networking"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A three-tier web application consists of:\n- Web tier: EC2 instances in public subnets (security group: SG-Web)\n- Application tier: EC2 instances in private subnets (security group: SG-App)\n- Database tier: RDS MySQL in private subnets (security group: SG-DB)\n\nThe security team requires:\n1. Internet users can access the web tier on ports 80 and 443\n2. Web tier can communicate with application tier on port 8080\n3. Application tier can communicate with database on port 3306\n4. Application tier should NOT accept direct connections from the internet\n5. Database should ONLY accept connections from the application tier\n\nWhich security group configuration correctly implements these requirements with the LEAST privilege?",
+      "options": [
+        {
+          "key": "A",
+          "text": "SG-Web: Inbound 0.0.0.0/0 on 80,443 | Outbound ALL\nSG-App: Inbound SG-Web on 8080 | Outbound SG-DB on 3306\nSG-DB: Inbound SG-App on 3306 | Outbound ALL"
+        },
+        {
+          "key": "B",
+          "text": "SG-Web: Inbound 0.0.0.0/0 on 80,443,8080 | Outbound ALL\nSG-App: Inbound 0.0.0.0/0 on 8080 | Outbound ALL\nSG-DB: Inbound 0.0.0.0/0 on 3306 | Outbound ALL"
+        },
+        {
+          "key": "C",
+          "text": "SG-Web: Inbound 0.0.0.0/0 on 80,443 | Outbound SG-App on 8080\nSG-App: Inbound SG-Web on 8080 | Outbound ALL\nSG-DB: Inbound 10.0.0.0/16 on 3306 | Outbound ALL"
+        },
+        {
+          "key": "D",
+          "text": "SG-Web: Inbound 0.0.0.0/0 on ALL ports | Outbound ALL\nSG-App: Inbound SG-Web on ALL ports | Outbound ALL\nSG-DB: Inbound SG-App on ALL ports | Outbound ALL"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "explanation": "**Why Option A is correct:**\n\nOption A implements the principle of least privilege by only allowing necessary traffic flows:\n\n**SG-Web (Web Tier):**\n- **Inbound:** 0.0.0.0/0 on ports 80 (HTTP) and 443 (HTTPS)\n  - Allows internet access as required\n  - Only opens necessary ports\n- **Outbound:** ALL (default)\n  - Allows web tier to initiate connections to app tier\n  - Note: Could be further restricted to SG-App:8080 for maximum security\n\n**SG-App (Application Tier):**\n- **Inbound:** SG-Web on port 8080\n  - **Key point:** Uses security group ID as source, not CIDR\n  - Only allows traffic from web tier instances\n  - Blocks direct internet access \u2713\n- **Outbound:** SG-DB on port 3306\n  - Only allows database connections\n  - Restricts unnecessary outbound traffic\n\n**SG-DB (Database Tier):**\n- **Inbound:** SG-App on port 3306\n  - Only accepts connections from application tier \u2713\n  - Most restrictive inbound rule\n- **Outbound:** ALL\n  - Allows responses to application tier\n  - Note: Could be restricted further but rarely needed\n\n**Security Group Referencing:**\n\nUsing security group IDs as sources/destinations (SG-Web, SG-App, SG-DB) provides dynamic security:\n\n```json\n{\n  \"IpPermissions\": [{\n    \"IpProtocol\": \"tcp\",\n    \"FromPort\": 8080,\n    \"ToPort\": 8080,\n    \"UserIdGroupPairs\": [{\n      \"GroupId\": \"sg-web-12345\",\n      \"Description\": \"Allow from web tier\"\n    }]\n  }]\n}\n```\n\n**Benefits:**\n- Automatically applies to all instances in the referenced security group\n- No need to update rules when instances scale\n- Works across instance launches/terminations\n- No need to track IP addresses\n\n**Why other options are WRONG:**\n\n**Option B:**\n- \u274c SG-Web exposes port 8080 to internet (unnecessary)\n- \u274c SG-App allows inbound from 0.0.0.0/0 (violates requirement #4)\n- \u274c SG-DB allows inbound from anywhere (violates requirement #5)\n- This is a major security risk - database is publicly accessible!\n\n**Option C:**\n- \u274c SG-DB uses VPC CIDR (10.0.0.0/16) instead of SG-App\n- While better than 0.0.0.0/0, this allows ANY instance in the VPC to access the database\n- Web tier instances could directly access database (violates least privilege)\n- Harder to maintain as subnet/VPC design changes\n\n**Option D:**\n- \u274c Opens ALL ports on all tiers\n- Massive security risk\n- Violates principle of least privilege\n- Allows unnecessary protocols and services\n\n**Complete Configuration Example:**\n\n```bash\n# Create security groups\naws ec2 create-security-group --group-name SG-Web \\\n  --description \"Web tier security group\"\n  \naws ec2 create-security-group --group-name SG-App \\\n  --description \"Application tier security group\"\n  \naws ec2 create-security-group --group-name SG-DB \\\n  --description \"Database tier security group\"\n\n# Configure SG-Web\naws ec2 authorize-security-group-ingress \\\n  --group-name SG-Web \\\n  --protocol tcp --port 80 --cidr 0.0.0.0/0\n  \naws ec2 authorize-security-group-ingress \\\n  --group-name SG-Web \\\n  --protocol tcp --port 443 --cidr 0.0.0.0/0\n\n# Configure SG-App\naws ec2 authorize-security-group-ingress \\\n  --group-name SG-App \\\n  --protocol tcp --port 8080 \\\n  --source-group SG-Web\n\n# Configure SG-DB  \naws ec2 authorize-security-group-ingress \\\n  --group-name SG-DB \\\n  --protocol tcp --port 3306 \\\n  --source-group SG-App\n```\n\n**Key Security Principles:**\n1. **Least Privilege:** Only open necessary ports\n2. **Defense in Depth:** Use security group referencing\n3. **Deny by Default:** Security groups are deny-by-default\n4. **Stateful:** Return traffic is automatically allowed\n\nReferences:\n- Security Groups: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html\n- Security Group Rules: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-group-rules.html",
+      "incorrect": "This configuration either exposes services unnecessarily to the internet, allows overly broad access within the VPC, or opens too many ports. Security groups should implement least privilege by only allowing necessary traffic sources (using security group references, not broad CIDR ranges) on specific required ports. Using 0.0.0.0/0 or VPC CIDR blocks for internal tiers violates the principle of least privilege.",
+      "hint": "Security groups are stateful and support referencing other security groups as sources. Which option uses security group references (not CIDR blocks) for internal communication?"
+    },
+    {
+      "id": "EC2-003",
+      "domain": "EC2",
+      "tags": [
+        "spot",
+        "batch",
+        "checkpointing"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A batch job runs nightly for 4 hours and can be interrupted as long as it can resume from checkpoints. The goal is to reduce compute cost as much as possible.",
+      "options": [
+        {
+          "key": "A",
+          "text": "On-Demand Instances"
+        },
+        {
+          "key": "B",
+          "text": "Reserved Instances (1 year)"
+        },
+        {
+          "key": "C",
+          "text": "Spot Instances with checkpointing"
+        },
+        {
+          "key": "D",
+          "text": "Dedicated Hosts"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Look for the option that allows interruption in exchange for the biggest discount.",
+      "explanation": "Spot Instances provide the largest discount compared to On-Demand and are designed for interruptible workloads. If the job checkpoints, it can handle interruptions and resume, making Spot the most cost-effective choice.",
+      "incorrect": "Reserved Instances and Savings Plans discount steady usage, but Spot is typically the lowest cost when interruption is acceptable.",
+      "references": [
+        {
+          "label": "EC2 purchasing options",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-purchasing-options.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-004",
+      "domain": "EC2",
+      "tags": [
+        "tenancy",
+        "compliance"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must use an existing per-socket software license and needs visibility into the underlying physical sockets. The company also needs to control instance placement on specific hardware.",
+      "options": [
+        {
+          "key": "A",
+          "text": "On-Demand Instances"
+        },
+        {
+          "key": "B",
+          "text": "Dedicated Instances"
+        },
+        {
+          "key": "C",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Only one option exposes host-level attributes for licensing and placement.",
+      "explanation": "Dedicated Hosts provide a physical server fully dedicated to your use and allow you to use existing per-socket licensing and control placement on specific hosts.",
+      "incorrect": "Dedicated Instances provide single-tenant hardware but do not provide the same host-level visibility and licensing flexibility as Dedicated Hosts.",
+      "references": [
+        {
+          "label": "EC2 purchasing options",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-purchasing-options.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-005",
+      "domain": "EC2",
+      "tags": [
+        "capacity-reservation",
+        "availability"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An application must always have capacity available in a specific Availability Zone, but the workload runs only during business hours. The company wants capacity guarantees without paying for a full Dedicated Host.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Reserved Instances"
+        },
+        {
+          "key": "B",
+          "text": "On-Demand Capacity Reservation"
+        },
+        {
+          "key": "C",
+          "text": "Spot Instances"
+        },
+        {
+          "key": "D",
+          "text": "Savings Plans"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Think about guaranteeing capacity in a specific AZ, independent of billing discounts.",
+      "explanation": "On-Demand Capacity Reservations guarantee capacity in a specific AZ. You pay the On-Demand rate for the reserved capacity, and you can cancel when you no longer need it. Discounts can be combined separately with Savings Plans or RIs.",
+      "incorrect": "Reserved Instances and Savings Plans focus on discounts and do not guarantee AZ capacity by themselves.",
+      "references": [
+        {
+          "label": "On-Demand Capacity Reservations",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-006",
+      "domain": "EC2",
+      "tags": [
+        "placement-groups"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A low-latency HPC workload needs the lowest possible network latency between instances in a single Availability Zone.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Spread placement group"
+        },
+        {
+          "key": "B",
+          "text": "Partition placement group"
+        },
+        {
+          "key": "C",
+          "text": "Cluster placement group"
+        },
+        {
+          "key": "D",
+          "text": "No placement group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "One placement group is designed for tightly-coupled workloads.",
+      "explanation": "A cluster placement group packs instances close together within an AZ to provide the lowest network latency and highest throughput, which is ideal for tightly-coupled HPC workloads.",
+      "incorrect": "Spread and partition placement groups prioritize fault isolation rather than lowest latency.",
+      "references": [
+        {
+          "label": "Placement groups",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-007",
+      "domain": "EC2",
+      "tags": [
+        "placement-groups",
+        "fault-isolation"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to run a set of instances where each instance must be placed on distinct underlying hardware to reduce correlated failures.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cluster placement group"
+        },
+        {
+          "key": "B",
+          "text": "Spread placement group"
+        },
+        {
+          "key": "C",
+          "text": "Partition placement group"
+        },
+        {
+          "key": "D",
+          "text": "Dedicated Hosts"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "The wording 'distinct underlying hardware' is the key.",
+      "explanation": "A spread placement group places instances on distinct hardware to reduce the risk of simultaneous failure. It is commonly used for small sets of critical instances.",
+      "incorrect": "Cluster groups do the opposite (pack together). Partition groups isolate by partitions, but not necessarily each instance on distinct hardware.",
+      "references": [
+        {
+          "label": "Spread placement groups",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html#placement-groups-spread"
+        }
+      ]
+    },
+    {
+      "id": "EC2-008",
+      "domain": "EC2",
+      "tags": [
+        "ebs",
+        "volume-types"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A database needs high, consistent IOPS at low latency. The workload is I/O intensive and requires predictable performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "st1 (Throughput Optimized HDD)"
+        },
+        {
+          "key": "B",
+          "text": "sc1 (Cold HDD)"
+        },
+        {
+          "key": "C",
+          "text": "gp3 (General Purpose SSD)"
+        },
+        {
+          "key": "D",
+          "text": "io2 (Provisioned IOPS SSD)"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "When you see predictable high IOPS, think provisioned IOPS SSD.",
+      "explanation": "io2 is designed for mission-critical, I/O intensive workloads that need high and consistent IOPS and low latency. It provides predictable performance.",
+      "incorrect": "HDD-based volumes (st1/sc1) optimize throughput, not low-latency IOPS. gp3 is general purpose and may be sufficient, but io2 is the best match for strict predictable IOPS.",
+      "references": [
+        {
+          "label": "EBS volume types",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-009",
+      "domain": "EC2",
+      "tags": [
+        "ebs",
+        "snapshots"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to create incremental backups of an EBS volume and store them durably in Amazon S3 without managing your own backup storage.",
+      "options": [
+        {
+          "key": "A",
+          "text": "EBS snapshots"
+        },
+        {
+          "key": "B",
+          "text": "EBS volume cloning"
+        },
+        {
+          "key": "C",
+          "text": "AMI copy"
+        },
+        {
+          "key": "D",
+          "text": "Instance store"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Incremental backups for EBS are a built-in feature.",
+      "explanation": "EBS snapshots are incremental backups of EBS volumes and are stored in Amazon S3 (managed by AWS).",
+      "incorrect": "Instance store is ephemeral. AMIs can include snapshots but snapshots are the direct solution for volume backups.",
+      "references": [
+        {
+          "label": "EBS snapshots",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-creating-snapshot.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-010",
+      "domain": "EC2",
+      "tags": [
+        "ebs",
+        "encryption"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An EC2 instance uses an unencrypted EBS volume. You must enable encryption with minimal downtime.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable encryption in place on the existing volume"
+        },
+        {
+          "key": "B",
+          "text": "Create a snapshot, copy it with encryption, then create a new encrypted volume and attach it"
+        },
+        {
+          "key": "C",
+          "text": "Enable EBS default encryption and reboot the instance"
+        },
+        {
+          "key": "D",
+          "text": "Convert the volume to gp3"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Encrypting an existing unencrypted volume requires a snapshot copy workflow.",
+      "explanation": "To encrypt an unencrypted volume, create a snapshot, copy the snapshot with encryption enabled, then create a new encrypted volume from the encrypted snapshot and attach it (with a stop/attach if needed).",
+      "incorrect": "Default encryption only applies to new volumes. Changing volume type does not encrypt it.",
+      "references": [
+        {
+          "label": "Encrypt unencrypted EBS volumes",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html#encrypt-unencrypted"
+        }
+      ]
+    },
+    {
+      "id": "EC2-011",
+      "domain": "EC2",
+      "tags": [
+        "instance-store",
+        "durability"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A high-performance cache needs very low latency local storage, and the data can be lost if the instance stops or terminates.",
+      "options": [
+        {
+          "key": "A",
+          "text": "EBS volumes"
+        },
+        {
+          "key": "B",
+          "text": "EFS"
+        },
+        {
+          "key": "C",
+          "text": "Instance store"
+        },
+        {
+          "key": "D",
+          "text": "S3"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Ephemeral, ultra-low latency local storage points to one choice.",
+      "explanation": "Instance store provides temporary block-level storage physically attached to the host. It is very fast but data is lost on stop/terminate, which matches a disposable cache.",
+      "incorrect": "EBS and EFS are durable network storage options; S3 is object storage.",
+      "references": [
+        {
+          "label": "Instance store",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-012",
+      "domain": "EC2",
+      "tags": [
+        "imdsv2",
+        "security"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Security requires protection against SSRF attacks that could access the instance metadata service. Which configuration best addresses this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Disable CloudWatch Logs"
+        },
+        {
+          "key": "B",
+          "text": "Require IMDSv2"
+        },
+        {
+          "key": "C",
+          "text": "Use a larger instance type"
+        },
+        {
+          "key": "D",
+          "text": "Attach an Elastic IP"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "IMDSv2 adds session-oriented requests that mitigate certain SSRF patterns.",
+      "explanation": "IMDSv2 requires a session token and uses PUT requests to obtain it, providing better protection against SSRF-style attacks compared to IMDSv1.",
+      "incorrect": "CloudWatch, instance type, and Elastic IP do not address metadata SSRF risks.",
+      "references": [
+        {
+          "label": "IMDSv2",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-013",
+      "domain": "EC2",
+      "tags": [
+        "autoscaling",
+        "health-checks"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An Auto Scaling group uses an Application Load Balancer. You want instances replaced if they fail the load balancer health check.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable EC2 health checks only"
+        },
+        {
+          "key": "B",
+          "text": "Enable ELB health checks for the Auto Scaling group"
+        },
+        {
+          "key": "C",
+          "text": "Use Spot Instances"
+        },
+        {
+          "key": "D",
+          "text": "Increase the cooldown period"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "You need the ASG to consider the load balancer health state.",
+      "explanation": "When you enable ELB health checks, Auto Scaling uses the ALB health status in addition to EC2 status checks and can replace instances that fail the load balancer checks.",
+      "incorrect": "Spot and cooldown do not change which health signals trigger replacement.",
+      "references": [
+        {
+          "label": "ASG health checks",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/health-checks.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-014",
+      "domain": "EC2",
+      "tags": [
+        "launch-template",
+        "best-practice"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to standardize Auto Scaling configuration and use the latest EC2 features. Which should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Launch Configuration"
+        },
+        {
+          "key": "B",
+          "text": "Launch Template"
+        },
+        {
+          "key": "C",
+          "text": "AMI only"
+        },
+        {
+          "key": "D",
+          "text": "Placement group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "One of these is the current recommended construct for ASG.",
+      "explanation": "Launch Templates are the newer, recommended way to define instance configuration and support newer EC2 features compared to launch configurations.",
+      "incorrect": "Launch configurations are legacy and have feature gaps.",
+      "references": [
+        {
+          "label": "Launch templates",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-templates.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-015",
+      "domain": "EC2",
+      "tags": [
+        "hibernation"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An application running on EC2 needs to preserve in-memory state across stops and starts to resume quickly without a full boot. Which feature matches this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "EC2 hibernation"
+        },
+        {
+          "key": "B",
+          "text": "EBS snapshots"
+        },
+        {
+          "key": "C",
+          "text": "Auto Scaling lifecycle hooks"
+        },
+        {
+          "key": "D",
+          "text": "AMI creation"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "This is about saving RAM contents on stop.",
+      "explanation": "EC2 hibernation saves the contents of instance memory (RAM) to the root EBS volume so the instance can resume quickly with the same in-memory state.",
+      "incorrect": "Snapshots and AMIs capture disk state, not active RAM state. Lifecycle hooks delay termination/launch actions.",
+      "references": [
+        {
+          "label": "EC2 hibernation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Hibernate.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-016",
+      "domain": "EC2",
+      "tags": [
+        "networking",
+        "enhanced-networking"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A network-intensive workload needs higher PPS and lower latency networking. Which EC2 capability should you enable or choose?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enhanced networking (ENA)"
+        },
+        {
+          "key": "B",
+          "text": "Placement group spread"
+        },
+        {
+          "key": "C",
+          "text": "EBS multi-attach"
+        },
+        {
+          "key": "D",
+          "text": "Instance store"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "This is specifically about network driver and virtualization improvements.",
+      "explanation": "Enhanced networking with ENA provides higher bandwidth, higher PPS, and lower latency for supported instance types.",
+      "incorrect": "Placement groups can help placement, but ENA is the direct feature for enhanced network performance.",
+      "references": [
+        {
+          "label": "Enhanced networking",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-017",
+      "domain": "EC2",
+      "tags": [
+        "t-instances",
+        "cpu-credits"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A T3 instance is running at 100% CPU for long periods and performance drops. What is the most likely cause?",
+      "options": [
+        {
+          "key": "A",
+          "text": "EBS bandwidth is capped"
+        },
+        {
+          "key": "B",
+          "text": "CPU credits are exhausted"
+        },
+        {
+          "key": "C",
+          "text": "Security group blocks CPU"
+        },
+        {
+          "key": "D",
+          "text": "Placement group limits CPU"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Burstable instances depend on CPU credits for sustained high CPU.",
+      "explanation": "T-family burstable instances use CPU credits. If the instance runs at high CPU for long periods, it can deplete credits and then be throttled to baseline performance.",
+      "incorrect": "Security groups and placement groups do not affect CPU scheduling like this.",
+      "references": [
+        {
+          "label": "Burstable performance instances",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-018",
+      "domain": "EC2",
+      "tags": [
+        "eip",
+        "cost"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A team allocates Elastic IP addresses but leaves them unattached for weeks. What is the impact?",
+      "options": [
+        {
+          "key": "A",
+          "text": "No cost for unattached Elastic IPs"
+        },
+        {
+          "key": "B",
+          "text": "Charges apply for unattached Elastic IPs"
+        },
+        {
+          "key": "C",
+          "text": "Charges apply only if attached to stopped instances"
+        },
+        {
+          "key": "D",
+          "text": "Elastic IPs are free only in private subnets"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "AWS charges to discourage scarce public IPv4 hoarding.",
+      "explanation": "AWS applies charges for Elastic IP addresses that are allocated but not associated with a running instance (and in other specific cases).",
+      "incorrect": "Elastic IPs are not universally free when idle.",
+      "references": [
+        {
+          "label": "Elastic IP pricing behavior",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-019",
+      "domain": "EC2",
+      "tags": [
+        "ami",
+        "copy"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to deploy the same preconfigured EC2 instance to another Region. What is the standard approach?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Copy the EBS volume directly to the other Region"
+        },
+        {
+          "key": "B",
+          "text": "Create an AMI and copy the AMI to the other Region"
+        },
+        {
+          "key": "C",
+          "text": "Use a placement group"
+        },
+        {
+          "key": "D",
+          "text": "Use an Elastic IP"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "AMI copy is the normal cross-Region reuse mechanism for EC2 images.",
+      "explanation": "Create an AMI from the instance and copy the AMI to the target Region. Then launch instances from that AMI in the new Region.",
+      "incorrect": "You cannot directly attach an EBS volume across Regions. Placement groups and Elastic IPs are not for image replication.",
+      "references": [
+        {
+          "label": "Copy AMIs",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/CopyingAMIs.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-020",
+      "domain": "EC2",
+      "tags": [
+        "ebs",
+        "multi-attach"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Two EC2 instances in the same AZ must share a single block device for a clustered application. The volume type must support Multi-Attach.",
+      "options": [
+        {
+          "key": "A",
+          "text": "gp3"
+        },
+        {
+          "key": "B",
+          "text": "io1/io2"
+        },
+        {
+          "key": "C",
+          "text": "st1"
+        },
+        {
+          "key": "D",
+          "text": "sc1"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Multi-Attach is supported for specific provisioned IOPS volumes.",
+      "explanation": "EBS Multi-Attach is supported for io1 and io2 volumes and allows a single volume to be attached to multiple instances in the same AZ (with application-level coordination).",
+      "incorrect": "General purpose and HDD volumes do not support Multi-Attach.",
+      "references": [
+        {
+          "label": "EBS Multi-Attach",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volumes-multi.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-021",
+      "domain": "EC2",
+      "tags": [
+        "autoscaling",
+        "scale-in-protection"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An Auto Scaling group must not terminate a specific instance during scale-in because it is running a long-lived job.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Disable Auto Scaling"
+        },
+        {
+          "key": "B",
+          "text": "Enable instance scale-in protection on that instance"
+        },
+        {
+          "key": "C",
+          "text": "Use a larger instance type"
+        },
+        {
+          "key": "D",
+          "text": "Move the instance to another subnet"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Auto Scaling supports per-instance protection from scale-in actions.",
+      "explanation": "Scale-in protection prevents Auto Scaling from terminating the protected instance during scale-in events.",
+      "incorrect": "Changing instance type or subnet does not prevent scale-in termination decisions.",
+      "references": [
+        {
+          "label": "Scale-in protection",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-instance-termination.html#as-instance-termination-protection"
+        }
+      ]
+    },
+    {
+      "id": "EC2-022",
+      "domain": "EC2",
+      "tags": [
+        "spot",
+        "capacity"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload uses Spot Instances. The team wants to reduce the chance of interruption while still using Spot pricing.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Use a single instance type in one AZ"
+        },
+        {
+          "key": "B",
+          "text": "Use multiple instance types and multiple Availability Zones in the Auto Scaling group"
+        },
+        {
+          "key": "C",
+          "text": "Set a higher On-Demand price cap"
+        },
+        {
+          "key": "D",
+          "text": "Disable checkpoints"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Diversification reduces Spot interruptions.",
+      "explanation": "Using multiple instance types and multiple AZs increases the available Spot capacity pools and reduces the likelihood that capacity shortage in one pool will interrupt all instances.",
+      "incorrect": "Spot no longer uses bid price in the old way; diversification is the practical reliability improvement.",
+      "references": [
+        {
+          "label": "Spot best practices",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-best-practices.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-023",
+      "domain": "EC2",
+      "tags": [
+        "instance-types",
+        "memory"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload is memory-intensive and requires the highest memory per vCPU. Which instance family is the best starting point?",
+      "options": [
+        {
+          "key": "A",
+          "text": "C family (compute optimized)"
+        },
+        {
+          "key": "B",
+          "text": "R family (memory optimized)"
+        },
+        {
+          "key": "C",
+          "text": "T family (burstable)"
+        },
+        {
+          "key": "D",
+          "text": "P family (GPU)"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Match the family name to the bottleneck.",
+      "explanation": "R-family instances are memory optimized and provide high memory-to-vCPU ratios for memory-heavy workloads.",
+      "incorrect": "Compute optimized and burstable families are not designed for high sustained memory needs.",
+      "references": [
+        {
+          "label": "Instance families",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-024",
+      "domain": "EC2",
+      "tags": [
+        "user-data",
+        "bootstrap"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to run a bootstrap script only on the first launch of an EC2 instance (for example, install packages and write config). Where should it go?",
+      "options": [
+        {
+          "key": "A",
+          "text": "EC2 user data"
+        },
+        {
+          "key": "B",
+          "text": "Security group inbound rules"
+        },
+        {
+          "key": "C",
+          "text": "Route table"
+        },
+        {
+          "key": "D",
+          "text": "EBS snapshot"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "User data is designed for instance initialization.",
+      "explanation": "EC2 user data runs at first boot (and can be configured for subsequent boots) and is commonly used for bootstrapping.",
+      "incorrect": "Security groups, route tables, and snapshots do not execute scripts.",
+      "references": [
+        {
+          "label": "EC2 user data",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-025",
+      "domain": "EC2",
+      "tags": [
+        "ssm",
+        "ops"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company wants to run commands on EC2 instances without opening inbound SSH and with centralized audit logging. Which service should be used?",
+      "options": [
+        {
+          "key": "A",
+          "text": "AWS Systems Manager Run Command"
+        },
+        {
+          "key": "B",
+          "text": "Amazon Inspector"
+        },
+        {
+          "key": "C",
+          "text": "AWS CloudTrail only"
+        },
+        {
+          "key": "D",
+          "text": "AWS Shield"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "This is about remote command execution without inbound access.",
+      "explanation": "Systems Manager Run Command lets you execute commands on instances using the SSM Agent and IAM, without inbound SSH, and integrates with logging and auditing.",
+      "incorrect": "Inspector scans vulnerabilities; CloudTrail logs API calls but does not execute commands; Shield is DDoS protection.",
+      "references": [
+        {
+          "label": "SSM Run Command",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-026",
+      "domain": "EC2",
+      "tags": [
+        "security-groups",
+        "stateful"
+      ],
+      "difficulty": 1,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Which statement about EC2 Security Groups is correct?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Security Groups are stateless"
+        },
+        {
+          "key": "B",
+          "text": "Security Groups are stateful"
+        },
+        {
+          "key": "C",
+          "text": "Security Groups apply only at subnet level"
+        },
+        {
+          "key": "D",
+          "text": "Security Groups evaluate rules in order and stop at first match"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Think stateful vs stateless boundary controls.",
+      "explanation": "Security Groups are stateful: return traffic is automatically allowed, regardless of inbound rules, as long as the request was allowed.",
+      "incorrect": "Network ACLs are stateless and apply at subnet level; security groups apply at ENI/instance level.",
+      "references": [
+        {
+          "label": "Security groups",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-027",
+      "domain": "EC2",
+      "tags": [
+        "ebs",
+        "resize"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to increase an EBS volume size for a running Linux instance with minimal downtime.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Create a new instance"
+        },
+        {
+          "key": "B",
+          "text": "Modify the EBS volume and then extend the file system on the instance"
+        },
+        {
+          "key": "C",
+          "text": "Copy the volume to another Region"
+        },
+        {
+          "key": "D",
+          "text": "Change the security group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "EBS supports online resize plus in-OS filesystem expansion.",
+      "explanation": "You can modify the EBS volume size (and possibly type) and then extend the partition and file system in the OS. Many changes can be done while the instance is running.",
+      "incorrect": "Region copy and security groups are unrelated; new instance is not required for a simple volume resize.",
+      "references": [
+        {
+          "label": "Modify EBS volumes",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/requesting-ebs-volume-modifications.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1001",
+      "domain": "EC2",
+      "tags": [
+        "pricing",
+        "savings-plan"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A team wants a 1-year commitment discount for EC2 but needs to freely change instance families and sizes over time.\nWhich option fits best?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Standard Reserved Instances"
+        },
+        {
+          "key": "B",
+          "text": "Convertible Reserved Instances"
+        },
+        {
+          "key": "C",
+          "text": "Compute Savings Plan"
+        },
+        {
+          "key": "D",
+          "text": "On-Demand Capacity Reservation"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Best discount with the most compute flexibility.",
+      "explanation": "Compute Savings Plans provide discounts with flexibility across instance families, sizes, and regions for EC2 compute usage."
+    },
+    {
+      "id": "EC2-1002",
+      "domain": "EC2",
+      "tags": [
+        "pricing",
+        "capacity"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You must guarantee EC2 capacity in a specific Availability Zone for a 2-day event. No 1-year commitment.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "On-Demand Capacity Reservation"
+        },
+        {
+          "key": "B",
+          "text": "Standard Reserved Instance"
+        },
+        {
+          "key": "C",
+          "text": "Compute Savings Plan"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Guarantee capacity without long-term commitment.",
+      "explanation": "On-Demand Capacity Reservations reserve capacity in an AZ and are billed at On-Demand rates."
+    },
+    {
+      "id": "EC2-1003",
+      "domain": "EC2",
+      "tags": [
+        "licensing",
+        "dedicated"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An application requires per-socket licensing and the company needs visibility and control of the underlying host hardware.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "B",
+          "text": "Dedicated Instances"
+        },
+        {
+          "key": "C",
+          "text": "Spot Instances"
+        },
+        {
+          "key": "D",
+          "text": "Savings Plans"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Host-level control and socket visibility.",
+      "explanation": "Dedicated Hosts provide host-level visibility and control suitable for per-socket licensing requirements."
+    },
+    {
+      "id": "EC2-1004",
+      "domain": "EC2",
+      "tags": [
+        "spot",
+        "batch"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A batch workload is interruptible and can restart from checkpoints. The goal is the lowest compute cost.\nWhich purchasing option is best?",
+      "options": [
+        {
+          "key": "A",
+          "text": "On-Demand"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances"
+        },
+        {
+          "key": "C",
+          "text": "Standard Reserved Instances"
+        },
+        {
+          "key": "D",
+          "text": "Dedicated Hosts"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Interruptible workloads get the biggest discount here.",
+      "explanation": "Spot Instances provide the largest discounts for fault-tolerant and interruptible workloads."
+    },
+    {
+      "id": "EC2-1005",
+      "domain": "EC2",
+      "tags": [
+        "placement-groups"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need the lowest network latency between EC2 instances for HPC workloads in a single AZ.\nWhich placement group should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cluster placement group"
+        },
+        {
+          "key": "B",
+          "text": "Spread placement group"
+        },
+        {
+          "key": "C",
+          "text": "Partition placement group"
+        },
+        {
+          "key": "D",
+          "text": "No placement group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Packed close together in one AZ.",
+      "explanation": "Cluster placement groups place instances close together for low latency and high throughput."
+    },
+    {
+      "id": "EC2-1006",
+      "domain": "EC2",
+      "tags": [
+        "placement-groups",
+        "resilience"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to reduce the risk of correlated failures by placing a small number of critical instances on distinct hardware.\nWhich placement group should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cluster placement group"
+        },
+        {
+          "key": "B",
+          "text": "Spread placement group"
+        },
+        {
+          "key": "C",
+          "text": "Partition placement group"
+        },
+        {
+          "key": "D",
+          "text": "Capacity Reservation"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Small number of instances, maximum separation.",
+      "explanation": "Spread placement groups place instances on distinct underlying hardware to reduce correlated failures."
+    },
+    {
+      "id": "EC2-1007",
+      "domain": "EC2",
+      "tags": [
+        "imds",
+        "security"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "Security requires forcing IMDSv2 on all EC2 instances.\nWhich instance metadata setting enforces this?",
+      "options": [
+        {
+          "key": "A",
+          "text": "HttpTokens = required"
+        },
+        {
+          "key": "B",
+          "text": "HttpTokens = optional"
+        },
+        {
+          "key": "C",
+          "text": "Disable IPv6"
+        },
+        {
+          "key": "D",
+          "text": "HopLimit = 2"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "IMDSv2 requires session tokens.",
+      "explanation": "Setting HttpTokens to required forces token usage, enforcing IMDSv2."
+    },
+    {
+      "id": "EC2-1008",
+      "domain": "EC2",
+      "tags": [
+        "ebs",
+        "encryption"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want every new EBS volume and snapshot in an AWS account to be encrypted automatically.\nWhat should you enable?",
+      "options": [
+        {
+          "key": "A",
+          "text": "EBS encryption by default (account setting)"
+        },
+        {
+          "key": "B",
+          "text": "S3 default encryption"
+        },
+        {
+          "key": "C",
+          "text": "CloudTrail Insights"
+        },
+        {
+          "key": "D",
+          "text": "EBS Fast Snapshot Restore"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "There is an account-level switch for EBS.",
+      "explanation": "Enable EBS encryption by default so all new EBS volumes and snapshots are encrypted automatically."
+    },
+    {
+      "id": "EC2-1009",
+      "domain": "EC2",
+      "tags": [
+        "ebs",
+        "snapshots"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to create a copy of an EBS snapshot in another AWS Region for disaster recovery.\nWhat should you do?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Copy the snapshot to the target Region"
+        },
+        {
+          "key": "B",
+          "text": "Move the volume to the target Region"
+        },
+        {
+          "key": "C",
+          "text": "Enable Multi-AZ on the volume"
+        },
+        {
+          "key": "D",
+          "text": "Use an Elastic IP"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Snapshots can be copied cross-Region.",
+      "explanation": "EBS snapshots can be copied to another Region for DR and used to create volumes there."
+    },
+    {
+      "id": "EC2-1010",
+      "domain": "EC2",
+      "tags": [
+        "ami"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need to quickly launch many identical EC2 instances with the same OS, packages, and configuration.\nWhat should you create?",
+      "options": [
+        {
+          "key": "A",
+          "text": "An AMI"
+        },
+        {
+          "key": "B",
+          "text": "A VPC peering connection"
+        },
+        {
+          "key": "C",
+          "text": "A security group"
+        },
+        {
+          "key": "D",
+          "text": "A placement group"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Reusable instance image.",
+      "explanation": "An AMI captures an instance configuration so you can launch identical instances repeatedly."
+    },
+    {
+      "id": "EC2-1011",
+      "domain": "EC2",
+      "tags": [
+        "asg",
+        "health-checks"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An Auto Scaling group should replace instances when the load balancer health checks fail (app-level failures), not only when EC2 status checks fail.\nWhat should you configure?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Enable ELB health checks for the Auto Scaling group"
+        },
+        {
+          "key": "B",
+          "text": "Enable detailed monitoring only"
+        },
+        {
+          "key": "C",
+          "text": "Use Spread placement group"
+        },
+        {
+          "key": "D",
+          "text": "Use an Internet Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "ASG can use EC2 checks or ELB checks.",
+      "explanation": "Enabling ELB health checks lets ASG replace instances that fail application health checks."
+    },
+    {
+      "id": "EC2-1012",
+      "domain": "EC2",
+      "tags": [
+        "asg",
+        "scaling"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You want Auto Scaling to keep average CPU around 50% automatically without manually defining step thresholds.\nWhich scaling policy should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "Target tracking scaling"
+        },
+        {
+          "key": "B",
+          "text": "Step scaling only"
+        },
+        {
+          "key": "C",
+          "text": "Scheduled scaling only"
+        },
+        {
+          "key": "D",
+          "text": "Lifecycle hooks"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Maintain a metric at a target value.",
+      "explanation": "Target tracking scaling maintains a selected metric at a target value automatically."
+    },
+    {
+      "id": "EC2-1013",
+      "domain": "EC2",
+      "tags": [
+        "ebs",
+        "volume-types"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A database needs very high, consistent IOPS with low latency on EBS.\nWhich EBS volume type fits best?",
+      "options": [
+        {
+          "key": "A",
+          "text": "io2"
+        },
+        {
+          "key": "B",
+          "text": "gp3"
+        },
+        {
+          "key": "C",
+          "text": "st1"
+        },
+        {
+          "key": "D",
+          "text": "sc1"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Provisioned IOPS SSD for critical DB workloads.",
+      "explanation": "io2 is designed for high, consistent IOPS and low latency workloads like databases."
+    },
+    {
+      "id": "EC2-1014",
+      "domain": "EC2",
+      "tags": [
+        "networking",
+        "hpc"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "You need OS-bypass, ultra-low latency networking for tightly coupled HPC workloads (MPI-style) on EC2.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "EFA (Elastic Fabric Adapter)"
+        },
+        {
+          "key": "B",
+          "text": "CloudFront"
+        },
+        {
+          "key": "C",
+          "text": "VPC peering"
+        },
+        {
+          "key": "D",
+          "text": "NAT Gateway"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "HPC feature for tightly coupled workloads.",
+      "explanation": "EFA provides OS-bypass networking optimized for tightly coupled HPC workloads."
+    },
+    {
+      "id": "EC2-1015",
+      "domain": "EC2",
+      "tags": [
+        "security",
+        "roles"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "An application on EC2 must call AWS APIs without storing long-term access keys on disk.\nWhat should you use?",
+      "options": [
+        {
+          "key": "A",
+          "text": "IAM user access keys in a config file"
+        },
+        {
+          "key": "B",
+          "text": "IAM role attached to the instance (instance profile)"
+        },
+        {
+          "key": "C",
+          "text": "Root account access keys"
+        },
+        {
+          "key": "D",
+          "text": "Access keys in user data"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Temporary credentials delivered automatically.",
+      "explanation": "Instance profiles provide temporary credentials via instance metadata and rotate automatically."
+    },
+    {
+      "id": "EC2-1016",
+      "domain": "EC2",
+      "tags": [
+        "spot-instances",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: run fault-tolerant and checkpointed batch jobs at the lowest compute cost. Which EC2 architecture capability is the BEST fit? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "B",
+          "text": "Cluster placement groups"
+        },
+        {
+          "key": "C",
+          "text": "Spot Instances"
+        },
+        {
+          "key": "D",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: run fault-tolerant and checkpointed batch jobs at the lowest compute cost.",
+      "explanation": "Spot Instances is correct because they provide deep discounts for interruptible workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Cluster placement groups is useful when you need to provide the lowest network latency for tightly coupled HPC traffic in one AZ, but it is not the best fit for this requirement.",
+        "C": "Correct. Spot Instances is the best choice because they provide deep discounts for interruptible workloads.",
+        "D": "Incorrect. IMDSv2 enforcement (HttpTokens required) is useful when you need to prevent insecure metadata access and require session tokens for instance metadata, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1017",
+      "domain": "EC2",
+      "tags": [
+        "on-demand-capacity-reservations",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: guarantee EC2 capacity in a specific Availability Zone for a planned event. Which option should be implemented first? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "B",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "key": "C",
+          "text": "Cluster placement groups"
+        },
+        {
+          "key": "D",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: guarantee EC2 capacity in a specific Availability Zone for a planned event.",
+      "explanation": "On-Demand Capacity Reservations is correct because they reserve AZ capacity without long-term commitment terms.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Provisioned IOPS io2 EBS volumes is useful when you need to deliver consistently high and predictable storage IOPS for critical databases, but it is not the best fit for this requirement.",
+        "B": "Correct. On-Demand Capacity Reservations is the best choice because they reserve AZ capacity without long-term commitment terms.",
+        "C": "Incorrect. Cluster placement groups is useful when you need to provide the lowest network latency for tightly coupled HPC traffic in one AZ, but it is not the best fit for this requirement.",
+        "D": "Incorrect. IMDSv2 enforcement (HttpTokens required) is useful when you need to prevent insecure metadata access and require session tokens for instance metadata, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1018",
+      "domain": "EC2",
+      "tags": [
+        "dedicated-hosts",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: use per-socket or per-core software licensing tied to physical host visibility. Which AWS capability is most appropriate? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "B",
+          "text": "Cluster placement groups"
+        },
+        {
+          "key": "C",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: use per-socket or per-core software licensing tied to physical host visibility.",
+      "explanation": "Dedicated Hosts is correct because they provide host-level affinity and license-aware placement control.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Provisioned IOPS io2 EBS volumes is useful when you need to deliver consistently high and predictable storage IOPS for critical databases, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Cluster placement groups is useful when you need to provide the lowest network latency for tightly coupled HPC traffic in one AZ, but it is not the best fit for this requirement.",
+        "C": "Correct. Dedicated Hosts is the best choice because they provide host-level affinity and license-aware placement control.",
+        "D": "Incorrect. Spot Instances is useful when you need to run fault-tolerant and checkpointed batch jobs at the lowest compute cost, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1019",
+      "domain": "EC2",
+      "tags": [
+        "imdsv2-enforcement-httptokens-required",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to prevent insecure metadata access and require session tokens for instance metadata. Which choice is correct? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "key": "B",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "C",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: prevent insecure metadata access and require session tokens for instance metadata.",
+      "explanation": "IMDSv2 enforcement (HttpTokens required) is correct because it hardens instance metadata access against SSRF-style abuse.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. On-Demand Capacity Reservations is useful when you need to guarantee EC2 capacity in a specific Availability Zone for a planned event, but it is not the best fit for this requirement.",
+        "B": "Correct. IMDSv2 enforcement (HttpTokens required) is the best choice because it hardens instance metadata access against SSRF-style abuse.",
+        "C": "Incorrect. Provisioned IOPS io2 EBS volumes is useful when you need to deliver consistently high and predictable storage IOPS for critical databases, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Spot Instances is useful when you need to run fault-tolerant and checkpointed batch jobs at the lowest compute cost, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1020",
+      "domain": "EC2",
+      "tags": [
+        "cluster-placement-groups",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: provide the lowest network latency for tightly coupled HPC traffic in one AZ. Which option matches best? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Spot Instances"
+        },
+        {
+          "key": "B",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "C",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "key": "D",
+          "text": "Cluster placement groups"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: provide the lowest network latency for tightly coupled HPC traffic in one AZ.",
+      "explanation": "Cluster placement groups is correct because they place instances physically close together for high throughput.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Spot Instances is useful when you need to run fault-tolerant and checkpointed batch jobs at the lowest compute cost, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement.",
+        "C": "Incorrect. On-Demand Capacity Reservations is useful when you need to guarantee EC2 capacity in a specific Availability Zone for a planned event, but it is not the best fit for this requirement.",
+        "D": "Correct. Cluster placement groups is the best choice because they place instances physically close together for high throughput."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1021",
+      "domain": "EC2",
+      "tags": [
+        "provisioned-iops-io2-ebs-volumes",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: deliver consistently high and predictable storage IOPS for critical databases. Which EC2 architecture capability is the BEST fit? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "B",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "C",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "D",
+          "text": "On-Demand Capacity Reservations"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: deliver consistently high and predictable storage IOPS for critical databases.",
+      "explanation": "Provisioned IOPS io2 EBS volumes is correct because they are designed for sustained high I/O performance workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement.",
+        "B": "Correct. Provisioned IOPS io2 EBS volumes is the best choice because they are designed for sustained high I/O performance workloads.",
+        "C": "Incorrect. IMDSv2 enforcement (HttpTokens required) is useful when you need to prevent insecure metadata access and require session tokens for instance metadata, but it is not the best fit for this requirement.",
+        "D": "Incorrect. On-Demand Capacity Reservations is useful when you need to guarantee EC2 capacity in a specific Availability Zone for a planned event, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1022",
+      "domain": "EC2",
+      "tags": [
+        "spot-instances",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: run fault-tolerant and checkpointed batch jobs at the lowest compute cost. Which option should be implemented first? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances"
+        },
+        {
+          "key": "C",
+          "text": "Cluster placement groups"
+        },
+        {
+          "key": "D",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: run fault-tolerant and checkpointed batch jobs at the lowest compute cost.",
+      "explanation": "Spot Instances is correct because they provide deep discounts for interruptible workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. IMDSv2 enforcement (HttpTokens required) is useful when you need to prevent insecure metadata access and require session tokens for instance metadata, but it is not the best fit for this requirement.",
+        "B": "Correct. Spot Instances is the best choice because they provide deep discounts for interruptible workloads.",
+        "C": "Incorrect. Cluster placement groups is useful when you need to provide the lowest network latency for tightly coupled HPC traffic in one AZ, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Provisioned IOPS io2 EBS volumes is useful when you need to deliver consistently high and predictable storage IOPS for critical databases, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1023",
+      "domain": "EC2",
+      "tags": [
+        "on-demand-capacity-reservations",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: guarantee EC2 capacity in a specific Availability Zone for a planned event. Which AWS capability is most appropriate? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Spot Instances"
+        },
+        {
+          "key": "B",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "C",
+          "text": "Cluster placement groups"
+        },
+        {
+          "key": "D",
+          "text": "On-Demand Capacity Reservations"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: guarantee EC2 capacity in a specific Availability Zone for a planned event.",
+      "explanation": "On-Demand Capacity Reservations is correct because they reserve AZ capacity without long-term commitment terms.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Spot Instances is useful when you need to run fault-tolerant and checkpointed batch jobs at the lowest compute cost, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Provisioned IOPS io2 EBS volumes is useful when you need to deliver consistently high and predictable storage IOPS for critical databases, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Cluster placement groups is useful when you need to provide the lowest network latency for tightly coupled HPC traffic in one AZ, but it is not the best fit for this requirement.",
+        "D": "Correct. On-Demand Capacity Reservations is the best choice because they reserve AZ capacity without long-term commitment terms."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1024",
+      "domain": "EC2",
+      "tags": [
+        "dedicated-hosts",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to use per-socket or per-core software licensing tied to physical host visibility. Which choice is correct? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "B",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "key": "C",
+          "text": "Spot Instances"
+        },
+        {
+          "key": "D",
+          "text": "Dedicated Hosts"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: use per-socket or per-core software licensing tied to physical host visibility.",
+      "explanation": "Dedicated Hosts is correct because they provide host-level affinity and license-aware placement control.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Provisioned IOPS io2 EBS volumes is useful when you need to deliver consistently high and predictable storage IOPS for critical databases, but it is not the best fit for this requirement.",
+        "B": "Incorrect. On-Demand Capacity Reservations is useful when you need to guarantee EC2 capacity in a specific Availability Zone for a planned event, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Spot Instances is useful when you need to run fault-tolerant and checkpointed batch jobs at the lowest compute cost, but it is not the best fit for this requirement.",
+        "D": "Correct. Dedicated Hosts is the best choice because they provide host-level affinity and license-aware placement control."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1025",
+      "domain": "EC2",
+      "tags": [
+        "imdsv2-enforcement-httptokens-required",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: prevent insecure metadata access and require session tokens for instance metadata. Which option matches best? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "key": "B",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "C",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: prevent insecure metadata access and require session tokens for instance metadata.",
+      "explanation": "IMDSv2 enforcement (HttpTokens required) is correct because it hardens instance metadata access against SSRF-style abuse.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. On-Demand Capacity Reservations is useful when you need to guarantee EC2 capacity in a specific Availability Zone for a planned event, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement.",
+        "C": "Correct. IMDSv2 enforcement (HttpTokens required) is the best choice because it hardens instance metadata access against SSRF-style abuse.",
+        "D": "Incorrect. Spot Instances is useful when you need to run fault-tolerant and checkpointed batch jobs at the lowest compute cost, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1026",
+      "domain": "EC2",
+      "tags": [
+        "cluster-placement-groups",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: provide the lowest network latency for tightly coupled HPC traffic in one AZ. Which EC2 architecture capability is the BEST fit? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "B",
+          "text": "Cluster placement groups"
+        },
+        {
+          "key": "C",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "D",
+          "text": "On-Demand Capacity Reservations"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "B"
+        ]
+      },
+      "hint": "Focus on the key requirement: provide the lowest network latency for tightly coupled HPC traffic in one AZ.",
+      "explanation": "Cluster placement groups is correct because they place instances physically close together for high throughput.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. IMDSv2 enforcement (HttpTokens required) is useful when you need to prevent insecure metadata access and require session tokens for instance metadata, but it is not the best fit for this requirement.",
+        "B": "Correct. Cluster placement groups is the best choice because they place instances physically close together for high throughput.",
+        "C": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement.",
+        "D": "Incorrect. On-Demand Capacity Reservations is useful when you need to guarantee EC2 capacity in a specific Availability Zone for a planned event, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1027",
+      "domain": "EC2",
+      "tags": [
+        "provisioned-iops-io2-ebs-volumes",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: deliver consistently high and predictable storage IOPS for critical databases. Which option should be implemented first? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "B",
+          "text": "Cluster placement groups"
+        },
+        {
+          "key": "C",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "D",
+          "text": "Dedicated Hosts"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: deliver consistently high and predictable storage IOPS for critical databases.",
+      "explanation": "Provisioned IOPS io2 EBS volumes is correct because they are designed for sustained high I/O performance workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Provisioned IOPS io2 EBS volumes is the best choice because they are designed for sustained high I/O performance workloads.",
+        "B": "Incorrect. Cluster placement groups is useful when you need to provide the lowest network latency for tightly coupled HPC traffic in one AZ, but it is not the best fit for this requirement.",
+        "C": "Incorrect. IMDSv2 enforcement (HttpTokens required) is useful when you need to prevent insecure metadata access and require session tokens for instance metadata, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1028",
+      "domain": "EC2",
+      "tags": [
+        "spot-instances",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: run fault-tolerant and checkpointed batch jobs at the lowest compute cost. Which AWS capability is most appropriate? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Cluster placement groups"
+        },
+        {
+          "key": "B",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "C",
+          "text": "Spot Instances"
+        },
+        {
+          "key": "D",
+          "text": "On-Demand Capacity Reservations"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: run fault-tolerant and checkpointed batch jobs at the lowest compute cost.",
+      "explanation": "Spot Instances is correct because they provide deep discounts for interruptible workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Cluster placement groups is useful when you need to provide the lowest network latency for tightly coupled HPC traffic in one AZ, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Provisioned IOPS io2 EBS volumes is useful when you need to deliver consistently high and predictable storage IOPS for critical databases, but it is not the best fit for this requirement.",
+        "C": "Correct. Spot Instances is the best choice because they provide deep discounts for interruptible workloads.",
+        "D": "Incorrect. On-Demand Capacity Reservations is useful when you need to guarantee EC2 capacity in a specific Availability Zone for a planned event, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1029",
+      "domain": "EC2",
+      "tags": [
+        "on-demand-capacity-reservations",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to guarantee EC2 capacity in a specific Availability Zone for a planned event. Which choice is correct? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "B",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "C",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: guarantee EC2 capacity in a specific Availability Zone for a planned event.",
+      "explanation": "On-Demand Capacity Reservations is correct because they reserve AZ capacity without long-term commitment terms.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Provisioned IOPS io2 EBS volumes is useful when you need to deliver consistently high and predictable storage IOPS for critical databases, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement.",
+        "C": "Correct. On-Demand Capacity Reservations is the best choice because they reserve AZ capacity without long-term commitment terms.",
+        "D": "Incorrect. Spot Instances is useful when you need to run fault-tolerant and checkpointed batch jobs at the lowest compute cost, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1030",
+      "domain": "EC2",
+      "tags": [
+        "dedicated-hosts",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: use per-socket or per-core software licensing tied to physical host visibility. Which option matches best? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "B",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "C",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "A"
+        ]
+      },
+      "hint": "Focus on the key requirement: use per-socket or per-core software licensing tied to physical host visibility.",
+      "explanation": "Dedicated Hosts is correct because they provide host-level affinity and license-aware placement control.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Correct. Dedicated Hosts is the best choice because they provide host-level affinity and license-aware placement control.",
+        "B": "Incorrect. IMDSv2 enforcement (HttpTokens required) is useful when you need to prevent insecure metadata access and require session tokens for instance metadata, but it is not the best fit for this requirement.",
+        "C": "Incorrect. On-Demand Capacity Reservations is useful when you need to guarantee EC2 capacity in a specific Availability Zone for a planned event, but it is not the best fit for this requirement.",
+        "D": "Incorrect. Spot Instances is useful when you need to run fault-tolerant and checkpointed batch jobs at the lowest compute cost, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1031",
+      "domain": "EC2",
+      "tags": [
+        "imdsv2-enforcement-httptokens-required",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A company must solve the following requirement: prevent insecure metadata access and require session tokens for instance metadata. Which EC2 architecture capability is the BEST fit? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "B",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "key": "C",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "D",
+          "text": "Cluster placement groups"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: prevent insecure metadata access and require session tokens for instance metadata.",
+      "explanation": "IMDSv2 enforcement (HttpTokens required) is correct because it hardens instance metadata access against SSRF-style abuse.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement.",
+        "B": "Incorrect. On-Demand Capacity Reservations is useful when you need to guarantee EC2 capacity in a specific Availability Zone for a planned event, but it is not the best fit for this requirement.",
+        "C": "Correct. IMDSv2 enforcement (HttpTokens required) is the best choice because it hardens instance metadata access against SSRF-style abuse.",
+        "D": "Incorrect. Cluster placement groups is useful when you need to provide the lowest network latency for tightly coupled HPC traffic in one AZ, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1032",
+      "domain": "EC2",
+      "tags": [
+        "cluster-placement-groups",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A solutions architect is reviewing this need: provide the lowest network latency for tightly coupled HPC traffic in one AZ. Which option should be implemented first? The primary focus is security.",
+      "options": [
+        {
+          "key": "A",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "B",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "C",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "D",
+          "text": "Cluster placement groups"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: provide the lowest network latency for tightly coupled HPC traffic in one AZ.",
+      "explanation": "Cluster placement groups is correct because they place instances physically close together for high throughput.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement.",
+        "B": "Incorrect. IMDSv2 enforcement (HttpTokens required) is useful when you need to prevent insecure metadata access and require session tokens for instance metadata, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Provisioned IOPS io2 EBS volumes is useful when you need to deliver consistently high and predictable storage IOPS for critical databases, but it is not the best fit for this requirement.",
+        "D": "Correct. Cluster placement groups is the best choice because they place instances physically close together for high throughput."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1033",
+      "domain": "EC2",
+      "tags": [
+        "provisioned-iops-io2-ebs-volumes",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 4,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "During an architecture review, the primary requirement is: deliver consistently high and predictable storage IOPS for critical databases. Which AWS capability is most appropriate? The primary focus is resilience.",
+      "options": [
+        {
+          "key": "A",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "B",
+          "text": "Spot Instances"
+        },
+        {
+          "key": "C",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "D",
+          "text": "Cluster placement groups"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: deliver consistently high and predictable storage IOPS for critical databases.",
+      "explanation": "Provisioned IOPS io2 EBS volumes is correct because they are designed for sustained high I/O performance workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. IMDSv2 enforcement (HttpTokens required) is useful when you need to prevent insecure metadata access and require session tokens for instance metadata, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Spot Instances is useful when you need to run fault-tolerant and checkpointed batch jobs at the lowest compute cost, but it is not the best fit for this requirement.",
+        "C": "Correct. Provisioned IOPS io2 EBS volumes is the best choice because they are designed for sustained high I/O performance workloads.",
+        "D": "Incorrect. Cluster placement groups is useful when you need to provide the lowest network latency for tightly coupled HPC traffic in one AZ, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1034",
+      "domain": "EC2",
+      "tags": [
+        "spot-instances",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 2,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "A workload owner asks for the most operationally sound approach to run fault-tolerant and checkpointed batch jobs at the lowest compute cost. Which choice is correct? The primary focus is performance.",
+      "options": [
+        {
+          "key": "A",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "key": "B",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "C",
+          "text": "Provisioned IOPS io2 EBS volumes"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "D"
+        ]
+      },
+      "hint": "Focus on the key requirement: run fault-tolerant and checkpointed batch jobs at the lowest compute cost.",
+      "explanation": "Spot Instances is correct because they provide deep discounts for interruptible workloads.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. On-Demand Capacity Reservations is useful when you need to guarantee EC2 capacity in a specific Availability Zone for a planned event, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement.",
+        "C": "Incorrect. Provisioned IOPS io2 EBS volumes is useful when you need to deliver consistently high and predictable storage IOPS for critical databases, but it is not the best fit for this requirement.",
+        "D": "Correct. Spot Instances is the best choice because they provide deep discounts for interruptible workloads."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    },
+    {
+      "id": "EC2-1035",
+      "domain": "EC2",
+      "tags": [
+        "on-demand-capacity-reservations",
+        "saa-c03",
+        "generated-2026"
+      ],
+      "difficulty": 3,
+      "type": "single",
+      "select": {
+        "min": 1,
+        "max": 1
+      },
+      "prompt": "For AWS SAA-C03 preparation, choose the best solution for this scenario: guarantee EC2 capacity in a specific Availability Zone for a planned event. Which option matches best? The primary focus is cost optimization.",
+      "options": [
+        {
+          "key": "A",
+          "text": "IMDSv2 enforcement (HttpTokens required)"
+        },
+        {
+          "key": "B",
+          "text": "Dedicated Hosts"
+        },
+        {
+          "key": "C",
+          "text": "On-Demand Capacity Reservations"
+        },
+        {
+          "key": "D",
+          "text": "Spot Instances"
+        }
+      ],
+      "answer": {
+        "keys": [
+          "C"
+        ]
+      },
+      "hint": "Focus on the key requirement: guarantee EC2 capacity in a specific Availability Zone for a planned event.",
+      "explanation": "On-Demand Capacity Reservations is correct because they reserve AZ capacity without long-term commitment terms.",
+      "incorrect": "The selected option does not best satisfy the stated requirement. Compare each option against the primary constraint in the prompt.",
+      "optionExplanations": {
+        "A": "Incorrect. IMDSv2 enforcement (HttpTokens required) is useful when you need to prevent insecure metadata access and require session tokens for instance metadata, but it is not the best fit for this requirement.",
+        "B": "Incorrect. Dedicated Hosts is useful when you need to use per-socket or per-core software licensing tied to physical host visibility, but it is not the best fit for this requirement.",
+        "C": "Correct. On-Demand Capacity Reservations is the best choice because they reserve AZ capacity without long-term commitment terms.",
+        "D": "Incorrect. Spot Instances is useful when you need to run fault-tolerant and checkpointed batch jobs at the lowest compute cost, but it is not the best fit for this requirement."
+      },
+      "references": [
+        {
+          "label": "Ec2 Architecture documentation",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+        }
+      ]
+    }
+  ]
+}

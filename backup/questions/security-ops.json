@@ -1,0 +1,215 @@
+{
+  "schemaVersion": "1.0",
+  "deckId": "aws-saa",
+  "questions": [
+    {
+      "id": "KMS-001",
+      "domain": "KMS",
+      "tags": ["encryption", "s3", "cmk"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A company must encrypt sensitive files in S3 using **customer-managed keys** with auditability of key usage. Which option BEST meets this requirement?",
+      "options": [
+        {"key": "A", "text": "SSE-S3 (S3-managed keys)"},
+        {"key": "B", "text": "SSE-KMS with a customer-managed KMS key"},
+        {"key": "C", "text": "SSE-C (customer-provided keys)"},
+        {"key": "D", "text": "Client-side encryption without KMS"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**SSE-KMS with a customer-managed KMS key** provides encryption at rest with full auditability via AWS CloudTrail for key usage and the ability to control key policies and rotation.\n\nThis satisfies both encryption and auditing requirements.",
+      "incorrect": "- **SSE-S3** uses AWS-managed keys with less control.\n- **SSE-C** requires the client to provide keys and does not integrate with KMS auditing.\n- **Client-side encryption** lacks centralized key usage auditing in KMS.\n\nSSE-KMS with CMKs is the best fit.",
+      "hint": "You need customer-managed keys and audit logs of key usage."
+    },
+    {
+      "id": "SECRETS-001",
+      "domain": "Secrets Manager",
+      "tags": ["rotation", "rds", "credentials"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "An application stores database credentials and needs **automatic rotation** without downtime. Which service should be used?",
+      "options": [
+        {"key": "A", "text": "AWS Systems Manager Parameter Store (Standard)"},
+        {"key": "B", "text": "AWS Secrets Manager"},
+        {"key": "C", "text": "AWS Key Management Service"},
+        {"key": "D", "text": "Amazon S3"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS Secrets Manager** provides built-in secret rotation for services like RDS with automated Lambda-based rotation workflows. It is designed specifically for managed credential rotation.\n\nThis matches the requirement for automatic rotation.",
+      "incorrect": "- **Parameter Store Standard** does not provide automatic rotation.\n- **KMS** manages keys, not secrets.\n- **S3** is not a secrets management service.\n\nSecrets Manager is the correct solution.",
+      "hint": "Use the AWS service that supports managed secret rotation."
+    },
+    {
+      "id": "WAF-001",
+      "domain": "WAF",
+      "tags": ["sql-injection", "xss", "alb"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A company wants to protect its public web application from **SQL injection** and **cross-site scripting (XSS)** attacks. Which service should they use?",
+      "options": [
+        {"key": "A", "text": "AWS Shield Standard"},
+        {"key": "B", "text": "AWS WAF"},
+        {"key": "C", "text": "Amazon GuardDuty"},
+        {"key": "D", "text": "AWS Config"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS WAF** provides Layer 7 web application firewall rules to block SQL injection, XSS, and other application-layer attacks. It integrates with ALB, API Gateway, and CloudFront.\n\nThis is the correct service for web application protection.",
+      "incorrect": "- **Shield Standard** is for DDoS protection at the network/transport layers.\n- **GuardDuty** detects threats but does not block traffic.\n- **Config** evaluates configuration compliance.\n\nAWS WAF is the right choice.",
+      "hint": "Use the service that filters malicious HTTP requests."
+    },
+    {
+      "id": "SHIELD-001",
+      "domain": "Shield",
+      "tags": ["ddos", "protection"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A high-profile ecommerce site needs **enhanced DDoS protection**, cost protection against scaling spikes, and access to the DDoS Response Team (DRT). Which service is BEST?",
+      "options": [
+        {"key": "A", "text": "AWS Shield Advanced"},
+        {"key": "B", "text": "AWS Shield Standard"},
+        {"key": "C", "text": "AWS WAF"},
+        {"key": "D", "text": "Amazon GuardDuty"}
+      ],
+      "answer": {"keys": ["A"]},
+      "explanation": "**AWS Shield Advanced** provides enhanced DDoS protection, cost protection against scaling charges, and access to the AWS DDoS Response Team.\n\nThis is the service designed for high-profile, mission-critical applications.",
+      "incorrect": "- **Shield Standard** provides basic protection but no DRT access or cost protection.\n- **WAF** protects against application-layer attacks but does not replace DDoS protection.\n- **GuardDuty** detects threats, not DDoS mitigation.\n\nShield Advanced is required for these features.",
+      "hint": "Look for the DDoS service that includes DRT access and cost protection."
+    },
+    {
+      "id": "GUARD-001",
+      "domain": "GuardDuty",
+      "tags": ["threat-detection", "anomaly"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A security team wants **continuous threat detection** using VPC Flow Logs, CloudTrail, and DNS logs to identify suspicious activity. Which service should they enable?",
+      "options": [
+        {"key": "A", "text": "Amazon Inspector"},
+        {"key": "B", "text": "Amazon GuardDuty"},
+        {"key": "C", "text": "AWS Config"},
+        {"key": "D", "text": "AWS Trusted Advisor"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Amazon GuardDuty** is a managed threat detection service that analyzes VPC Flow Logs, CloudTrail events, and DNS logs to identify malicious or anomalous activity.\n\nThis is exactly what the team requested.",
+      "incorrect": "- **Inspector** scans for vulnerabilities, not continuous threat detection.\n- **Config** evaluates configuration compliance.\n- **Trusted Advisor** provides best practice checks but not threat detection.\n\nGuardDuty is the correct service.",
+      "hint": "Use the managed service that analyzes CloudTrail, VPC Flow Logs, and DNS logs."
+    },
+    {
+      "id": "ORG-001",
+      "domain": "Organizations",
+      "tags": ["scp", "governance", "guardrails"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "An organization wants to **prevent member accounts** from disabling CloudTrail or deleting log archives. What is the BEST way to enforce this?",
+      "options": [
+        {"key": "A", "text": "Create IAM policies in each account"},
+        {"key": "B", "text": "Use an AWS Organizations Service Control Policy (SCP)"},
+        {"key": "C", "text": "Use AWS Config rules only"},
+        {"key": "D", "text": "Store logs in S3 without policies"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Service Control Policies (SCPs)** in AWS Organizations provide centralized permission guardrails that member accounts cannot override. An SCP can explicitly deny actions such as stopping CloudTrail or deleting log archives.\n\nThis is the strongest and most centralized enforcement mechanism.",
+      "incorrect": "- **IAM policies** can be altered within accounts and are not centralized guardrails.\n- **Config rules** monitor compliance but do not prevent actions.\n- **S3 without policies** provides no protection.\n\nSCPs are required for enforceable organization-wide restrictions.",
+      "hint": "Use the organization-level control that overrides account permissions."
+    },
+    {
+      "id": "TRAIL-001",
+      "domain": "CloudTrail",
+      "tags": ["audit", "api-logging"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A compliance team needs a complete history of **AWS API calls** across an account for auditing and investigations. Which service should they use?",
+      "options": [
+        {"key": "A", "text": "Amazon CloudWatch Metrics"},
+        {"key": "B", "text": "AWS CloudTrail"},
+        {"key": "C", "text": "AWS Config"},
+        {"key": "D", "text": "Amazon GuardDuty"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS CloudTrail** records API activity across AWS services and provides an audit log of actions taken in the account. It is the primary service for API call auditing.\n\nThis directly satisfies the requirement.",
+      "incorrect": "- **CloudWatch Metrics** provide operational metrics, not API audit logs.\n- **Config** records configuration changes, not all API calls.\n- **GuardDuty** detects threats but is not a complete audit log.\n\nCloudTrail is the correct auditing service.",
+      "hint": "Use the service that logs API calls for governance and audit."
+    },
+    {
+      "id": "CONFIG-001",
+      "domain": "Config",
+      "tags": ["compliance", "resource-change"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A security team wants to **continuously evaluate** whether S3 buckets are publicly accessible and receive notifications when they become noncompliant. Which service should they use?",
+      "options": [
+        {"key": "A", "text": "AWS Config with managed rules"},
+        {"key": "B", "text": "AWS CloudTrail only"},
+        {"key": "C", "text": "AWS IAM Access Analyzer only"},
+        {"key": "D", "text": "Amazon GuardDuty"}
+      ],
+      "answer": {"keys": ["A"]},
+      "explanation": "**AWS Config** provides continuous configuration monitoring and managed rules (such as checking for public S3 buckets). It can notify and record compliance status changes.\n\nThis is the correct service for continuous compliance monitoring.",
+      "incorrect": "- **CloudTrail** logs API activity but does not evaluate compliance rules.\n- **Access Analyzer** identifies potential access but does not continuously track compliance states.\n- **GuardDuty** is for threat detection.\n\nConfig is purpose-built for compliance monitoring.",
+      "hint": "Choose the service that continuously evaluates resource configuration against rules."
+    },
+    {
+      "id": "SSM-001",
+      "domain": "Systems Manager",
+      "tags": ["session-manager", "no-ssh"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "An operations team wants to access EC2 instances **without opening SSH/RDP ports** and without managing bastion hosts. Which solution is BEST?",
+      "options": [
+        {"key": "A", "text": "Use a public bastion host with SSH"},
+        {"key": "B", "text": "Use AWS Systems Manager Session Manager"},
+        {"key": "C", "text": "Open SSH to 0.0.0.0/0"},
+        {"key": "D", "text": "Use AWS Direct Connect"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**AWS Systems Manager Session Manager** provides secure shell access without opening inbound ports. It uses IAM for authentication and can log session activity.\n\nThis meets the requirement for access without SSH/RDP exposure.",
+      "incorrect": "- **Bastion hosts** still require SSH ports and maintenance.\n- **Opening SSH to the internet** is insecure.\n- **Direct Connect** is networking and does not provide instance access controls.\n\nSession Manager is the best choice.",
+      "hint": "Look for the managed service that allows shell access without inbound ports."
+    },
+    {
+      "id": "CW-001",
+      "domain": "CloudWatch",
+      "tags": ["alarms", "logs", "metrics"],
+      "difficulty": 2,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A team needs to **alert** when application logs contain the phrase \"ERROR\" more than 10 times in 5 minutes. Which AWS feature should they use?",
+      "options": [
+        {"key": "A", "text": "CloudWatch Logs metric filter + CloudWatch Alarm"},
+        {"key": "B", "text": "CloudTrail data events"},
+        {"key": "C", "text": "AWS Config rule"},
+        {"key": "D", "text": "AWS WAF rule"}
+      ],
+      "answer": {"keys": ["A"]},
+      "explanation": "**CloudWatch Logs metric filters** can turn log patterns into metrics. A **CloudWatch Alarm** can then trigger when the metric exceeds a threshold.\n\nThis is the standard solution for log-based alerting.",
+      "incorrect": "- **CloudTrail** tracks API calls, not application log patterns.\n- **Config** monitors resource configurations.\n- **WAF** filters HTTP requests, not application logs.\n\nCloudWatch metric filters and alarms are correct.",
+      "hint": "Use CloudWatch to convert log patterns into metrics and alarm on them."
+    },
+    {
+      "id": "COG-001",
+      "domain": "Cognito",
+      "tags": ["user-auth", "federation", "mobile"],
+      "difficulty": 3,
+      "type": "single",
+      "select": {"min": 1, "max": 1},
+      "prompt": "A mobile application needs **user sign-up/sign-in**, social identity federation, and token-based authentication for APIs. Which AWS service is BEST suited?",
+      "options": [
+        {"key": "A", "text": "AWS IAM roles only"},
+        {"key": "B", "text": "Amazon Cognito User Pools and Identity Pools"},
+        {"key": "C", "text": "AWS Secrets Manager"},
+        {"key": "D", "text": "AWS KMS"}
+      ],
+      "answer": {"keys": ["B"]},
+      "explanation": "**Amazon Cognito User Pools** provide user sign-up/sign-in and federation, while **Identity Pools** provide temporary AWS credentials for authenticated users. Together they enable token-based auth and social identity login for mobile apps.\n\nThis directly matches the requirements.",
+      "incorrect": "- **IAM roles only** are not designed for end-user sign-up/sign-in.\n- **Secrets Manager** and **KMS** manage secrets and keys, not user authentication.\n\nCognito is the correct service for mobile user auth and federation.",
+      "hint": "Use the AWS service built for end-user authentication and federation."
+    }
+  ]
+}
